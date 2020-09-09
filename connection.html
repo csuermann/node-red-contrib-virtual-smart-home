@@ -1,0 +1,23 @@
+<script type="text/javascript">
+  RED.nodes.registerType('vsh-connection', {
+    category: 'config',
+    paletteLabel: 'connection',
+    defaults: {
+      name: { value: '' },
+    },
+    label: function () {
+      return this.name || 'my vsh connection'
+    },
+  })
+</script>
+
+<script type="text/html" data-template-name="vsh-connection">
+  <div class="form-row">
+    <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-config-input-name" placeholder="Name" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="vsh-connection">
+  <p> </p>
+</script>

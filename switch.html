@@ -1,0 +1,38 @@
+<script type="text/javascript">
+  RED.nodes.registerType('vsh-switch', {
+    category: 'virtual smart home',
+    color: '#a6bbcf',
+    defaults: {
+      name: { value: '' },
+      connection: { type: 'vsh-connection', required: true },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: 'vsh_icon.svg',
+    color: '#31C4F3',
+    paletteLabel: 'switch',
+    label: function () {
+      return this.name || 'switch'
+    },
+  })
+</script>
+
+<script type="text/html" data-template-name="vsh-switch">
+  <div class="form-row">
+    <label for="node-input-connection"
+      ><i class="fa fa-globe"></i> Connection</label
+    >
+    <input type="text" id="node-input-connection" placeholder="connection" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="vsh-switch">
+  <p
+    >A simple node that converts the message payloads into all lowercase
+    characters</p
+  >
+</script>
