@@ -2,7 +2,16 @@ module.exports = function (RED) {
   function SwitchNode (config) {
     RED.nodes.createNode(this, config)
 
-    var node = this
+    const node = this
+
+    this.connectionNode = RED.nodes.getNode(config.connection)
+
+    if (this.connectionNode) {
+      //connection is configured
+      console.dir(this.connectionNode)
+    } else {
+      //no connection configured
+    }
 
     node.on('input', function (msg, send, done) {
       msg.payload = msg.payload.toLowerCase()

@@ -26,5 +26,8 @@
       "connection": "connection.js",
       "switch": "switch.js"
     }
+  },
+  "dependencies": {
+    "dayjs": "^1.8.35"
   }
 }

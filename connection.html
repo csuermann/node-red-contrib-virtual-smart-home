@@ -1,20 +1,327 @@
 <script type="text/javascript">
-  RED.nodes.registerType('vsh-connection', {
-    category: 'config',
-    paletteLabel: 'connection',
-    defaults: {
-      name: { value: '' },
-    },
-    label: function () {
-      return this.name || 'my vsh connection'
-    },
-  })
+  ;(function () {
+    let pollingIntervalId
+
+    async function postData(url, data = {}) {
+      const response = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        redirect: 'follow',
+        body: JSON.stringify(data),
+      })
+      return response.json()
+    }
+
+    const fetchDeviceCode = function () {
+      const settings = {
+        url: 'https://api.amazon.com/auth/o2/create/codepair',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        data: {
+          response_type: 'device_code',
+          client_id:
+            'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
+          scope: 'profile',
+        },
+      }
+
+      return new Promise((resolve, reject) => {
+        $.ajax(settings).done(resolve).fail(reject)
+      })
+    }
+
+    const fetchDeviceToken = function (device_code, user_code) {
+      return new Promise((resolve, reject) => {
+        const settings = {
+          url: 'https://api.amazon.com/auth/o2/token',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          data: {
+            grant_type: 'device_code',
+            device_code,
+            user_code,
+          },
+        }
+
+        $.ajax(settings).done(resolve).fail(reject)
+      })
+    }
+
+    const provisionDevice = function (accessToken) {
+      return postData(
+        'https://ashygtd8pc.execute-api.eu-west-1.amazonaws.com/dev/provision',
+        {
+          accessToken: accessToken,
+        }
+      )
+    }
+
+    const stopPolling = function () {
+      if (pollingIntervalId) {
+        clearInterval(pollingIntervalId)
+      }
+    }
+
+    const oneditprepare = async function () {
+      if (!this.email) {
+        try {
+          const {
+            device_code,
+            expires_in,
+            interval,
+            user_code,
+            verification_uri,
+          } = await fetchDeviceCode()
+
+          const now = new Date()
+          const expiresAt = new Date(now.getTime() + expires_in * 1000)
+
+          $('#user-code').html(user_code)
+          $('#verification-uri').attr('href', verification_uri)
+          $('#verification-uri').html(verification_uri)
+          $('#expiry').html(expiresAt)
+          $('#refresh-interval').html(interval)
+
+          pollingIntervalId = setInterval(async () => {
+            if (new Date() > expiresAt) {
+              stopPolling()
+              return
+            }
+
+            try {
+              console.log('polling...')
+
+              const deviceTokenResponse = await fetchDeviceToken(
+                device_code,
+                user_code
+              )
+
+              stopPolling()
+
+              console.log('deviceTokenResponse', deviceTokenResponse)
+
+              const provisionData = await provisionDevice(
+                deviceTokenResponse.access_token
+              )
+
+              $('#device-code').hide()
+
+              $('#node-config-input-refreshToken').val(
+                deviceTokenResponse.refresh_token
+              )
+
+              $('#node-config-input-email').val(provisionData.email)
+              $('#node-config-input-server').val(provisionData.server)
+              $('#node-config-input-port').val(provisionData.port)
+              $('#node-config-input-cert').val(provisionData.cert)
+              $('#node-config-input-privateKey').val(provisionData.privateKey)
+              $('#node-config-input-caCert').val(provisionData.caCert)
+              $('#node-config-input-thingId').val(provisionData.thingId)
+
+              $('#provisioned').show()
+
+              console.log('provisionData', provisionData)
+            } catch (e) {
+              if (e.status != 400) {
+                stopPolling()
+                console.log(e)
+                alert(`Error: ${e.status}`)
+              }
+            }
+          }, interval * (1000 / 2)) //twice as fast as allowed...
+
+          $('#device-code').show()
+        } catch (e) {
+          alert(e)
+        }
+      } else {
+        $('#provisioned').show()
+      }
+    }
+
+    RED.nodes.registerType('vsh-connection', {
+      category: 'config',
+      paletteLabel: 'connection',
+      defaults: {
+        name: { value: '' },
+        refreshToken: { value: '', required: true },
+        email: { value: '', required: true },
+        server: { value: '', required: true },
+        port: { value: '', required: true },
+        cert: { value: '', required: true },
+        privateKey: { value: '', required: true },
+        caCert: { value: '', required: true },
+        thingId: { value: '', required: true },
+      },
+      credentials: {
+        refreshToken: { type: 'text' },
+        email: { type: 'text' },
+        cert: { type: 'text' },
+        privateKey: { type: 'text' },
+      },
+      label: function () {
+        return this.name || this.email || 'unnamed connection'
+      },
+      oneditprepare,
+      oneditsave: stopPolling,
+      oneditcancel: stopPolling,
+    })
+  })()
 </script>
+
+<style>
+  #provisioned,
+  #device-code {
+    display: none;
+  }
+
+  #device-code {
+    padding: 10px;
+    text-align: center;
+    border: 3px red dashed;
+  }
+
+  #provisioned h1 {
+    font-size: 1.5em;
+    margin-top: 30px;
+  }
+
+  #user-code {
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  a {
+    text-decoration: underline !important;
+  }
+</style>
 
 <script type="text/html" data-template-name="vsh-connection">
   <div class="form-row">
     <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-config-input-name" placeholder="Name" />
+  </div>
+
+  <div id="device-code">
+    <h1>Device Registration</h1>
+    <p
+      >Go to
+      <a id="verification-uri" href="" target="_blank">VERIFICATION_URI</a> on
+      your smartphone, computer, or tablet and enter this code:</p
+    >
+    <h2 id="user-code">USER_CODE</h2>
+    <p
+      >Once you entered the code, the linking process may take up to
+      <span id="refresh-interval">REFRESH-INTERVAL</span> seconds.</p
+    >
+    <p>The code expires <span id="expiry">EXPIRY</span>.</p>
+  </div>
+
+  <div id="provisioned">
+    <h1>Connection Details</h1>
+    <div class="form-row">
+      <label for="node-config-input-email"
+        ><i class="fa fa-user"></i> Account</label
+      >
+      <input
+        type="text"
+        id="node-config-input-email"
+        readonly
+        placeholder="Email"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-refreshToken"
+        ><i class="fa fa-refresh"></i> Refresh Token</label
+      >
+      <input
+        type="text"
+        id="node-config-input-refreshToken"
+        readonly
+        placeholder="Refresh Token"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-server"
+        ><i class="fa fa-server"></i> Server</label
+      >
+      <input
+        type="text"
+        id="node-config-input-server"
+        readonly
+        placeholder="Server"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-port"
+        ><i class="fa fa-building"></i> Port</label
+      >
+      <input
+        type="text"
+        id="node-config-input-port"
+        readonly
+        placeholder="Port"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-cert"
+        ><i class="fa fa-certificate"></i> Certificate</label
+      >
+      <input
+        type="text"
+        id="node-config-input-cert"
+        readonly
+        placeholder="Certificate"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-privateKey"
+        ><i class="fa fa-key"></i> Private Key</label
+      >
+      <input
+        type="text"
+        id="node-config-input-privateKey"
+        readonly
+        placeholder="Private Key"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-caCert"
+        ><i class="fa fa-certificate"></i> CA Certificate</label
+      >
+      <input
+        type="text"
+        id="node-config-input-caCert"
+        readonly
+        placeholder="CA Certificate"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-thingId"
+        ><i class="fa fa-cog"></i> Thing ID</label
+      >
+      <input
+        type="text"
+        id="node-config-input-thingId"
+        readonly
+        placeholder="Thing ID"
+      />
+    </div>
   </div>
 </script>
 

@@ -4,5 +4,13 @@ module.exports = function (RED) {
 
     const node = this
   }
-  RED.nodes.registerType('vsh-connection', ConnectionNode)
+
+  RED.nodes.registerType('vsh-connection', ConnectionNode, {
+    credentials: {
+      refreshToken: { type: 'text' },
+      email: { type: 'text' },
+      cert: { type: 'text' },
+      privateKey: { type: 'text' }
+    }
+  })
 }
