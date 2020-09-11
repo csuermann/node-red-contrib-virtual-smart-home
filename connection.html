@@ -148,6 +148,10 @@
       }
     }
 
+    const oneditsave = function () {
+      stopPolling()
+    }
+
     RED.nodes.registerType('vsh-connection', {
       category: 'config',
       paletteLabel: 'connection',
@@ -172,7 +176,7 @@
         return this.name || this.email || 'unnamed connection'
       },
       oneditprepare,
-      oneditsave: stopPolling,
+      oneditsave,
       oneditcancel: stopPolling,
     })
   })()

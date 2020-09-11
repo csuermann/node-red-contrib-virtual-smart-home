@@ -28,6 +28,8 @@
     }
   },
   "dependencies": {
-    "dayjs": "^1.8.35"
+    "async-mqtt": "^2.6.1",
+    "dayjs": "^1.8.35",
+    "js-base64": "^3.4.5"
   }
 }
