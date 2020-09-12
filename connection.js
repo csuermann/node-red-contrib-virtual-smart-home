@@ -9,7 +9,20 @@ module.exports = function (RED) {
 
     this.childNodes = {}
     this.isConnected = false
+    this.isSubscribed = false
     this.isError = false
+
+    this.jobQueue = []
+
+    this.jobQueueExecutor = setInterval(() => {
+      this.jobQueue = this.jobQueue.filter(job => job() == false)
+    }, 3000)
+
+    this.execOrQueueJob = function (job) {
+      if (job() == false) {
+        this.jobQueue.push(job)
+      }
+    }
 
     this.registerChildNode = function (nodeId, callbacks) {
       this.childNodes[nodeId] = callbacks
@@ -20,6 +33,32 @@ module.exports = function (RED) {
         fill: this.isConnected ? 'green' : 'red',
         text: this.isConnected ? 'online' : 'offline'
       })
+
+      const discoveryJob = () => {
+        if (!this.isConnected) {
+          return false
+        }
+
+        const { friendlyName, template } = callbacks['getDeviceConfig']()
+
+        this.mqttClient.publish(`vsh/${config.thingId}/discover`, {
+          deviceId: nodeId,
+          friendlyName,
+          template
+        })
+      }
+
+      this.execOrQueueJob(discoveryJob)
+
+      const requestShadowJob = () => {
+        if (!this.isSubscribed) {
+          return false
+        }
+
+        this.requestShadowForNode(nodeId)
+      }
+
+      this.execOrQueueJob(requestShadowJob)
     }
 
     this.unregisterChildNode = function (nodeId) {
@@ -35,6 +74,7 @@ module.exports = function (RED) {
     }
 
     this.execCallbackForOne = function (nodeId, eventName, eventDetails) {
+      console.log('in execCallbackForOne', nodeId, eventName)
       if (this.childNodes[nodeId][eventName]) {
         return this.childNodes[nodeId][eventName](eventDetails)
       }
@@ -42,11 +82,15 @@ module.exports = function (RED) {
 
     this.requestShadowForAllChildNodes = function () {
       for (const nodeId in this.childNodes) {
-        this.mqttClient.publish(
-          `$aws/things/${config.thingId}/shadow/name/vshd-${nodeId}/get`,
-          {}
-        )
+        this.requestShadowForNode(nodeId)
       }
+    }
+
+    this.requestShadowForNode = function (nodeId) {
+      this.mqttClient.publish(
+        `$aws/things/${config.thingId}/shadow/name/${nodeId}/get`,
+        {}
+      )
     }
 
     this.updateShadow = function ({ nodeId, type }) {
@@ -60,7 +104,7 @@ module.exports = function (RED) {
       }
 
       this.mqttClient.publish(
-        `$aws/things/${config.thingId}/shadow/name/vshd-${nodeId}/update`,
+        `$aws/things/${config.thingId}/shadow/name/${nodeId}/update`,
         payload
       )
     }
@@ -87,6 +131,7 @@ module.exports = function (RED) {
             text: 'online'
           })
         },
+
         onDisconnect: () => {
           this.isConnected = false
           if (!this.isError) {
@@ -97,6 +142,7 @@ module.exports = function (RED) {
             })
           }
         },
+
         onError: error => {
           this.isConnected = false
           this.isError = true
@@ -106,13 +152,16 @@ module.exports = function (RED) {
             text: error.code
           })
         },
-        onSubscribeSuccess: subscribeResult =>
-          this.requestShadowForAllChildNodes(),
+
+        onSubscribeSuccess: subscribeResult => {
+          this.isSubscribed = true
+        },
+
         onMessage: (topic, message) => {
           //find out which child node the message is for:
-          const match = topic.match(/vshd-([^\/]+)/)
+          const match = topic.match(/vshd-[^\/]+/)
           if (match) {
-            const nodeId = match[1]
+            const nodeId = match[0]
 
             //find out which action to perform:
             if (topic.includes('/get/accepted')) {
@@ -143,6 +192,7 @@ module.exports = function (RED) {
     }
 
     this.on('close', async function (removed, done) {
+      clearInterval(this.jobQueueExecutor)
       await this.mqttClient.disconnect()
       this.execCallbackForAll('onDisconnect')
       done()

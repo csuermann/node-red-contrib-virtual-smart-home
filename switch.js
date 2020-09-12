@@ -18,13 +18,19 @@ module.exports = function (RED) {
     if (connectionNode) {
       //connection is configured
       //register callbacks. This way connectionNode can communicate with us:
-      connectionNode.registerChildNode(this.id.replace('.', ''), {
+      connectionNode.registerChildNode('vshd-' + this.id.replace('.', ''), {
         setStatus: status => node.status(status),
         getLocalState: () => localState,
         setLocalState: state => {
           localState = { ...localState, ...state }
           const nodeContext = node.context()
           nodeContext.set('state', state)
+        },
+        getDeviceConfig: () => {
+          return {
+            friendlyName: config.name || 'switch',
+            template: 'SWITCH'
+          }
         }
       })
     }

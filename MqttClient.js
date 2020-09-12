@@ -56,7 +56,7 @@ function MqttClient (options, callbacksObj) {
 
   this.publish = async function (topic, json) {
     try {
-      return await this.client.publish(topic, JSON.stringify(json))
+      return await this.client.publish(topic, JSON.stringify(json), { qos: 1 })
     } catch (e) {
       console.log(e)
     }
