@@ -6,34 +6,26 @@ module.exports = function (RED) {
 
     const connectionNode = RED.nodes.getNode(config.connection)
 
+    let localState = {
+      source: 'device',
+      powerState: 'OFF'
+    }
+
     const sendMessage = function (msg) {
-      this.send(msg)
+      node.send(msg)
     }
 
     if (connectionNode) {
       //connection is configured
-      //register callbacks. This way connectionNode can update us:
-      connectionNode.registerChildNode({
-        nodeId: this.id,
-        connect: () =>
-          node.status({
-            shape: 'dot',
-            fill: 'green',
-            text: 'online'
-          }),
-        disconnect: () =>
-          node.status({
-            shape: 'dot',
-            fill: 'red',
-            text: 'offline'
-          }),
-        error: error =>
-          node.status({
-            shape: 'ring',
-            fill: 'red',
-            text: error.code
-          }),
-        message: () => sendMessage(msg)
+      //register callbacks. This way connectionNode can communicate with us:
+      connectionNode.registerChildNode(this.id.replace('.', ''), {
+        setStatus: status => node.status(status),
+        getLocalState: () => localState,
+        setLocalState: state => {
+          localState = { ...localState, ...state }
+          const nodeContext = node.context()
+          nodeContext.set('state', state)
+        }
       })
     }
 

@@ -71,6 +71,11 @@
       }
     }
 
+    const showError = function (errorMsg) {
+      $('#error-msg').html(errorMsg)
+      $('#error').show()
+    }
+
     const oneditprepare = async function () {
       if (!this.email) {
         try {
@@ -94,6 +99,8 @@
           pollingIntervalId = setInterval(async () => {
             if (new Date() > expiresAt) {
               stopPolling()
+              $('#device-code').hide()
+              showError('code expired')
               return
             }
 
@@ -133,8 +140,8 @@
             } catch (e) {
               if (e.status != 400) {
                 stopPolling()
-                console.log(e)
-                alert(`Error: ${e.status}`)
+                $('#device-code').hide()
+                showError(e.message)
               }
             }
           }, interval * (1000 / 2)) //twice as fast as allowed...
@@ -184,11 +191,13 @@
 
 <style>
   #provisioned,
-  #device-code {
+  #device-code,
+  #error {
     display: none;
   }
 
-  #device-code {
+  #device-code,
+  #error {
     padding: 10px;
     text-align: center;
     border: 3px red dashed;
@@ -212,6 +221,11 @@
   <div class="form-row">
     <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-config-input-name" placeholder="Name" />
+  </div>
+
+  <div id="error">
+    <h1>ERROR</h1>
+    <span id="error-msg">ERROR-MSG</span>
   </div>
 
   <div id="device-code">
