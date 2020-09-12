@@ -74,7 +74,6 @@ module.exports = function (RED) {
     }
 
     this.execCallbackForOne = function (nodeId, eventName, eventDetails) {
-      console.log('in execCallbackForOne', nodeId, eventName)
       if (this.childNodes[nodeId][eventName]) {
         return this.childNodes[nodeId][eventName](eventDetails)
       }
@@ -165,16 +164,28 @@ module.exports = function (RED) {
 
             //find out which action to perform:
             if (topic.includes('/get/accepted')) {
-              this.execCallbackForOne(
-                nodeId,
-                'setLocalState',
-                message.state.reported
-              )
+              if (message.state.reported) {
+                this.execCallbackForOne(
+                  nodeId,
+                  'setLocalState',
+                  message.state.reported
+                )
+              }
             } else if (topic.includes('/get/rejected')) {
               //shadow for the device does not yet exist! Let's create it:
               this.updateShadow({ nodeId, type: 'reported' })
             } else if (topic.includes('/update/delta')) {
               this.execCallbackForOne(nodeId, 'setLocalState', message.state)
+              const updatedLocalState = this.execCallbackForOne(
+                nodeId,
+                'getLocalState'
+              )
+              //delete updatedLocalState.source
+              const msg = {
+                payload: updatedLocalState
+              }
+              this.execCallbackForOne(nodeId, 'emitMessage', msg)
+              this.updateShadow({ nodeId, type: 'reported' })
             }
           }
         }

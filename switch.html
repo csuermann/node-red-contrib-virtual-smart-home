@@ -4,6 +4,7 @@
     defaults: {
       name: { value: '' },
       connection: { type: 'vsh-connection', required: true },
+      passthrough: { value: false },
     },
     inputs: 1,
     outputs: 1,
@@ -26,6 +27,17 @@
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-passthrough"
+      ><i class="fa fa-forward"></i> Passthrough</label
+    >
+    <input
+      type="checkbox"
+      id="node-input-passthrough"
+      style="display:inline-block;width:22px;vertical-align:top;"
+      autocomplete="off"
+    />
   </div>
 </script>
 
