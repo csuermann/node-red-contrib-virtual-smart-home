@@ -117,7 +117,14 @@ module.exports = function (RED) {
         ca: Base64.decode(config.caCert),
         clientId: config.thingId,
         reconnectPeriod: 5000,
-        keepalive: 90
+        keepalive: 90,
+        will: {
+          topic: `vsh/${config.thingId}/update`,
+          payload: JSON.stringify({
+            state: { reported: { connected: false } }
+          }),
+          qos: 1
+        }
       }
 
       this.mqttClient = new MqttClient(options, {
@@ -128,6 +135,10 @@ module.exports = function (RED) {
             shape: 'dot',
             fill: 'green',
             text: 'online'
+          })
+
+          this.mqttClient.publish(`vsh/${config.thingId}/update`, {
+            state: { reported: { connected: true } }
           })
         },
 
@@ -204,6 +215,9 @@ module.exports = function (RED) {
 
     this.on('close', async function (removed, done) {
       clearInterval(this.jobQueueExecutor)
+      await this.mqttClient.publish(`vsh/${config.thingId}/update`, {
+        state: { reported: { connected: false } }
+      })
       await this.mqttClient.disconnect()
       this.execCallbackForAll('onDisconnect')
       done()

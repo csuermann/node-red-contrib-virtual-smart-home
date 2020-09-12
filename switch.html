@@ -14,8 +14,30 @@
     label: function () {
       return this.name || 'switch'
     },
+    oneditprepare: () => setTimeout(() => $('#donation').fadeIn('slow'), 2000),
   })
 </script>
+
+<style>
+  #donation {
+    display: none;
+    padding: 15px;
+    text-align: center;
+    border: 3px #253b80 solid;
+    margin-top: 30px;
+    background-color: #cad7de;
+    color: #253b80;
+    width: 90%;
+  }
+
+  #donaton h1 {
+    line-height: normal;
+  }
+
+  #donation img {
+    height: 5em;
+  }
+</style>
 
 <script type="text/html" data-template-name="vsh-switch">
   <div class="form-row">
@@ -38,6 +60,23 @@
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
     />
+  </div>
+
+  <div id="donation">
+    <h1>Please Support</h1>
+    <p>
+      Please note that <i>virtual smart home</i> can only function as long as
+      someone is paying the bills for the backend infrastructure.
+    </p>
+    <p>
+      So if you're satisfied with this project, please contribute your share.
+    </p>
+    <p>Thank you!</p>
+    <a
+      target="_blank"
+      href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url"
+      ><img src="icons/node-red-contrib-virtual-smart-home/donate.svg"
+    /></a>
   </div>
 </script>
 

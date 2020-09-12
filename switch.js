@@ -41,7 +41,6 @@ module.exports = function (RED) {
           }
         },
         emitMessage: msg => {
-          //console.log('EMITTING MSG', msg)
           node.send(msg)
         }
       })
