@@ -34,22 +34,6 @@ module.exports = function (RED) {
         text: this.isConnected ? 'online' : 'offline'
       })
 
-      const discoveryJob = () => {
-        if (!this.isConnected) {
-          return false
-        }
-
-        const { friendlyName, template } = callbacks['getDeviceConfig']()
-
-        this.mqttClient.publish(`vsh/${config.thingId}/discover`, {
-          deviceId: nodeId,
-          friendlyName,
-          template
-        })
-      }
-
-      this.execOrQueueJob(discoveryJob)
-
       const requestShadowJob = () => {
         if (!this.isSubscribed) {
           return false
@@ -87,7 +71,7 @@ module.exports = function (RED) {
 
     this.requestShadowForNode = function (nodeId) {
       this.mqttClient.publish(
-        `$aws/things/${config.thingId}/shadow/name/${nodeId}/get`,
+        `$aws/things/${this.credentials.thingId}/shadow/name/${nodeId}/get`,
         {}
       )
     }
@@ -103,23 +87,92 @@ module.exports = function (RED) {
       }
 
       this.mqttClient.publish(
-        `$aws/things/${config.thingId}/shadow/name/${nodeId}/update`,
+        `$aws/things/${this.credentials.thingId}/shadow/name/${nodeId}/update`,
         payload
       )
     }
 
-    if (config.server) {
+    this.discover = function (nodeId) {
+      const { friendlyName, template } = this.execCallbackForOne(
+        nodeId,
+        'getDeviceConfig'
+      )
+
+      this.mqttClient.publish(`vsh/${this.credentials.thingId}/discover`, {
+        deviceId: nodeId,
+        friendlyName,
+        template
+      })
+    }
+
+    this.handleGetAccepted = function (nodeId, message) {
+      if (message.state.reported) {
+        const { friendlyName, template } = this.execCallbackForOne(
+          nodeId,
+          'getDeviceConfig'
+        )
+
+        if (message.state.reported.template !== template) {
+          //device type (template) has changed! Invalidate shadow (will be recreated by handleDeleteAccepted())
+          this.mqttClient.publish(
+            `$aws/things/${this.credentials.thingId}/shadow/name/${nodeId}/delete`,
+            {}
+          )
+        } else if (message.state.reported.friendlyName !== friendlyName) {
+          //name has changed!
+          this.updateShadow({ nodeId, type: 'reported' })
+          this.discover(nodeId)
+        } else {
+          //override local state only if neither template nor name changed!
+          this.execCallbackForOne(
+            nodeId,
+            'setLocalState',
+            message.state.reported
+          )
+        }
+      }
+    }
+
+    this.handleGetRejected = function (nodeId) {
+      //shadow for the device does not yet exist! Let's create it:
+      this.updateShadow({ nodeId, type: 'reported' })
+      this.discover(nodeId)
+    }
+
+    this.handleUpdateDelta = function (nodeId, message) {
+      this.execCallbackForOne(nodeId, 'setLocalState', message.state)
+      const updatedLocalState = this.execCallbackForOne(nodeId, 'getLocalState')
+
+      delete updatedLocalState.friendlyName
+      delete updatedLocalState.template
+
+      const msg = {
+        payload: updatedLocalState
+      }
+      this.execCallbackForOne(nodeId, 'emitMessage', msg)
+      this.updateShadow({ nodeId, type: 'reported' })
+    }
+
+    this.handleDeleteAccepted = function (nodeId) {
+      //re-instantiate shadow from local state:
+      this.updateShadow({ nodeId, type: 'reported' })
+      this.discover(nodeId)
+    }
+
+    if (this.credentials.server) {
       const options = {
-        host: config.server,
+        host: this.credentials.server,
         port: config.port,
         key: Base64.decode(this.credentials.privateKey),
         cert: Base64.decode(this.credentials.cert),
-        ca: Base64.decode(config.caCert),
-        clientId: config.thingId,
+        ca: Base64.decode(this.credentials.caCert),
+        clientId: this.credentials.thingId,
         reconnectPeriod: 5000,
+        reconnectPeriod: 0, //TODO:: 5000
         keepalive: 90,
+        rejectUnauthorized: false,
         will: {
-          topic: `vsh/${config.thingId}/update`,
+          topic: `vsh/${this.credentials.thingId}/update`,
           payload: JSON.stringify({
             state: { reported: { connected: false } }
           }),
@@ -137,7 +190,7 @@ module.exports = function (RED) {
             text: 'online'
           })
 
-          this.mqttClient.publish(`vsh/${config.thingId}/update`, {
+          this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
             state: { reported: { connected: true } }
           })
         },
@@ -175,50 +228,48 @@ module.exports = function (RED) {
 
             //find out which action to perform:
             if (topic.includes('/get/accepted')) {
-              if (message.state.reported) {
-                this.execCallbackForOne(
-                  nodeId,
-                  'setLocalState',
-                  message.state.reported
-                )
-              }
+              this.handleGetAccepted(nodeId, message)
             } else if (topic.includes('/get/rejected')) {
-              //shadow for the device does not yet exist! Let's create it:
-              this.updateShadow({ nodeId, type: 'reported' })
+              this.handleGetRejected(nodeId, message)
+            } else if (topic.includes('/delete/accepted')) {
+              this.handleDeleteAccepted(nodeId)
             } else if (topic.includes('/update/delta')) {
-              this.execCallbackForOne(nodeId, 'setLocalState', message.state)
-              const updatedLocalState = this.execCallbackForOne(
-                nodeId,
-                'getLocalState'
-              )
-              //delete updatedLocalState.source
-              const msg = {
-                payload: updatedLocalState
-              }
-              this.execCallbackForOne(nodeId, 'emitMessage', msg)
-              this.updateShadow({ nodeId, type: 'reported' })
+              this.handleUpdateDelta(nodeId, message)
             }
           }
         }
       })
 
-      this.mqttClient.connect()
+      try {
+        this.mqttClient.connect().then(() => {
+          const topicsToSubscribe = [
+            `$aws/things/${this.credentials.thingId}/shadow/name/+/delete/accepted`,
+            `$aws/things/${this.credentials.thingId}/shadow/name/+/get/accepted`,
+            `$aws/things/${this.credentials.thingId}/shadow/name/+/get/rejected`,
+            `$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`
+          ]
 
-      const topicsToSubscribe = [
-        `$aws/things/${config.thingId}/shadow/name/+/get/accepted`,
-        `$aws/things/${config.thingId}/shadow/name/+/get/rejected`,
-        `$aws/things/${config.thingId}/shadow/name/+/update/delta`
-      ]
-
-      this.mqttClient.subscribe(topicsToSubscribe)
+          this.mqttClient.subscribe(topicsToSubscribe)
+        })
+      } catch (e) {
+        console.log('CONNECTING TO MQTT BROKER FAILED', e)
+      }
     }
 
     this.on('close', async function (removed, done) {
       clearInterval(this.jobQueueExecutor)
-      await this.mqttClient.publish(`vsh/${config.thingId}/update`, {
-        state: { reported: { connected: false } }
-      })
-      await this.mqttClient.disconnect()
+      try {
+        await this.mqttClient.publish(
+          `vsh/${this.credentials.thingId}/update`,
+          {
+            state: { reported: { connected: false } }
+          }
+        )
+        await this.mqttClient.disconnect()
+      } catch (e) {
+        console.log(e)
+      }
+
       this.execCallbackForAll('onDisconnect')
       done()
     })
@@ -229,6 +280,9 @@ module.exports = function (RED) {
       refreshToken: { type: 'text' },
       email: { type: 'text' },
       cert: { type: 'text' },
+      thingId: { type: 'text' },
+      caCert: { type: 'text' },
+      server: { type: 'text' },
       privateKey: { type: 'text' }
     }
   })

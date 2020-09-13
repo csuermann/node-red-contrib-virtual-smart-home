@@ -77,7 +77,7 @@
     }
 
     const oneditprepare = async function () {
-      if (!this.email) {
+      if (!this.credentials.email) {
         try {
           const {
             device_code,
@@ -105,7 +105,7 @@
             }
 
             try {
-              console.log('polling...')
+              console.log('polling for deviceTokenResponse...')
 
               const deviceTokenResponse = await fetchDeviceToken(
                 device_code,
@@ -164,23 +164,27 @@
       paletteLabel: 'connection',
       defaults: {
         name: { value: '' },
-        refreshToken: { value: '', required: true },
-        email: { value: '', required: true },
-        server: { value: '', required: true },
+        //refreshToken: { value: '', required: true },
+        //email: { value: '', required: true },
+        //server: { value: '', required: true },
         port: { value: '', required: true },
-        cert: { value: '', required: true },
-        privateKey: { value: '', required: true },
-        caCert: { value: '', required: true },
-        thingId: { value: '', required: true },
+        //cert: { value: '', required: true },
+        //privateKey: { value: '', required: true },
+        //caCert: { value: '', required: true },
+        //thingId: { value: '', required: true },
       },
       credentials: {
         refreshToken: { type: 'text' },
         email: { type: 'text' },
         cert: { type: 'text' },
         privateKey: { type: 'text' },
+        caCert: { type: 'text' },
+        thingId: { type: 'text' },
+        server: { type: 'text', required: true },
       },
       label: function () {
-        return this.name || this.email || 'unnamed connection'
+        console.log(this)
+        return this.name || this.credentials.email || 'unnamed connection'
       },
       oneditprepare,
       oneditsave,

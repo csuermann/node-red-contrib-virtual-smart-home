@@ -30,6 +30,7 @@
   "dependencies": {
     "async-mqtt": "^2.6.1",
     "dayjs": "^1.8.35",
+    "deepmerge": "^4.2.2",
     "js-base64": "^3.4.5"
   }
 }

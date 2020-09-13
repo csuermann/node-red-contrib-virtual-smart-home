@@ -1,4 +1,5 @@
-const { powerState } = require('./device-types')
+const merge = require('deepmerge')
+const { getValidators, getDefaultState } = require('./device-types')
 
 module.exports = function (RED) {
   function VirtualDeviceNode (config) {
@@ -11,6 +12,8 @@ module.exports = function (RED) {
     const connectionNode = RED.nodes.getNode(config.connection)
 
     let localState = getDefaultState(config.template)
+    localState['template'] = config.template
+    localState['friendlyName'] = config.name || config.template.toLowerCase()
 
     const validators = getValidators(config.template)
 
@@ -23,7 +26,7 @@ module.exports = function (RED) {
     }
 
     const setLocalState = function (state) {
-      localState = { ...localState, ...state }
+      localState = merge(localState, state)
       const nodeContext = node.context()
       nodeContext.set('state', localState)
     }
@@ -63,14 +66,17 @@ module.exports = function (RED) {
 
     node.on('input', function (msg, send, done) {
       const approvedState = validateState(msg.payload)
-      console.log('approved state', approvedState)
-      setLocalState({ ...approvedState, source: 'device' })
+      const mergedState = merge(getLocalState(), approvedState)
+
+      setLocalState({ ...mergedState, source: 'device' })
 
       const updatedState = getLocalState()
+      delete updatedState.friendlyName
+      delete updatedState.template
 
       connectionNode.updateShadow({ nodeId, type: 'desired' })
 
-      if (config.passthrough) {
+      if (config.passthrough && Object.keys(approvedState).length > 0) {
         send({ payload: updatedState })
       }
 

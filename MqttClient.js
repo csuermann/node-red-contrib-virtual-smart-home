@@ -4,8 +4,11 @@ function MqttClient (options, callbacksObj) {
   this.options = options
   this.client = null
 
-  this.connect = function () {
-    this.client = MQTT.connect('mqtts://' + this.options.host, this.options)
+  this.connect = async function () {
+    this.client = await MQTT.connect(
+      'mqtts://' + this.options.host,
+      this.options
+    )
 
     this.client.on('connect', this.handleOnConnect)
     this.client.on('close', this.handleOnDisconnect)
@@ -17,7 +20,7 @@ function MqttClient (options, callbacksObj) {
     try {
       callbacksObj['onConnect']()
     } catch (e) {
-      console.log(e)
+      console.log('MqttClient:handleOnConnect', e)
     }
   }
 
@@ -25,15 +28,17 @@ function MqttClient (options, callbacksObj) {
     try {
       callbacksObj['onDisconnect']()
     } catch (e) {
+      console.log('MqttClient:handleOnDisconnect', e)
       console.log(e)
     }
   }
 
   this.handleOnError = function (error) {
+    console.log(error)
     try {
       callbacksObj['onError'](error)
     } catch (e) {
-      console.log(e)
+      console.log('MqttClient:handleOnError', e)
     }
   }
 
