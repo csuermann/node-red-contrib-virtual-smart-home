@@ -23,8 +23,8 @@
   "homepage": "https://github.com/csuermann/node-red-contrib-virtual-smart-home#readme",
   "node-red": {
     "nodes": {
-      "connection": "connection.js",
-      "switch": "switch.js"
+      "vsh-connection": "connection.js",
+      "vsh-virtual-device": "virtual-device.js"
     }
   },
   "dependencies": {

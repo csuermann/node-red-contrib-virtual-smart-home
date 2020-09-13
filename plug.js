@@ -2,12 +2,12 @@ const baseNode = require('./baseNode')
 const { powerState } = require('./validators')
 
 module.exports = function (RED) {
-  function SwitchNode (config) {
+  function PlugNode (config) {
     baseNode({
       RED,
       config,
       node: this,
-      template: 'SWITCH',
+      template: 'PLUG',
       defaultState: {
         source: 'device',
         powerState: 'OFF'
@@ -18,5 +18,5 @@ module.exports = function (RED) {
     })
   }
 
-  RED.nodes.registerType('vsh-switch', SwitchNode)
+  RED.nodes.registerType('vsh-plug', PlugNode)
 }

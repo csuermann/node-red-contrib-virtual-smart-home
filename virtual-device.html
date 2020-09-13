@@ -1,0 +1,104 @@
+<script type="text/javascript">
+  RED.nodes.registerType('vsh-virtual-device', {
+    category: 'virtual smart home',
+    defaults: {
+      name: { value: '' },
+      connection: { type: 'vsh-connection', required: true },
+      template: { value: 'SWITCH', required: true },
+      passthrough: { value: false },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: 'vsh_icon.svg',
+    color: '#31C4F3',
+    paletteLabel: 'virtual device',
+    label: function () {
+      return this.name || 'virtual device'
+    },
+    oneditprepare: () => setTimeout(() => $('#donation').fadeIn('slow'), 2000),
+  })
+</script>
+
+<style>
+  #donation {
+    display: none;
+    padding: 15px;
+    text-align: center;
+    border: 3px #253b80 solid;
+    margin-top: 30px;
+    background-color: #cad7de;
+    color: #253b80;
+    width: 90%;
+  }
+
+  #donaton h1 {
+    line-height: normal;
+  }
+
+  #donation img {
+    height: 5em;
+  }
+</style>
+
+<script type="text/html" data-template-name="vsh-virtual-device">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-connection"
+      ><i class="fa fa-globe"></i> Connection</label
+    >
+    <input type="text" id="node-input-connection" placeholder="connection" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-template"><i class="fa fa-tag"></i> Type</label>
+    <select id="node-input-template">
+      <option value="SWITCH">Switch</option>
+      <option value="PLUG">Plug</option>
+      <option value="DIMMABLE_LIGHT_BULB">Dimmable Light Bulb</option>
+      <option value="COLOR_CHANGING_LIGHT_BULB"
+        >Color Changing Light Bulb</option
+      >
+      <option value="DIMMER_SWITCH">Dimmer Switch</option>
+      <option value="BLINDS">Blinds</option>
+      <option value="GARAGE_DOOR_OPENER">Garage Door Opener</option>
+      <option value="LOCK">Lock</option>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-passthrough"
+      ><i class="fa fa-forward"></i> Passthrough</label
+    >
+    <input
+      type="checkbox"
+      id="node-input-passthrough"
+      style="display:inline-block;width:22px;vertical-align:top;"
+      autocomplete="off"
+    />
+  </div>
+
+  <div id="donation">
+    <h1>Please Support</h1>
+    <p>
+      Your <i>virtual smart home</i> can only function as long as someone is
+      paying the bills for the backend infrastructure.
+    </p>
+    <p>
+      If you are satisfied with this project, please contribute your share.
+    </p>
+    <p>Thank you!</p>
+    <a
+      target="_blank"
+      href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url"
+      ><img src="icons/node-red-contrib-virtual-smart-home/donate.png"
+    /></a>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="vsh-virtual-device">
+  <p>A virtual device that can be controlled via Alexa</p>
+</script>
