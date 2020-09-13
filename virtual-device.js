@@ -1,4 +1,4 @@
-const { powerState } = require('./validators')
+const { powerState } = require('./device-types')
 
 module.exports = function (RED) {
   function VirtualDeviceNode (config) {
@@ -10,14 +10,9 @@ module.exports = function (RED) {
 
     const connectionNode = RED.nodes.getNode(config.connection)
 
-    let localState = {
-      source: 'device',
-      powerState: 'OFF'
-    }
+    let localState = getDefaultState(config.template)
 
-    const validators = {
-      powerState
-    }
+    const validators = getValidators(config.template)
 
     const sendMessage = function (msg) {
       node.send(msg)
