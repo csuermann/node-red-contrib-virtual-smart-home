@@ -30,8 +30,8 @@ payload.
 The node also accepts incoming messages that can be used to inform Alexa about
 local device changes, which will then be reflected in the Alexa app. If the
 passthrough option is enabled, this will also trigger an outgoing message, just
-like when the node gets invoked via Alexa. In this case `payload`.source is set
-to 'device' instead of 'alexa'.
+like when the node gets invoked via Alexa. In this case `payload.source` is set
+to `device` instead of `alexa`.
 
 ## Docs
 
