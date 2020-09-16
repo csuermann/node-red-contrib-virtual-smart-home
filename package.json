@@ -1,19 +1,20 @@
 {
   "name": "node-red-contrib-virtual-smart-home",
   "version": "1.0.0",
-  "description": "Node-RED nodes to interact with Amazon Alexa for controlling virtual or physical smart home devices",
-  "main": "index.js",
+  "description": "A Node-RED node that represents a 'virtual device' which can be controlled via Amazon Alexa. Requires the virtual smart home skill to be enabled for your Amazon account.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/csuermann/node-red-contrib-virtual-smart-home.git"
+    "url": "https://github.com/csuermann/node-red-contrib-virtual-smart-home"
   },
   "keywords": [
     "Alexa",
     "smart-home",
-    "node-red"
+    "node-red",
+    "virtual smart home",
+    "virtual device"
   ],
   "author": "Cornelius Suermann",
   "license": "MIT",
