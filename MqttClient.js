@@ -4,42 +4,26 @@ function MqttClient (options, callbacksObj) {
   this.options = options
   this.client = null
 
-  this.connect = async function () {
-    this.client = await MQTT.connect(
-      'mqtts://' + this.options.host,
-      this.options
-    )
+  this.connect = function () {
+    this.client = MQTT.connect('mqtts://' + this.options.host, this.options)
 
     this.client.on('connect', this.handleOnConnect)
     this.client.on('close', this.handleOnDisconnect)
+    this.client.on('offline', this.handleOnDisconnect)
     this.client.on('error', this.handleOnError)
     this.client.on('message', this.handleOnMessage)
   }
 
   this.handleOnConnect = function () {
-    try {
-      callbacksObj['onConnect']()
-    } catch (e) {
-      console.log('MqttClient:handleOnConnect', e)
-    }
+    callbacksObj['onConnect']()
   }
 
   this.handleOnDisconnect = function () {
-    try {
-      callbacksObj['onDisconnect']()
-    } catch (e) {
-      console.log('MqttClient:handleOnDisconnect', e)
-      console.log(e)
-    }
+    callbacksObj['onDisconnect']()
   }
 
   this.handleOnError = function (error) {
-    console.log(error)
-    try {
-      callbacksObj['onError'](error)
-    } catch (e) {
-      console.log('MqttClient:handleOnError', e)
-    }
+    callbacksObj['onError'](error)
   }
 
   this.handleOnMessage = function (topic, message, packet) {

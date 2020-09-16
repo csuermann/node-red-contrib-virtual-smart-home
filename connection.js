@@ -168,7 +168,6 @@ module.exports = function (RED) {
         ca: Base64.decode(this.credentials.caCert),
         clientId: this.credentials.thingId,
         reconnectPeriod: 5000,
-        reconnectPeriod: 0, //TODO:: 5000
         keepalive: 90,
         rejectUnauthorized: false,
         will: {
@@ -240,20 +239,16 @@ module.exports = function (RED) {
         }
       })
 
-      try {
-        this.mqttClient.connect().then(() => {
-          const topicsToSubscribe = [
-            `$aws/things/${this.credentials.thingId}/shadow/name/+/delete/accepted`,
-            `$aws/things/${this.credentials.thingId}/shadow/name/+/get/accepted`,
-            `$aws/things/${this.credentials.thingId}/shadow/name/+/get/rejected`,
-            `$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`
-          ]
+      this.mqttClient.connect()
 
-          this.mqttClient.subscribe(topicsToSubscribe)
-        })
-      } catch (e) {
-        console.log('CONNECTING TO MQTT BROKER FAILED', e)
-      }
+      const topicsToSubscribe = [
+        `$aws/things/${this.credentials.thingId}/shadow/name/+/delete/accepted`,
+        `$aws/things/${this.credentials.thingId}/shadow/name/+/get/accepted`,
+        `$aws/things/${this.credentials.thingId}/shadow/name/+/get/rejected`,
+        `$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`
+      ]
+
+      this.mqttClient.subscribe(topicsToSubscribe)
     }
 
     this.on('close', async function (removed, done) {

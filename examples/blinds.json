@@ -1,0 +1,148 @@
+[
+  {
+    "id": "2415de34.a57552",
+    "type": "subflow",
+    "name": "device state",
+    "info": "",
+    "category": "",
+    "in": [
+      {
+        "x": 60,
+        "y": 80,
+        "wires": [
+          {
+            "id": "b643ba4b.ed8568"
+          }
+        ]
+      }
+    ],
+    "out": [],
+    "env": [],
+    "color": "#FDF0C2",
+    "icon": "node-red-contrib-virtual-smart-home/vsh_icon.svg",
+    "status": {
+      "x": 340,
+      "y": 160,
+      "wires": [
+        {
+          "id": "481bce2f.15694",
+          "port": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": "b643ba4b.ed8568",
+    "type": "function",
+    "z": "2415de34.a57552",
+    "name": "state",
+    "func": "node.status({\n    text: JSON.stringify(msg.payload)\n})\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "x": 190,
+    "y": 80,
+    "wires": [[]]
+  },
+  {
+    "id": "481bce2f.15694",
+    "type": "status",
+    "z": "2415de34.a57552",
+    "name": "",
+    "scope": ["b643ba4b.ed8568"],
+    "x": 200,
+    "y": 160,
+    "wires": [[]]
+  },
+  {
+    "id": "6dc99a3c.4197a4",
+    "type": "inject",
+    "z": "b27e9fc0.1db62",
+    "name": "up",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"mode\":\"Position.Up\"}",
+    "payloadType": "json",
+    "x": 150,
+    "y": 1040,
+    "wires": [["64d2e5d6.21833c"]]
+  },
+  {
+    "id": "64d2e5d6.21833c",
+    "type": "vsh-virtual-device",
+    "z": "b27e9fc0.1db62",
+    "name": "my virtual blinds",
+    "connection": "",
+    "template": "BLINDS",
+    "passthrough": true,
+    "x": 460,
+    "y": 1040,
+    "wires": [["2d80deef.8e3972", "33d4b041.83837"]]
+  },
+  {
+    "id": "3e0fcb72.ccee14",
+    "type": "comment",
+    "z": "b27e9fc0.1db62",
+    "name": "BLINDS",
+    "info": "",
+    "x": 130,
+    "y": 980,
+    "wires": []
+  },
+  {
+    "id": "2d80deef.8e3972",
+    "type": "debug",
+    "z": "b27e9fc0.1db62",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 730,
+    "y": 1040,
+    "wires": []
+  },
+  {
+    "id": "33d4b041.83837",
+    "type": "subflow:2415de34.a57552",
+    "z": "b27e9fc0.1db62",
+    "name": "",
+    "env": [],
+    "x": 730,
+    "y": 1080,
+    "wires": []
+  },
+  {
+    "id": "7e1e991d.512e38",
+    "type": "inject",
+    "z": "b27e9fc0.1db62",
+    "name": "down",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"mode\":\"Position.Down\"}",
+    "payloadType": "json",
+    "x": 150,
+    "y": 1080,
+    "wires": [["64d2e5d6.21833c"]]
+  }
+]

@@ -58,7 +58,7 @@
 
     const provisionDevice = function (accessToken) {
       return postData(
-        'https://ashygtd8pc.execute-api.eu-west-1.amazonaws.com/dev/provision',
+        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/provision',
         {
           accessToken: accessToken,
         }
@@ -164,14 +164,7 @@
       paletteLabel: 'connection',
       defaults: {
         name: { value: '' },
-        //refreshToken: { value: '', required: true },
-        //email: { value: '', required: true },
-        //server: { value: '', required: true },
         port: { value: '', required: true },
-        //cert: { value: '', required: true },
-        //privateKey: { value: '', required: true },
-        //caCert: { value: '', required: true },
-        //thingId: { value: '', required: true },
       },
       credentials: {
         refreshToken: { type: 'text' },
@@ -183,8 +176,7 @@
         server: { type: 'text', required: true },
       },
       label: function () {
-        console.log(this)
-        return this.name || this.credentials.email || 'unnamed connection'
+        return this.name || `connection_${this.id}`
       },
       oneditprepare,
       oneditsave,
@@ -197,6 +189,10 @@
   #provisioned,
   #device-code,
   #error {
+    display: none;
+  }
+
+  .hidden {
     display: none;
   }
 
@@ -255,7 +251,7 @@
     <h1>Connection Details</h1>
     <div class="form-row">
       <label for="node-config-input-email"
-        ><i class="fa fa-user"></i> Account</label
+        ><i class="fa fa-user"></i> Linked Account</label
       >
       <input
         type="text"
@@ -265,7 +261,7 @@
       />
     </div>
 
-    <div class="form-row">
+    <div class="form-row hidden">
       <label for="node-config-input-refreshToken"
         ><i class="fa fa-refresh"></i> Refresh Token</label
       >
@@ -277,7 +273,7 @@
       />
     </div>
 
-    <div class="form-row">
+    <div class="form-row hidden">
       <label for="node-config-input-server"
         ><i class="fa fa-server"></i> Server</label
       >
@@ -289,7 +285,7 @@
       />
     </div>
 
-    <div class="form-row">
+    <div class="form-row hidden">
       <label for="node-config-input-port"
         ><i class="fa fa-building"></i> Port</label
       >
@@ -301,7 +297,7 @@
       />
     </div>
 
-    <div class="form-row">
+    <div class="form-row hidden">
       <label for="node-config-input-cert"
         ><i class="fa fa-certificate"></i> Certificate</label
       >
@@ -313,7 +309,7 @@
       />
     </div>
 
-    <div class="form-row">
+    <div class="form-row hidden">
       <label for="node-config-input-privateKey"
         ><i class="fa fa-key"></i> Private Key</label
       >
@@ -325,7 +321,7 @@
       />
     </div>
 
-    <div class="form-row">
+    <div class="form-row hidden">
       <label for="node-config-input-caCert"
         ><i class="fa fa-certificate"></i> CA Certificate</label
       >

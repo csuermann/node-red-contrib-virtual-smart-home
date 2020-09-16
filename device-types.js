@@ -28,7 +28,7 @@ const color = val => {
   )
 }
 const lightMode = val => val == 'hsb' || val == 'temp'
-const blindsMode = val => false
+const position = val => val == 'Position.Up' || val == 'Position.Down'
 
 const types = {
   SWITCH: {
@@ -66,7 +66,7 @@ const types = {
       powerState: 'OFF',
       brightness: 100,
       colorTemperatureInKelvin: 2200,
-      lightMode: 'hsb',
+      lightMode: 'temp',
       color: { hue: 60, saturation: 1, brightness: 1 }
     },
     validators: {
@@ -91,17 +91,23 @@ const types = {
   BLINDS: {
     defaultState: {
       source: 'device',
-      powerState: 'OFF',
-      brightness: 100
+      mode: 'Position.Up',
+      instance: 'Blinds.Position'
     },
     validators: {
-      mode: blindsMode
+      mode: position
+    }
+  },
+  GARAGE_DOOR_OPENER: {
+    defaultState: {
+      source: 'device',
+      mode: 'Position.Up',
+      instance: 'GarageDoor.Position'
+    },
+    validators: {
+      mode: position
     }
   }
-
-  //::TODO:: support more types
-  // GARAGE_DOOR_OPENER
-  // LOCK
 }
 
 function getValidators (template) {
