@@ -37,3 +37,8 @@ to 'device' instead of 'alexa'.
 
 Detailes docs are shipped as part of the Node-RED package and available through
 the 'help' panel.
+
+## Warranty
+
+This package comes without any warranty. Use it, enjoy it, but all at your own
+risk.
