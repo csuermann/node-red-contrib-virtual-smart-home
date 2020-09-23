@@ -273,6 +273,7 @@ module.exports = function (RED) {
   RED.nodes.registerType('vsh-connection', ConnectionNode, {
     credentials: {
       refreshToken: { type: 'text' },
+      accessToken: { type: 'text' },
       email: { type: 'text' },
       cert: { type: 'text' },
       thingId: { type: 'text' },
