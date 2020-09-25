@@ -1,8 +1,9 @@
 <script type="text/javascript">
   ;(function () {
     let pollingIntervalId
+    let registeredDeviceCount = 0
 
-    async function postData(url, data = {}) {
+    async function execPostRequest(url, data = {}) {
       const response = await fetch(url, {
         method: 'POST',
         mode: 'cors',
@@ -17,16 +18,32 @@
       return response.json()
     }
 
-    async function getData(url) {
+    async function execGetRequest(url, headers) {
       const response = await fetch(url, {
         method: 'GET',
         mode: 'cors',
         cache: 'no-cache',
         credentials: 'same-origin',
         headers: {
+          ...headers,
+        },
+        redirect: 'follow',
+      })
+      return response.json()
+    }
+
+    async function execDeleteRequest(url, headers = {}, data = {}) {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        headers: {
+          ...headers,
           'Content-Type': 'application/json',
         },
         redirect: 'follow',
+        body: JSON.stringify(data),
       })
       return response.json()
     }
@@ -49,6 +66,19 @@
       return new Promise((resolve, reject) => {
         $.ajax(settings).done(resolve).fail(reject)
       })
+    }
+
+    async function ensureValidAccessToken() {
+      const now = new Date().getTime()
+      const expiry = $('#node-config-input-accessTokenExpiry').val() || 0
+      const refreshToken = $('#node-config-input-refreshToken').val()
+
+      if (expiry < now) {
+        const tokenData = await fetchFreshAccessToken(refreshToken)
+        populateTokenData(tokenData)
+      }
+
+      return $('#node-config-input-accessToken').val()
     }
 
     function fetchFreshAccessToken(refreshToken) {
@@ -90,8 +120,18 @@
       })
     }
 
+    function populateTokenData({ access_token, refresh_token, expires_in }) {
+      $('#node-config-input-refreshToken').val(refresh_token)
+      $('#node-config-input-accessToken').val(access_token)
+
+      const accessTokenExpiryTimestamp =
+        new Date().getTime() + (expires_in - 15) * 1000
+
+      $('#node-config-input-accessTokenExpiry').val(accessTokenExpiryTimestamp)
+    }
+
     function provisionDevice(accessToken) {
-      return postData(
+      return execPostRequest(
         'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/provision',
         {
           accessToken: accessToken,
@@ -100,10 +140,9 @@
     }
 
     function getRegisteredDevices(accessToken) {
-      return getData(
-        `https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/devices?accessToken=${encodeURI(
-          accessToken
-        )}`
+      return execGetRequest(
+        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/devices',
+        { Authorization: accessToken }
       )
     }
 
@@ -118,22 +157,81 @@
       $('#error').show()
     }
 
+    async function deleteDevice(thingId, deviceId) {
+      $(`#${deviceId}`).fadeOut()
+      registeredDeviceCount--
+
+      if (registeredDeviceCount == 0) {
+        $('#empty').show()
+        $('#device-list-table').hide()
+      }
+
+      const accessToken = await ensureValidAccessToken()
+
+      execDeleteRequest(
+        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/device',
+        { Authorization: accessToken },
+        { thingId, deviceId }
+      )
+    }
+
     async function displayRegisteredDevices() {
       $('#registered-devices').show()
-      const { access_token } = await fetchFreshAccessToken(
-        $('#node-config-input-refreshToken').val()
-      )
 
-      const registeredDevices = await getRegisteredDevices(access_token)
+      const accessToken = await ensureValidAccessToken()
+
+      let registeredDevices = await getRegisteredDevices(accessToken)
+
+      registeredDeviceCount = registeredDevices.length
 
       $('#loading').hide()
 
+      if (registeredDevices.length == 0) {
+        $('#empty').show()
+        return
+      }
+
+      registeredDevices = registeredDevices.sort((a, b) => {
+        const nameA = a.friendlyName.toUpperCase()
+        const nameB = b.friendlyName.toUpperCase()
+
+        let comparison = 0
+        if (nameA > nameB) {
+          comparison = 1
+        } else if (nameA < nameB) {
+          comparison = -1
+        }
+        return comparison
+      })
+
+      registeredDevices = registeredDevices.map((item) => {
+        var splitStr = item.template.toLowerCase().split('_')
+        for (var i = 0; i < splitStr.length; i++) {
+          splitStr[i] =
+            splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1)
+        }
+        item.template = splitStr.join(' ')
+        return item
+      })
+
       $.each(registeredDevices, function (i, item) {
         let $tr = $('<tr>')
+          .attr('id', item.deviceId)
+          .addClass(
+            item.thingId == $('#node-config-input-thingId').val()
+              ? 'same-thing'
+              : 'other-thing'
+          )
           .append(
-            $('<td>').text(item.deviceId),
             $('<td>').text(item.friendlyName),
-            $('<td>').text(item.template)
+            $('<td>').text(item.template),
+            $('<td>')
+              .addClass('action-column')
+              .append(
+                $('<i class="fa fa-trash">').on('click', () =>
+                  deleteDevice(item.thingId, item.deviceId)
+                )
+              )
           )
           .appendTo('#device-list-table')
       })
@@ -187,9 +285,7 @@
 
               $('#device-code').hide()
 
-              $('#node-config-input-refreshToken').val(
-                deviceTokenResponse.refresh_token
-              )
+              populateTokenData(deviceTokenResponse)
 
               $('#node-config-input-email').val(provisionData.email)
               $('#node-config-input-server').val(provisionData.server)
@@ -231,6 +327,7 @@
       defaults: {
         name: { value: '' },
         port: { value: '', required: true },
+        accessTokenExpiry: { value: 0 },
       },
       credentials: {
         refreshToken: { type: 'text' },
@@ -257,13 +354,14 @@
   #registered-devices,
   #device-list-table,
   #device-code,
+  #empty,
   #error {
     display: none;
   }
 
-  /* .hidden {
+  .hidden {
     display: none;
-  } */
+  }
 
   #device-code,
   #error {
@@ -276,6 +374,31 @@
   #registered-devices h1 {
     font-size: 1.5em;
     margin-top: 30px;
+  }
+
+  #registered-devices table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  #registered-devices table,
+  #registered-devices th,
+  #registered-devices td {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: left;
+  }
+
+  #registered-devices td.action-column {
+    text-align: center;
+  }
+
+  #registered-devices td.action-column i {
+    cursor: pointer;
+  }
+
+  #registered-devices .other-thing {
+    background-color: #f5f2f2;
   }
 
   #user-code {
@@ -332,18 +455,6 @@
     </div>
 
     <div class="form-row hidden">
-      <label for="node-config-input-refreshToken"
-        ><i class="fa fa-refresh"></i> Refresh Token</label
-      >
-      <input
-        type="text"
-        id="node-config-input-refreshToken"
-        readonly
-        placeholder="Refresh Token"
-      />
-    </div>
-
-    <div class="form-row hidden">
       <label for="node-config-input-accessToken"
         ><i class="fa fa-ticket"></i> Access Token</label
       >
@@ -352,6 +463,29 @@
         id="node-config-input-accessToken"
         readonly
         placeholder="Access Token"
+      />
+    </div>
+    <div class="form-row hidden">
+      <label for="node-config-input-accessTokenExpiry"
+        ><i class="fa fa-clock-o"></i> Token Expiry</label
+      >
+      <input
+        type="text"
+        id="node-config-input-accessTokenExpiry"
+        readonly
+        placeholder="Access Token Expiry"
+      />
+    </div>
+
+    <div class="form-row hidden">
+      <label for="node-config-input-refreshToken"
+        ><i class="fa fa-refresh"></i> Refresh Token</label
+      >
+      <input
+        type="text"
+        id="node-config-input-refreshToken"
+        readonly
+        placeholder="Refresh Token"
       />
     </div>
 
@@ -431,12 +565,15 @@
   <div id="registered-devices">
     <h1>Registered Devices</h1>
     <div id="loading">...loading...</div>
+    <div id="empty"
+      >There are currently no devices registered for this account</div
+    >
     <div>
       <table id="device-list-table">
         <tr>
-          <th>DeviceId</th>
-          <th>Name</th>
-          <th>Type</th>
+          <th style="width: 45%">Name</th>
+          <th style="width: 45%">Type</th>
+          <th>&nbsp;</th>
         </tr>
       </table>
     </div>
