@@ -11,6 +11,7 @@ module.exports = function (RED) {
     this.isConnected = false
     this.isSubscribed = false
     this.isError = false
+    this.isKilled = false
 
     this.jobQueue = []
 
@@ -200,7 +201,7 @@ module.exports = function (RED) {
             this.execCallbackForAll('setStatus', {
               shape: 'dot',
               fill: 'red',
-              text: 'offline'
+              text: this.isKilled ? 'KILLED' : 'offline'
             })
           }
         },
@@ -235,6 +236,9 @@ module.exports = function (RED) {
             } else if (topic.includes('/update/delta')) {
               this.handleUpdateDelta(nodeId, message)
             }
+          } else if (topic == `vsh/${this.credentials.thingId}/kill`) {
+            this.isKilled = true
+            this.mqttClient.disconnect()
           }
         }
       })
@@ -245,7 +249,8 @@ module.exports = function (RED) {
         `$aws/things/${this.credentials.thingId}/shadow/name/+/delete/accepted`,
         `$aws/things/${this.credentials.thingId}/shadow/name/+/get/accepted`,
         `$aws/things/${this.credentials.thingId}/shadow/name/+/get/rejected`,
-        `$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`
+        `$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`,
+        `vsh/${this.credentials.thingId}/kill`
       ]
 
       this.mqttClient.subscribe(topicsToSubscribe)
