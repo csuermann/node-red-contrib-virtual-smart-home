@@ -5,7 +5,17 @@
     "name": "device state",
     "info": "",
     "category": "",
-    "in": [{ "x": 60, "y": 80, "wires": [{ "id": "b643ba4b.ed8568" }] }],
+    "in": [
+      {
+        "x": 60,
+        "y": 80,
+        "wires": [
+          {
+            "id": "b643ba4b.ed8568"
+          }
+        ]
+      }
+    ],
     "out": [],
     "env": [],
     "color": "#FDF0C2",
@@ -13,7 +23,12 @@
     "status": {
       "x": 340,
       "y": 160,
-      "wires": [{ "id": "481bce2f.15694", "port": 0 }]
+      "wires": [
+        {
+          "id": "481bce2f.15694",
+          "port": 0
+        }
+      ]
     }
   },
   {
@@ -41,11 +56,15 @@
     "wires": [[]]
   },
   {
-    "id": "40b6bf52.8d61d",
+    "id": "4def6751.3afbc8",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "on",
-    "props": [{ "p": "payload" }],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
@@ -53,16 +72,20 @@
     "topic": "",
     "payload": "{\"powerState\":\"ON\"}",
     "payloadType": "json",
-    "x": 150,
-    "y": 680,
-    "wires": [["5cfbbf0.ea7604"]]
+    "x": 170,
+    "y": 160,
+    "wires": [["97e1b7a3.fcc548"]]
   },
   {
-    "id": "b2815f6d.e98db",
+    "id": "bc4a064.f3316f8",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "off",
-    "props": [{ "p": "payload" }],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
@@ -70,36 +93,36 @@
     "topic": "",
     "payload": "{\"powerState\":\"OFF\"}",
     "payloadType": "json",
-    "x": 150,
-    "y": 720,
-    "wires": [["5cfbbf0.ea7604"]]
+    "x": 170,
+    "y": 200,
+    "wires": [["97e1b7a3.fcc548"]]
   },
   {
-    "id": "5cfbbf0.ea7604",
+    "id": "97e1b7a3.fcc548",
     "type": "vsh-virtual-device",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "my virtual color light",
-    "connection": "",
+    "connection": "76dd9476.4f330c",
     "template": "COLOR_CHANGING_LIGHT_BULB",
     "passthrough": true,
-    "x": 480,
-    "y": 680,
-    "wires": [["9c2bb679.7a47d8", "501c2cd3.61a7e4"]]
+    "x": 500,
+    "y": 160,
+    "wires": [["aabe1100.ff556", "189d641f.3aebec"]]
   },
   {
-    "id": "a56f6424.9e4698",
+    "id": "bd0aba42.a2bca8",
     "type": "comment",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "COLOR CHANGING LIGHT BULB",
     "info": "",
-    "x": 220,
-    "y": 620,
+    "x": 240,
+    "y": 100,
     "wires": []
   },
   {
-    "id": "9c2bb679.7a47d8",
+    "id": "aabe1100.ff556",
     "type": "debug",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -108,26 +131,30 @@
     "complete": "false",
     "statusVal": "",
     "statusType": "auto",
-    "x": 730,
-    "y": 680,
+    "x": 750,
+    "y": 160,
     "wires": []
   },
   {
-    "id": "501c2cd3.61a7e4",
+    "id": "189d641f.3aebec",
     "type": "subflow:2415de34.a57552",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "",
     "env": [],
-    "x": 730,
-    "y": 720,
+    "x": 750,
+    "y": 200,
     "wires": []
   },
   {
-    "id": "38764be9.4af844",
+    "id": "55818fcf.efc5f",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "60%",
-    "props": [{ "p": "payload" }],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
@@ -135,16 +162,20 @@
     "topic": "",
     "payload": "{\"powerState\":\"ON\",\"brightness\":77}",
     "payloadType": "json",
-    "x": 150,
-    "y": 760,
-    "wires": [["5cfbbf0.ea7604"]]
+    "x": 170,
+    "y": 240,
+    "wires": [["97e1b7a3.fcc548"]]
   },
   {
-    "id": "d08b5fca.ceeaf",
+    "id": "e3cb895d.cabc98",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "warm white (temp)",
-    "props": [{ "p": "payload" }],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
@@ -152,16 +183,20 @@
     "topic": "",
     "payload": "{\"colorTemperatureInKelvin\":2200,\"lightMode\":\"temp\"}",
     "payloadType": "json",
-    "x": 190,
-    "y": 840,
-    "wires": [["5cfbbf0.ea7604"]]
+    "x": 210,
+    "y": 320,
+    "wires": [["97e1b7a3.fcc548"]]
   },
   {
-    "id": "87bc57ed.a67808",
+    "id": "ea2fa8b8.e1bab8",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "d4b071dd.484d2",
     "name": "green (hsb)",
-    "props": [{ "p": "payload" }],
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
@@ -169,8 +204,58 @@
     "topic": "",
     "payload": "{\"color\":{\"hue\":120,\"saturation\":1,\"brightness\":0.5},\"lightMode\":\"hsb\"}",
     "payloadType": "json",
-    "x": 160,
-    "y": 800,
-    "wires": [["5cfbbf0.ea7604"]]
+    "x": 180,
+    "y": 280,
+    "wires": [["97e1b7a3.fcc548"]]
+  },
+  {
+    "id": "9b146471.549368",
+    "type": "inject",
+    "z": "d4b071dd.484d2",
+    "name": "red (color_rgb)",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"color_rgb\":[255,0,0],\"lightMode\":\"hsb\"}",
+    "payloadType": "json",
+    "x": 190,
+    "y": 360,
+    "wires": [["97e1b7a3.fcc548"]]
+  },
+  {
+    "id": "c11714ec.e74448",
+    "type": "inject",
+    "z": "d4b071dd.484d2",
+    "name": "blue (color_hex)",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"color_hex\":\"0000FF\",\"lightMode\":\"hsb\"}",
+    "payloadType": "json",
+    "x": 200,
+    "y": 400,
+    "wires": [["97e1b7a3.fcc548"]]
+  },
+  {
+    "id": "76dd9476.4f330c",
+    "type": "vsh-connection",
+    "z": "",
+    "name": "default",
+    "port": "8883",
+    "accessTokenExpiry": "1601204689879"
   }
 ]

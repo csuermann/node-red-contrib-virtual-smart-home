@@ -63,6 +63,90 @@ const color = val => {
   }
 }
 
+const color_rgb = val => {
+  if (!typeof val == 'array' || val.length !== 3) {
+    return false
+  }
+
+  const isValid =
+    Number.isInteger(val[0]) &&
+    val[0] >= 0 &&
+    val[0] <= 255 &&
+    Number.isInteger(val[1]) &&
+    val[1] >= 0 &&
+    val[1] <= 255 &&
+    Number.isInteger(val[2]) &&
+    val[2] >= 0 &&
+    val[2] <= 255
+
+  if (!isValid) {
+    return true
+  }
+
+  const hsb = convert.rgb.hsl(val)
+
+  return {
+    key: 'color',
+    value: {
+      hue: hsb[0],
+      saturation: hsb[1] / 100,
+      brightness: hsb[2] / 100
+    }
+  }
+}
+
+const color_cmyk = val => {
+  if (!typeof val == 'array' || val.length !== 4) {
+    return false
+  }
+
+  const isValid =
+    Number.isInteger(val[0]) &&
+    val[0] >= 0 &&
+    val[0] <= 100 &&
+    Number.isInteger(val[1]) &&
+    val[1] >= 0 &&
+    val[1] <= 100 &&
+    Number.isInteger(val[2]) &&
+    val[2] >= 0 &&
+    val[2] <= 100 &&
+    Number.isInteger(val[3]) &&
+    val[3] >= 0 &&
+    val[3] <= 100
+
+  if (!isValid) {
+    return true
+  }
+
+  const hsb = convert.cmyk.hsl(val)
+
+  return {
+    key: 'color',
+    value: {
+      hue: hsb[0],
+      saturation: hsb[1] / 100,
+      brightness: hsb[2] / 100
+    }
+  }
+}
+
+const color_hex = val => {
+  if (!/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(val)) {
+    return false
+  }
+
+  const hsb = convert.hex.hsl(val)
+
+  return {
+    key: 'color',
+    value: {
+      hue: hsb[0],
+      saturation: hsb[1] / 100,
+      brightness: hsb[2] / 100
+    }
+  }
+}
+
 const lightMode = val => {
   const isValid = val == 'hsb' || val == 'temp'
   if (!isValid) {
@@ -158,8 +242,11 @@ const types = {
     validators: {
       powerState,
       brightness,
-      color,
       colorTemperatureInKelvin,
+      color_hex,
+      color_rgb,
+      color_cmyk,
+      color,
       lightMode
     },
     decorator: colorChangingLightDecorator
