@@ -121,7 +121,7 @@
     </dt>
     <dd
       >key/value pairs of device attributes to update. Invalid attributes will
-      be silently ignored.</dd
+      be silently ignored. (Available attributes are documented below)</dd
     >
   </dl>
 
@@ -205,10 +205,17 @@
       >payload.lightMode
       <span class="property-type">string</span>
     </dt>
-    <dd
-      >'temp': colorTemperatureInKelvin attribute is applied. 'hsb': color
-      attribute is applied.</dd
-    >
+    <dd>
+      <ul>
+        <li>'temp': colorTemperatureInKelvin attribute is applied</li>
+        <li
+          >'hsb': color attribute is applied. For convenience, the color will
+          also be populated as <code>payload.color_rgb</code>,
+          <code>payload.color_hex</code>, and
+          <code>payload.color_cmyk</code>.</li
+        >
+      </ul>
+    </dd>
     <dt
       >payload.colorTemperatureInKelvin
       <span class="property-type">int</span>
@@ -223,7 +230,7 @@
       >payload.color.hue
       <span class="property-type">int</span>
     </dt>
-    <dd>Hue (0-360)</dd>
+    <dd>Hue (0...360)</dd>
     <dt
       >payload.color.saturation
       <span class="property-type">float</span>
@@ -234,6 +241,22 @@
       <span class="property-type">float</span>
     </dt>
     <dd>Brightness (0.0...1.0)</dd>
+
+    <dt
+      >payload.color_rgb
+      <span class="property-type">array(3)</span>
+    </dt>
+    <dd>RGB representation of <code>payload.color</code></dd>
+    <dt
+      >payload.color_hex
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Hexadecimal representation of <code>payload.color</code></dd>
+    <dt
+      >payload.color_cmyk
+      <span class="property-type">array(4)</span>
+    </dt>
+    <dd>CMYK representation of <code>payload.color</code></dd>
   </dl>
 
   <h4>Dimmer Switch</h4>

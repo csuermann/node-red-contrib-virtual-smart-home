@@ -167,7 +167,7 @@
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "payload": "{\"color\":{\"hue\":120,\"saturation\":1,\"brightness\":1},\"lightMode\":\"hsb\"}",
+    "payload": "{\"color\":{\"hue\":120,\"saturation\":1,\"brightness\":0.5},\"lightMode\":\"hsb\"}",
     "payloadType": "json",
     "x": 160,
     "y": 800,

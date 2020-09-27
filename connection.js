@@ -142,15 +142,7 @@ module.exports = function (RED) {
 
     this.handleUpdateDelta = function (nodeId, message) {
       this.execCallbackForOne(nodeId, 'setLocalState', message.state)
-      const updatedLocalState = this.execCallbackForOne(nodeId, 'getLocalState')
-
-      delete updatedLocalState.friendlyName
-      delete updatedLocalState.template
-
-      const msg = {
-        payload: updatedLocalState
-      }
-      this.execCallbackForOne(nodeId, 'emitMessage', msg)
+      this.execCallbackForOne(nodeId, 'emitLocalState')
       this.updateShadow({ nodeId, type: 'reported' })
     }
 

@@ -1,7 +1,31 @@
-const powerState = val => val == 'ON' || val == 'OFF'
-const brightness = val => Number.isInteger(val) && val >= 0 && val <= 100
-const colorTemperatureInKelvin = val =>
-  Number.isInteger(val) && val >= 1000 && val <= 10000
+const convert = require('color-convert')
+
+//---VALIDATORS---
+
+const powerState = val => {
+  const isValid = val == 'ON' || val == 'OFF'
+  if (!isValid) {
+    return false
+  }
+  return { key: 'powerState', value: val }
+}
+
+const brightness = val => {
+  const isValid = Number.isInteger(val) && val >= 0 && val <= 100
+  if (!isValid) {
+    return false
+  }
+  return { key: 'brightness', value: val }
+}
+
+const colorTemperatureInKelvin = val => {
+  const isValid = Number.isInteger(val) && val >= 1000 && val <= 10000
+  if (!isValid) {
+    return false
+  }
+  return { key: 'colorTemperatureInKelvin', value: val }
+}
+
 const color = val => {
   if (!typeof val == 'object') {
     return false
@@ -15,7 +39,7 @@ const color = val => {
     return false
   }
 
-  return (
+  const isValid =
     typeof val.hue == 'number' &&
     val.hue >= 0 &&
     val.hue <= 360 &&
@@ -25,10 +49,69 @@ const color = val => {
     typeof val.brightness == 'number' &&
     val.brightness >= 0 &&
     val.brightness <= 1
-  )
+
+  if (!isValid) {
+    return false
+  }
+  return {
+    key: 'color',
+    value: {
+      hue: val.hue,
+      saturation: val.saturation,
+      brightness: val.brightness
+    }
+  }
 }
-const lightMode = val => val == 'hsb' || val == 'temp'
-const position = val => val == 'Position.Up' || val == 'Position.Down'
+
+const lightMode = val => {
+  const isValid = val == 'hsb' || val == 'temp'
+  if (!isValid) {
+    return false
+  }
+  return { key: 'lightMode', value: val }
+}
+
+const position = val => {
+  const isValid = val == 'Position.Up' || val == 'Position.Down'
+  if (!isValid) {
+    return false
+  }
+  return { key: 'position', value: val }
+}
+
+//---DECORATORS---
+
+const defaultDecorator = localState => {
+  delete localState.friendlyName
+  delete localState.template
+  return localState
+}
+
+const colorChangingLightDecorator = localState => {
+  localState = defaultDecorator(localState)
+
+  localState['color_rgb'] = convert.hsl.rgb(
+    localState.color.hue,
+    localState.color.saturation * 100,
+    localState.color.brightness * 100
+  )
+
+  localState['color_hex'] = convert.hsl.hex(
+    localState.color.hue,
+    localState.color.saturation * 100,
+    localState.color.brightness * 100
+  )
+
+  localState['color_cmyk'] = convert.hsl.cmyk(
+    localState.color.hue,
+    localState.color.saturation * 100,
+    localState.color.brightness * 100
+  )
+
+  return localState
+}
+
+//---TYPES---
 
 const types = {
   SWITCH: {
@@ -38,7 +121,8 @@ const types = {
     },
     validators: {
       powerState
-    }
+    },
+    decorator: defaultDecorator
   },
   PLUG: {
     defaultState: {
@@ -47,7 +131,8 @@ const types = {
     },
     validators: {
       powerState
-    }
+    },
+    decorator: defaultDecorator
   },
   DIMMABLE_LIGHT_BULB: {
     defaultState: {
@@ -58,7 +143,8 @@ const types = {
     validators: {
       powerState,
       brightness
-    }
+    },
+    decorator: defaultDecorator
   },
   COLOR_CHANGING_LIGHT_BULB: {
     defaultState: {
@@ -75,7 +161,8 @@ const types = {
       color,
       colorTemperatureInKelvin,
       lightMode
-    }
+    },
+    decorator: colorChangingLightDecorator
   },
   DIMMER_SWITCH: {
     defaultState: {
@@ -86,7 +173,8 @@ const types = {
     validators: {
       powerState,
       brightness
-    }
+    },
+    decorator: defaultDecorator
   },
   BLINDS: {
     defaultState: {
@@ -96,7 +184,8 @@ const types = {
     },
     validators: {
       mode: position
-    }
+    },
+    decorator: defaultDecorator
   },
   GARAGE_DOOR_OPENER: {
     defaultState: {
@@ -106,12 +195,19 @@ const types = {
     },
     validators: {
       mode: position
-    }
+    },
+    decorator: defaultDecorator
   }
 }
 
+//---HELPERS---
+
 function getValidators (template) {
   return types[template].validators
+}
+
+function getDecorator (template) {
+  return types[template].decorator
 }
 
 function getDefaultState (template) {
@@ -120,5 +216,6 @@ function getDefaultState (template) {
 
 module.exports = {
   getValidators,
+  getDecorator,
   getDefaultState
 }

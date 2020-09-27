@@ -1,5 +1,9 @@
 const merge = require('deepmerge')
-const { getValidators, getDefaultState } = require('./device-types')
+const {
+  getValidators,
+  getDecorator,
+  getDefaultState
+} = require('./device-types')
 
 module.exports = function (RED) {
   function VirtualDeviceNode (config) {
@@ -16,17 +20,14 @@ module.exports = function (RED) {
     localState['friendlyName'] = config.name || config.template.toLowerCase()
 
     const validators = getValidators(config.template)
-
-    const sendMessage = function (msg) {
-      node.send(msg)
-    }
+    const decorator = getDecorator(config.template)
 
     const getLocalState = function () {
-      return localState
+      return { ...localState }
     }
 
     const setLocalState = function (state) {
-      localState = merge(localState, state)
+      localState = merge(getLocalState(), state)
       const nodeContext = node.context()
       nodeContext.set('state', localState)
     }
@@ -36,8 +37,10 @@ module.exports = function (RED) {
 
       for (const key in state) {
         if (validators[key]) {
-          if (validators[key](state[key])) {
-            approvedState[key] = state[key]
+          let validatorResult = validators[key](state[key])
+
+          if (false !== validatorResult) {
+            approvedState[validatorResult.key] = validatorResult.value
           }
         }
       }
@@ -58,7 +61,10 @@ module.exports = function (RED) {
             template: config.template
           }
         },
-        emitMessage: msg => {
+        emitLocalState: () => {
+          const msg = {
+            payload: decorator(getLocalState())
+          }
           node.send(msg)
         }
       })
@@ -70,14 +76,10 @@ module.exports = function (RED) {
 
       setLocalState({ ...mergedState, source: 'device' })
 
-      const updatedState = getLocalState()
-      delete updatedState.friendlyName
-      delete updatedState.template
-
       connectionNode.updateShadow({ nodeId, type: 'desired' })
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
-        send({ payload: updatedState })
+        send({ payload: decorator(getLocalState()) })
       }
 
       if (done) {
