@@ -83,7 +83,7 @@ const color_rgb = val => {
     return true
   }
 
-  const hsb = convert.rgb.hsl(val)
+  const hsb = convert.rgb.hsv(val)
 
   return {
     key: 'color',
@@ -118,7 +118,7 @@ const color_cmyk = val => {
     return true
   }
 
-  const hsb = convert.cmyk.hsl(val)
+  const hsb = convert.cmyk.hsv(val)
 
   return {
     key: 'color',
@@ -135,7 +135,7 @@ const color_hex = val => {
     return false
   }
 
-  const hsb = convert.hex.hsl(val)
+  const hsb = convert.hex.hsv(val)
 
   return {
     key: 'color',
@@ -174,19 +174,19 @@ const defaultDecorator = localState => {
 const colorChangingLightDecorator = localState => {
   localState = defaultDecorator(localState)
 
-  localState['color_rgb'] = convert.hsl.rgb(
+  localState['color_rgb'] = convert.hsv.rgb(
     localState.color.hue,
     localState.color.saturation * 100,
     localState.color.brightness * 100
   )
 
-  localState['color_hex'] = convert.hsl.hex(
+  localState['color_hex'] = convert.hsv.hex(
     localState.color.hue,
     localState.color.saturation * 100,
     localState.color.brightness * 100
   )
 
-  localState['color_cmyk'] = convert.hsl.cmyk(
+  localState['color_cmyk'] = convert.hsv.cmyk(
     localState.color.hue,
     localState.color.saturation * 100,
     localState.color.brightness * 100
