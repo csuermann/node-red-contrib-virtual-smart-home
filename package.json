@@ -14,7 +14,8 @@
     "smart-home",
     "node-red",
     "virtual smart home",
-    "virtual device"
+    "virtual device",
+    "vsh"
   ],
   "author": "Cornelius Suermann",
   "license": "MIT",
