@@ -429,15 +429,16 @@
   </div>
 
   <div id="device-code">
-    <h1>Device Registration</h1>
-    <p
-      >Please note that <i>virtual smart home</i> can only function as long as
-      someone is paying the bills for the backend infrastructure.</p
-    >
+    <h1>Account Linking</h1>
+    <p>
+      The connection must be linked to the same Amazon Alexa account that was /
+      will be used to activate the 'virtual smart home' skill.
+    </p>
     <p
       >Go to
       <a id="verification-uri" href="" target="_blank">VERIFICATION_URI</a> on
-      your smartphone, computer, or tablet and enter this code:</p
+      your smartphone, computer, or tablet and enter this code after loggin
+      in:</p
     >
     <h2 id="user-code">USER_CODE</h2>
     <p
@@ -588,5 +589,36 @@
 </script>
 
 <script type="text/html" data-help-name="vsh-connection">
-  <p> </p>
+  <p>A connection to the IoT cloud, linked to an Alexa account.</p>
+  <p
+    ><strong>Note:</strong> Although it is possible to create multiple
+    connections that are all linked to the same Alexa account, this comes with
+    an overhead and should be avoided. For most use-cases one single connection
+    that is shared by many virtual devices should suffice.</p
+  >
+  <h3>Account Linking</h3>
+  <p
+    >The connection must be linked to the same Amazon Alexa account that was /
+    will be used to activate the 'virtual smart home' skill. To achieve that, a
+    temporary code will be displayed that needs to be entered at
+    https://amazon.com/us/code.</p
+  ><h3>Connection Details</h3>
+  <p
+    >Once account linking is completed, the connection details will be
+    displayed. They will however only be needed for troubleshooting support
+    requests.</p
+  >
+  <h3>Registered Devices</h3>
+  <p
+    >The 'Registered Devices' section lists all virtual devices that are
+    associated with the Alexa account the connection was linked with. Hence the
+    list might contain more devices than the ones using this connection. Devices
+    linked to another connection are displayed with a gray background.</p
+  >
+  <p
+    >Registered devices can be deleted by clicking the trash icon, which will
+    also delete the device from Alexa. Note that a deleted device might
+    re-appear if its corresponding vsh-virtual-device node still exists and
+    reconnects.</p
+  >
 </script>

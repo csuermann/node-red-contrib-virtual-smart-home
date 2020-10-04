@@ -1,5 +1,6 @@
 const { Base64 } = require('js-base64')
 const MqttClient = require('./MqttClient')
+const VSH_VERSION = require('./version')
 
 module.exports = function (RED) {
   function ConnectionNode (config) {
@@ -192,7 +193,13 @@ module.exports = function (RED) {
           })
 
           this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
-            state: { reported: { connected: true } }
+            state: {
+              reported: {
+                connected: true,
+                vsh_version: VSH_VERSION,
+                nr_version: RED.version()
+              }
+            }
           })
         },
 
