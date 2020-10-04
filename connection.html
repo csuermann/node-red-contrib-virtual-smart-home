@@ -283,6 +283,12 @@
                 deviceTokenResponse.access_token
               )
 
+              if (provisionData.error) {
+                const error = new Error(provisionData.error)
+                error.status = 500 //so that catch below works!
+                throw error
+              }
+
               $('#device-code').hide()
 
               populateTokenData(deviceTokenResponse)
@@ -302,6 +308,7 @@
               if (e.status != 400) {
                 stopPolling()
                 $('#device-code').hide()
+                console.log(e)
                 showError(e.message)
               }
             }
