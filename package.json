@@ -1,7 +1,7 @@
 {
   "name": "node-red-contrib-virtual-smart-home",
   "version": "1.0.0",
-  "description": "A Node-RED node that represents a 'virtual device' which can be controlled via Amazon Alexa. Requires the virtual smart home skill to be enabled for your Amazon account.",
+  "description": "A Node-RED node that represents a 'virtual device' which can be controlled via Alexa. Requires the virtual smart home skill to be enabled for your Amazon account.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepack": "echo \"module.exports = '$npm_package_version'\" > version.js"
