@@ -1,8 +1,14 @@
 # Virtual Smart Home
 
 A Node-RED node that represents a virtual device which can be controlled via
-Alexa. Requires the 'virtual smart home' skill to be enabled for your Amazon
-account.
+Amazon Alexa. Requires the '_virtual smart home_' skill to be enabled for your
+Amazon account.
+
+## Availability
+
+The _virtual smart home_ skill is currently
+[available in Germany](https://skills-store.amazon.de/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
+and pending approval for Europe. Non-Europe locales will be supported shortly.
 
 ## Highlights
 
@@ -14,9 +20,11 @@ account.
   - Dimmer Switch
   - Blinds
   - Garage Door Opener
-- new virtual devices will proactively be discovered by Alexa. No need to ask
-  Alexa to discover devices.
 - no separate account needed. Just link your existing Amazon account.
+- new virtual devices can simply be draged onto the Node-RED canvas and will
+  proactively be discovered by Alexa. No need to ask Alexa to discover devices.
+- devices that are no longer needed can be removed from Alexa via the Node-RED
+  editor.
 - local state changes of devices get synchronized with Alexa
 - secure communication with the IoT cloud through individually provisioned
   certificates
