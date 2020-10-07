@@ -13,6 +13,7 @@ module.exports = function (RED) {
     this.isSubscribed = false
     this.isError = false
     this.isKilled = false
+    this.killedStatusText = 'KILLED'
 
     this.jobQueue = []
 
@@ -141,12 +142,6 @@ module.exports = function (RED) {
       this.discover(nodeId)
     }
 
-    // this.handleUpdateDelta = function (nodeId, message) {
-    //   this.execCallbackForOne(nodeId, 'setLocalState', message.state)
-    //   this.execCallbackForOne(nodeId, 'emitLocalState')
-    //   this.updateShadow({ nodeId, type: 'reported' })
-    // }
-
     this.handleUpdateAccepted = function (nodeId, message) {
       if (message.state.desired && !message.state.reported) {
         //update must have been initiated from Alexa!
@@ -209,7 +204,7 @@ module.exports = function (RED) {
             this.execCallbackForAll('setStatus', {
               shape: 'dot',
               fill: 'red',
-              text: this.isKilled ? 'KILLED' : 'offline'
+              text: this.isKilled ? this.killedStatusText : 'offline'
             })
           }
         },
@@ -241,13 +236,16 @@ module.exports = function (RED) {
               this.handleGetRejected(nodeId, message)
             } else if (topic.includes('/delete/accepted')) {
               this.handleDeleteAccepted(nodeId)
-              // } else if (topic.includes('/update/delta')) {
-              //   this.handleUpdateDelta(nodeId, message)
             } else if (topic.includes('/update/accepted')) {
               this.handleUpdateAccepted(nodeId, message)
             }
           } else if (topic == `vsh/${this.credentials.thingId}/kill`) {
+            console.warn(
+              'CONNECTION KILLED! Reason:',
+              message.reason || 'undefined'
+            )
             this.isKilled = true
+            this.killedStatusText = message.reason ? message.reason : 'KILLED'
             this.mqttClient.disconnect()
           }
         }
@@ -259,7 +257,6 @@ module.exports = function (RED) {
         `$aws/things/${this.credentials.thingId}/shadow/name/+/delete/accepted`,
         `$aws/things/${this.credentials.thingId}/shadow/name/+/get/accepted`,
         `$aws/things/${this.credentials.thingId}/shadow/name/+/get/rejected`,
-        //`$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`,
         `$aws/things/${this.credentials.thingId}/shadow/name/+/update/accepted`,
         `vsh/${this.credentials.thingId}/kill`
       ]
