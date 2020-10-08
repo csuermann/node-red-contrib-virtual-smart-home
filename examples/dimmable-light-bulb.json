@@ -133,7 +133,7 @@
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "payload": "{\"powerState\":\"ON\",\"brightness\":77}",
+    "payload": "{\"powerState\":\"ON\",\"brightness\":60}",
     "payloadType": "json",
     "x": 150,
     "y": 480,
