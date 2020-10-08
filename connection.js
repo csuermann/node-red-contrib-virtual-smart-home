@@ -11,6 +11,7 @@ module.exports = function (RED) {
     this.mqttClient = undefined
     this.childNodes = {}
     this.isConnected = false
+    this.isDisconnecting = false
     this.isSubscribed = false
     this.isError = false
     this.isKilled = false
@@ -28,10 +29,10 @@ module.exports = function (RED) {
       }
     }
 
-    this.registerChildNode = function (nodeId, callbacks) {
+    this.registerChildNode = async function (nodeId, callbacks) {
       if (Object.keys(this.childNodes).length == 0) {
         //first child node is registering!
-        this.connectAndSubscribe()
+        await this.connectAndSubscribe()
       }
 
       this.childNodes[nodeId] = callbacks
@@ -54,9 +55,13 @@ module.exports = function (RED) {
       this.execOrQueueJob(requestShadowJob)
     }
 
-    this.unregisterChildNode = function (nodeId) {
-      console.log('UNREGISTERING CHILD NODE', nodeId)
+    this.unregisterChildNode = async function (nodeId) {
       delete this.childNodes[nodeId]
+
+      if (Object.keys(this.childNodes).length == 0) {
+        //last child node is unregistering!
+        await this.disconnect()
+      }
     }
 
     this.execCallbackForAll = function (eventName, eventDetails) {
@@ -164,10 +169,12 @@ module.exports = function (RED) {
       this.discover(nodeId)
     }
 
-    this.connectAndSubscribe = function () {
+    this.connectAndSubscribe = async function () {
       if (!this.credentials.server) {
         return
       }
+
+      this.isDisconnecting = false
 
       const options = {
         host: this.credentials.server,
@@ -272,10 +279,16 @@ module.exports = function (RED) {
         `vsh/${this.credentials.thingId}/kill`
       ]
 
-      this.mqttClient.subscribe(topicsToSubscribe)
+      await this.mqttClient.subscribe(topicsToSubscribe)
     }
 
     this.disconnect = async function () {
+      if (this.isDisconnecting) {
+        return
+      }
+
+      this.isDisconnecting = true
+
       await this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
         state: { reported: { connected: false } }
       })

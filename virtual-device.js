@@ -89,7 +89,7 @@ module.exports = function (RED) {
 
     node.on('close', function (removed, done) {
       if (connectionNode) {
-        connectionNode.unregisterChildNode(node.id)
+        connectionNode.unregisterChildNode(nodeId)
       }
       node.status({})
       done()
