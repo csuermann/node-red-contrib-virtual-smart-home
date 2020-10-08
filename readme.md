@@ -40,7 +40,16 @@ Non-Europe locales will be supported shortly.
 
 The node gets invoked through Amazon Alexa (either via a voice command or via
 the Alexa app) and outputs a `msg` object containing the updated device state as
-payload.
+payload. For example, when you say "Alexa, dim the kitchen light to 50 percent",
+the following `msg` object will be emitted:
+
+```JSON
+{
+  "brightness":50,
+  "powerState":"ON",
+  "source":"alexa"
+}
+```
 
 The node also accepts incoming messages that can be used to inform Alexa about
 local device changes, which will then be reflected in the Alexa app. If the
