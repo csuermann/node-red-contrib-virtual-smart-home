@@ -29,10 +29,10 @@ module.exports = function (RED) {
       }
     }
 
-    this.registerChildNode = async function (nodeId, callbacks) {
+    this.registerChildNode = function (nodeId, callbacks) {
       if (Object.keys(this.childNodes).length == 0) {
         //first child node is registering!
-        await this.connectAndSubscribe()
+        this.connectAndSubscribe()
       }
 
       this.childNodes[nodeId] = callbacks
