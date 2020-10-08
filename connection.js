@@ -293,6 +293,7 @@ module.exports = function (RED) {
         state: { reported: { connected: false } }
       })
       await this.mqttClient.disconnect()
+      this.isSubscribed = false
     }
 
     this.on('close', async function (removed, done) {

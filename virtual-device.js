@@ -87,9 +87,9 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', function (removed, done) {
+    node.on('close', async function (removed, done) {
       if (connectionNode) {
-        connectionNode.unregisterChildNode(nodeId)
+        await connectionNode.unregisterChildNode(nodeId)
       }
       node.status({})
       done()
