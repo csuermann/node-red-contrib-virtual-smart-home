@@ -6,9 +6,16 @@ Amazon account.
 
 ## Availability
 
-The _virtual smart home_ skill is currently
-[available in Germany](https://skills-store.amazon.de/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-and pending approval for Europe. Non-Europe locales will be supported shortly.
+The _virtual smart home_ skill is currently available in the Amazon skill stores
+of
+
+- [Germany](https://skills-store.amazon.de/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
+- [UK](https://skills-store.amazon.co.uk/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
+- [France](https://skills-store.amazon.fr/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
+- [Italy](https://skills-store.amazon.it/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
+- [Spain](https://skills-store.amazon.es/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
+
+Non-Europe locales will be supported shortly.
 
 ## Highlights
 
