@@ -8,6 +8,7 @@ module.exports = function (RED) {
 
     const node = this
 
+    this.mqttClient = undefined
     this.childNodes = {}
     this.isConnected = false
     this.isSubscribed = false
@@ -28,6 +29,11 @@ module.exports = function (RED) {
     }
 
     this.registerChildNode = function (nodeId, callbacks) {
+      if (Object.keys(this.childNodes).length == 0) {
+        //first child node is registering!
+        this.connectAndSubscribe()
+      }
+
       this.childNodes[nodeId] = callbacks
 
       //immediately push most relevant state to new subscriber
@@ -49,6 +55,7 @@ module.exports = function (RED) {
     }
 
     this.unregisterChildNode = function (nodeId) {
+      console.log('UNREGISTERING CHILD NODE', nodeId)
       delete this.childNodes[nodeId]
     }
 
@@ -157,7 +164,11 @@ module.exports = function (RED) {
       this.discover(nodeId)
     }
 
-    if (this.credentials.server) {
+    this.connectAndSubscribe = function () {
+      if (!this.credentials.server) {
+        return
+      }
+
       const options = {
         host: this.credentials.server,
         port: config.port,
@@ -246,7 +257,7 @@ module.exports = function (RED) {
             )
             this.isKilled = true
             this.killedStatusText = message.reason ? message.reason : 'KILLED'
-            this.mqttClient.disconnect()
+            this.disconnect()
           }
         }
       })
@@ -264,16 +275,17 @@ module.exports = function (RED) {
       this.mqttClient.subscribe(topicsToSubscribe)
     }
 
+    this.disconnect = async function () {
+      await this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
+        state: { reported: { connected: false } }
+      })
+      await this.mqttClient.disconnect()
+    }
+
     this.on('close', async function (removed, done) {
       clearInterval(this.jobQueueExecutor)
       try {
-        await this.mqttClient.publish(
-          `vsh/${this.credentials.thingId}/update`,
-          {
-            state: { reported: { connected: false } }
-          }
-        )
-        await this.mqttClient.disconnect()
+        await this.disconnect()
       } catch (e) {
         console.log(e)
       }
