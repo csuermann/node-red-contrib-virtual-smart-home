@@ -74,8 +74,12 @@
       const refreshToken = $('#node-config-input-refreshToken').val()
 
       if (expiry < now) {
-        const tokenData = await fetchFreshAccessToken(refreshToken)
-        populateTokenData(tokenData)
+        try {
+          const tokenData = await fetchFreshAccessToken(refreshToken)
+          populateTokenData(tokenData)
+        } catch (e) {
+          showError('fetching a fresh Access Token failed')
+        }
       }
 
       return $('#node-config-input-accessToken').val()
@@ -168,11 +172,16 @@
 
       const accessToken = await ensureValidAccessToken()
 
-      execDeleteRequest(
+      const deleteResult = await execDeleteRequest(
         'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/device',
         { Authorization: accessToken },
         { thingId, deviceId }
       )
+
+      if (deleteResult.error) {
+        showError('delete failed')
+        $(`#${deviceId}`).fadeIn()
+      }
     }
 
     async function displayRegisteredDevices() {
