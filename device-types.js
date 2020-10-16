@@ -166,8 +166,11 @@ const position = val => {
 //---DECORATORS---
 
 const defaultDecorator = localState => {
+  localState.name = localState.friendlyName
+  localState.type = localState.template
   delete localState.friendlyName
   delete localState.template
+
   return localState
 }
 

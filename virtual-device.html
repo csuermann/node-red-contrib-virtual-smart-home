@@ -157,6 +157,39 @@
     can be found in the 'import nodes' section underneath the 'import' menu.
   </p>
 
+  <h4>General Attributes (always present)</h4>
+  <dl class="message-properties">
+    <dt
+      >payload.name
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Name of the virtual device</dd>
+  </dl>
+
+  <dl class="message-properties">
+    <dt
+      >payload.type
+      <span class="property-type">string</span>
+    </dt>
+    <dd>Type of the virtual device</dd>
+  </dl>
+
+  <dl class="message-properties">
+    <dt
+      >payload.source
+      <span class="property-type">string</span>
+    </dt>
+    <dd
+      ><ul
+        ><li>'alexa' if the device update was triggered by Alexa</li>
+        <li
+          >'device' if the device update was triggered by an incoming
+          message.</li
+        >
+      </ul></dd
+    >
+  </dl>
+
   <h4>Switch</h4>
   <dl class="message-properties">
     <dt

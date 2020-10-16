@@ -28,7 +28,7 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
   - Blinds
   - Garage Door Opener
 - no separate account needed. Just link your existing Amazon account.
-- new virtual devices can simply be draged onto the Node-RED canvas and will
+- new virtual devices can simply be dragged onto the Node-RED canvas and will
   proactively be discovered by Alexa. No need to ask Alexa to discover devices.
 - devices that are no longer needed can be removed from Alexa via the Node-RED
   editor.
