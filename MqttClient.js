@@ -5,7 +5,7 @@ const globalLmiter = new Bottleneck({
   highWater: 50,
   reservoir: 40, // initial value
   reservoirIncreaseAmount: 2,
-  reservoirIncreaseInterval: 1000, // must be divisible by 250
+  reservoirIncreaseInterval: 10000, // must be divisible by 250
   reservoirIncreaseMaximum: 40,
   strategy: Bottleneck.strategy.LEAK,
 
@@ -30,7 +30,7 @@ function MqttClient (options, callbacksObj) {
     highWater: 50,
     reservoir: 40, // initial value
     reservoirIncreaseAmount: 2,
-    reservoirIncreaseInterval: 1000, // must be divisible by 250
+    reservoirIncreaseInterval: 10000, // must be divisible by 250
     reservoirIncreaseMaximum: 40,
     strategy: Bottleneck.strategy.LEAK,
 
