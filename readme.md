@@ -32,6 +32,7 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
   proactively be discovered by Alexa. No need to ask Alexa to discover devices.
 - devices that are no longer needed can be removed from Alexa via the Node-RED
   editor.
+- changes made to virtual device types and names will immediately be picked up by Alexa.
 - local state changes of devices get synchronized with Alexa
 - secure communication with the IoT cloud through individually provisioned
   certificates
@@ -47,7 +48,9 @@ the following `msg` object will be emitted:
 {
   "brightness":50,
   "powerState":"ON",
-  "source":"alexa"
+  "source":"alexa",
+  "name":"kitchen light",
+  "type":"DIMMABLE_LIGHT_BULB"
 }
 ```
 

@@ -1,4 +1,5 @@
 const merge = require('deepmerge')
+const deepEql = require('deep-eql')
 const {
   getValidators,
   getDecorator,
@@ -71,12 +72,16 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg, send, done) {
+      const oldLocalState = getLocalState()
       const approvedState = validateState(msg.payload)
-      const mergedState = merge(getLocalState(), approvedState)
+      const mergedState = merge(oldLocalState, approvedState)
+      const newLocalState = { ...mergedState, source: 'device' }
 
-      setLocalState({ ...mergedState, source: 'device' })
+      if (!deepEql(oldLocalState, newLocalState)) {
+        setLocalState(newLocalState)
 
-      connectionNode.updateShadow({ nodeId, type: 'desired' })
+        connectionNode.updateShadow({ nodeId, type: 'desired' })
+      }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
         send({ payload: decorator(getLocalState()) })
