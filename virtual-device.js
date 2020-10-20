@@ -1,5 +1,6 @@
 const merge = require('deepmerge')
 const deepEql = require('deep-eql')
+const RateLimiter = require('./RateLimiter')
 const {
   getValidators,
   getDecorator,
@@ -22,6 +23,19 @@ module.exports = function (RED) {
 
     const validators = getValidators(config.template)
     const decorator = getDecorator(config.template)
+
+    let isIncomingMsgProcessingAllowed = true
+
+    const rater = new RateLimiter({
+      highWaterMark: 15,
+      intervalInSec: 60,
+      onExhaustionCb: () => {
+        isIncomingMsgProcessingAllowed = false
+        console.log(
+          'Blocking device state sync to Alexa from now on! Quota exhausted!'
+        )
+      }
+    })
 
     const getLocalState = function () {
       return { ...localState }
@@ -77,10 +91,15 @@ module.exports = function (RED) {
       const mergedState = merge(oldLocalState, approvedState)
       const newLocalState = { ...mergedState, source: 'device' }
 
-      if (!deepEql(oldLocalState, newLocalState)) {
+      if (
+        isIncomingMsgProcessingAllowed &&
+        !deepEql(oldLocalState, newLocalState)
+      ) {
         setLocalState(newLocalState)
 
-        connectionNode.updateShadow({ nodeId, type: 'desired' })
+        rater.execute(() =>
+          connectionNode.updateShadow({ nodeId, type: 'desired' })
+        )
       }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
