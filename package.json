@@ -30,9 +30,14 @@
       "vsh-virtual-device": "virtual-device.js"
     }
   },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
+  },
   "dependencies": {
     "async-mqtt": "^2.6.1",
-    "bottleneck": "^2.19.5",
     "color-convert": "^2.0.1",
     "dayjs": "^1.8.35",
     "deep-eql": "^4.0.0",

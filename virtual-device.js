@@ -27,7 +27,7 @@ module.exports = function (RED) {
     let isIncomingMsgProcessingAllowed = true
 
     const rater = new RateLimiter({
-      highWaterMark: 15,
+      highWaterMark: 10,
       intervalInSec: 60,
       onExhaustionCb: () => {
         isIncomingMsgProcessingAllowed = false
