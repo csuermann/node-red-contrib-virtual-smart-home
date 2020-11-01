@@ -60,6 +60,21 @@ passthrough option is enabled, this will also trigger an outgoing message, just
 like when the node gets invoked via Alexa. In this case `payload.source` is set
 to `device` instead of `alexa`.
 
+## Setup instructions
+
+- In the Alexa app:
+   1. Search the skill store for the `virtual smart home` skill
+   1. Enable the 'virtual smart home' skill
+   1. Complete the account linking process by logging in with your Amazon account credentials
+- In Node-RED:
+   1. Install the `node-red-contrib-virtual-smart-home` module
+   1. Place a `virtual device` node onto the canvas and connect it to a debug node
+   1. Double click on the virtual device node to enter a name and select a device type. Once set up you can use this name to control the device via Alexa.
+   1. Configure a new `vsh-connection` by clicking the pen icon
+   1. Follow the instructions to complete the account linking process. Make sure you use the same Amazon account credentials as above!
+   1. Deploy your Node-RED flow. This will trigger your virtual device to be discovered by Alexa. You should even get a push notification via the Alexa app (if notifications are enabled).
+   1. You should now be able to control your virtual device with your voice, e.g. by saying "Alexa, turn xxx on". Inspect the output of the connected debug node and consult the docs in order to do something useful.
+
 ## Docs
 
 Detailes docs are shipped as part of the Node-RED package and available through
