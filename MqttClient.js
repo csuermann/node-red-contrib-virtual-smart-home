@@ -1,7 +1,7 @@
 const MQTT = require('async-mqtt')
 const RateLimiter = require('./RateLimiter')
 
-function MqttClient (options, callbacksObj) {
+function MqttClient(options, callbacksObj) {
   this.options = options
   this.client = null
 
@@ -17,7 +17,7 @@ function MqttClient (options, callbacksObj) {
         () => this.handleOnError({ code: 'connection quota exhausted' }),
         2000
       )
-    }
+    },
   })
 
   this.connect = function () {
@@ -53,6 +53,7 @@ function MqttClient (options, callbacksObj) {
   this.disconnect = async function () {
     try {
       await this.client.end()
+      this.rater.destroy()
     } catch (e) {
       console.log(e)
     }

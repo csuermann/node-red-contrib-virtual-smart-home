@@ -1,9 +1,9 @@
 'use strict'
 
-function RateLimiter ({
+function RateLimiter({
   highWaterMark = 10,
   intervalInSec = 5,
-  onExhaustionCb
+  onExhaustionCb,
 } = {}) {
   this.highWaterMark = highWaterMark
   this.intervalInSec = intervalInSec * 1000
@@ -30,6 +30,10 @@ RateLimiter.prototype.execute = function (callback) {
   if (this.counter == this.highWaterMark) {
     this.exhaustedCallback()
   }
+}
+
+RateLimiter.prototype.destroy = function () {
+  clearInterval(this.intervalHandle)
 }
 
 module.exports = RateLimiter

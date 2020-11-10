@@ -4,11 +4,11 @@ const RateLimiter = require('./RateLimiter')
 const {
   getValidators,
   getDecorator,
-  getDefaultState
+  getDefaultState,
 } = require('./device-types')
 
 module.exports = function (RED) {
-  function VirtualDeviceNode (config) {
+  function VirtualDeviceNode(config) {
     RED.nodes.createNode(this, config)
 
     const node = this
@@ -27,14 +27,14 @@ module.exports = function (RED) {
     let isIncomingMsgProcessingAllowed = true
 
     const rater = new RateLimiter({
-      highWaterMark: 10,
-      intervalInSec: 60,
+      highWaterMark: 15,
+      intervalInSec: 180,
       onExhaustionCb: () => {
         isIncomingMsgProcessingAllowed = false
         console.log(
           'Blocking device state sync to Alexa from now on! Quota exhausted!'
         )
-      }
+      },
     })
 
     const getLocalState = function () {
@@ -67,21 +67,21 @@ module.exports = function (RED) {
       //connection is configured
       //register callbacks. This way connectionNode can communicate with us:
       connectionNode.registerChildNode(nodeId, {
-        setStatus: status => node.status(status),
+        setStatus: (status) => node.status(status),
         getLocalState,
         setLocalState,
         getDeviceConfig: () => {
           return {
             friendlyName: config.name || config.template.toLowerCase(),
-            template: config.template
+            template: config.template,
           }
         },
         emitLocalState: () => {
           const msg = {
-            payload: decorator(getLocalState())
+            payload: decorator(getLocalState()),
           }
           node.send(msg)
-        }
+        },
       })
     }
 
@@ -116,6 +116,7 @@ module.exports = function (RED) {
         await connectionNode.unregisterChildNode(nodeId)
       }
       node.status({})
+      rater.destroy()
       done()
     })
   }

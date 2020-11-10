@@ -3,7 +3,7 @@ const MqttClient = require('./MqttClient')
 const VSH_VERSION = require('./version')
 
 module.exports = function (RED) {
-  function ConnectionNode (config) {
+  function ConnectionNode(config) {
     RED.nodes.createNode(this, config)
 
     const node = this
@@ -20,7 +20,7 @@ module.exports = function (RED) {
     this.jobQueue = []
 
     this.jobQueueExecutor = setInterval(() => {
-      this.jobQueue = this.jobQueue.filter(job => job() == false)
+      this.jobQueue = this.jobQueue.filter((job) => job() == false)
     }, 3000)
 
     this.execOrQueueJob = function (job) {
@@ -41,7 +41,7 @@ module.exports = function (RED) {
       this.execCallbackForOne(nodeId, 'setStatus', {
         shape: 'dot',
         fill: this.isConnected ? 'green' : 'red',
-        text: this.isConnected ? 'online' : 'offline'
+        text: this.isConnected ? 'online' : 'offline',
       })
 
       const requestShadowJob = () => {
@@ -94,7 +94,7 @@ module.exports = function (RED) {
     this.updateShadow = function ({ nodeId, type }) {
       const localDeviceState = this.execCallbackForOne(nodeId, 'getLocalState')
       const payload = {
-        state: { reported: localDeviceState }
+        state: { reported: localDeviceState },
       }
 
       if (type === 'desired') {
@@ -116,7 +116,7 @@ module.exports = function (RED) {
       this.mqttClient.publish(`vsh/${this.credentials.thingId}/discover`, {
         deviceId: nodeId,
         friendlyName,
-        template
+        template,
       })
     }
 
@@ -189,10 +189,10 @@ module.exports = function (RED) {
         will: {
           topic: `vsh/${this.credentials.thingId}/update`,
           payload: JSON.stringify({
-            state: { reported: { connected: false } }
+            state: { reported: { connected: false } },
           }),
-          qos: 1
-        }
+          qos: 1,
+        },
       }
 
       this.mqttClient = new MqttClient(options, {
@@ -202,7 +202,7 @@ module.exports = function (RED) {
           this.execCallbackForAll('setStatus', {
             shape: 'dot',
             fill: 'green',
-            text: 'online'
+            text: 'online',
           })
 
           this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
@@ -210,9 +210,9 @@ module.exports = function (RED) {
               reported: {
                 connected: true,
                 vsh_version: VSH_VERSION,
-                nr_version: RED.version()
-              }
-            }
+                nr_version: RED.version(),
+              },
+            },
           })
         },
 
@@ -222,22 +222,22 @@ module.exports = function (RED) {
             this.execCallbackForAll('setStatus', {
               shape: 'dot',
               fill: 'red',
-              text: this.isKilled ? this.killedStatusText : 'offline'
+              text: this.isKilled ? this.killedStatusText : 'offline',
             })
           }
         },
 
-        onError: error => {
+        onError: (error) => {
           this.isConnected = false
           this.isError = true
           this.execCallbackForAll('setStatus', {
             shape: 'dot',
             fill: 'red',
-            text: error.code
+            text: error.code,
           })
         },
 
-        onSubscribeSuccess: subscribeResult => {
+        onSubscribeSuccess: (subscribeResult) => {
           this.isSubscribed = true
         },
 
@@ -257,7 +257,10 @@ module.exports = function (RED) {
             } else if (topic.includes('/update/accepted')) {
               this.handleUpdateAccepted(nodeId, message)
             }
-          } else if (topic == `vsh/${this.credentials.thingId}/kill`) {
+          } else if (
+            topic == `vsh/${this.credentials.thingId}/kill` ||
+            topic == `vsh/version/${VSH_VERSION}/kill`
+          ) {
             console.warn(
               'CONNECTION KILLED! Reason:',
               message.reason || 'undefined'
@@ -266,7 +269,7 @@ module.exports = function (RED) {
             this.killedStatusText = message.reason ? message.reason : 'KILLED'
             this.disconnect()
           }
-        }
+        },
       })
 
       this.mqttClient.connect()
@@ -276,7 +279,8 @@ module.exports = function (RED) {
         `$aws/things/${this.credentials.thingId}/shadow/name/+/get/accepted`,
         `$aws/things/${this.credentials.thingId}/shadow/name/+/get/rejected`,
         `$aws/things/${this.credentials.thingId}/shadow/name/+/update/accepted`,
-        `vsh/${this.credentials.thingId}/kill`
+        `vsh/${this.credentials.thingId}/kill`,
+        `vsh/version/${VSH_VERSION}/kill`,
       ]
 
       await this.mqttClient.subscribe(topicsToSubscribe)
@@ -290,7 +294,7 @@ module.exports = function (RED) {
       this.isDisconnecting = true
 
       await this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
-        state: { reported: { connected: false } }
+        state: { reported: { connected: false } },
       })
       await this.mqttClient.disconnect()
       this.isSubscribed = false
@@ -318,7 +322,7 @@ module.exports = function (RED) {
       thingId: { type: 'text' },
       caCert: { type: 'text' },
       server: { type: 'text' },
-      privateKey: { type: 'text' }
-    }
+      privateKey: { type: 'text' },
+    },
   })
 }
