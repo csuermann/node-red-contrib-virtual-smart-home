@@ -15,7 +15,7 @@
     label: function () {
       return this.name || 'virtual device'
     },
-    //oneditprepare: () => setTimeout(() => $('#donation').fadeIn('slow'), 2000),
+    oneditprepare: () => setTimeout(() => $('#donation').fadeIn('slow'), 2000),
   })
 </script>
 
@@ -59,9 +59,9 @@
       <option value="SWITCH">Switch</option>
       <option value="PLUG">Plug</option>
       <option value="DIMMABLE_LIGHT_BULB">Dimmable Light Bulb</option>
-      <option value="COLOR_CHANGING_LIGHT_BULB"
-        >Color Changing Light Bulb</option
-      >
+      <option value="COLOR_CHANGING_LIGHT_BULB">
+        Color Changing Light Bulb
+      </option>
       <option value="DIMMER_SWITCH">Dimmer Switch</option>
       <option value="BLINDS">Blinds</option>
       <option value="GARAGE_DOOR_OPENER">Garage Door Opener</option>
@@ -86,9 +86,7 @@
       Your <i>virtual smart home</i> can only function as long as someone is
       paying the bills for the backend infrastructure.
     </p>
-    <p>
-      If you are satisfied with this project, please contribute your share.
-    </p>
+    <p>If you are satisfied with this project, please contribute your share.</p>
     <p>Thank you!</p>
     <a
       target="_blank"
@@ -100,11 +98,11 @@
 
 <script type="text/html" data-help-name="vsh-virtual-device">
   <p>A virtual device that can be controlled via Amazon Alexa.</p>
-  <p
-    >The node gets invoked through Amazon Alexa (either via a voice command or
+  <p>
+    The node gets invoked through Amazon Alexa (either via a voice command or
     via the Alexa app) and outputs a <code>msg</code> object containing the
-    updated device state as <code>payload</code>.</p
-  >
+    updated device state as <code>payload</code>.
+  </p>
   <p>
     The node also accepts incoming messages that can be used to inform Alexa
     about local device changes, which will then be reflected in the Alexa app.
@@ -115,35 +113,35 @@
 
   <h3>Inputs</h3>
   <dl class="message-properties">
-    <dt
-      >payload
+    <dt>
+      payload
       <span class="property-type">object</span>
     </dt>
-    <dd
-      >key/value pairs of device attributes to update. Invalid attributes will
-      be silently ignored. (Available attributes are documented below)</dd
-    >
+    <dd>
+      key/value pairs of device attributes to update. Invalid attributes will be
+      silently ignored. (Available attributes are documented below)
+    </dd>
   </dl>
 
   <h3>Outputs</h3>
   <dl class="message-properties">
-    <dt
-      >payload
+    <dt>
+      payload
       <span class="property-type">object</span>
     </dt>
     <dd>key/value pairs of device attributes.</dd>
   </dl>
   <h3>Details</h3>
-  <p
-    >This node requires a connection to be configured, which links the node to
-    an Amazon account. This can be done by clicking the pencil icon. Also, the
+  <p>
+    This node requires a connection to be configured, which links the node to an
+    Amazon account. This can be done by clicking the pencil icon. Also, the
     Alexa skill 'virtual smart home' needs to be enabled for the same Amazon
-    account.</p
-  >
+    account.
+  </p>
   <p>
     All virtual device nodes that belong to one Alexa account should share the
-    same connection!</p
-  >
+    same connection!
+  </p>
 
   <h3>Payload attributes</h3>
   <p>
@@ -159,41 +157,40 @@
 
   <h4>General Attributes (always present)</h4>
   <dl class="message-properties">
-    <dt
-      >payload.name
+    <dt>
+      payload.name
       <span class="property-type">string</span>
     </dt>
     <dd>Name of the virtual device</dd>
   </dl>
 
   <dl class="message-properties">
-    <dt
-      >payload.type
+    <dt>
+      payload.type
       <span class="property-type">string</span>
     </dt>
     <dd>Type of the virtual device</dd>
   </dl>
 
   <dl class="message-properties">
-    <dt
-      >payload.source
+    <dt>
+      payload.source
       <span class="property-type">string</span>
     </dt>
-    <dd
-      ><ul
-        ><li>'alexa' if the device update was triggered by Alexa</li>
-        <li
-          >'device' if the device update was triggered by an incoming
-          message.</li
-        >
-      </ul></dd
-    >
+    <dd>
+      <ul>
+        <li>'alexa' if the device update was triggered by Alexa</li>
+        <li>
+          'device' if the device update was triggered by an incoming message.
+        </li>
+      </ul>
+    </dd>
   </dl>
 
   <h4>Switch</h4>
   <dl class="message-properties">
-    <dt
-      >payload.powerState
+    <dt>
+      payload.powerState
       <span class="property-type">string</span>
     </dt>
     <dd>'ON' or 'OFF'</dd>
@@ -201,8 +198,8 @@
 
   <h4>Plug</h4>
   <dl class="message-properties">
-    <dt
-      >payload.powerState
+    <dt>
+      payload.powerState
       <span class="property-type">string</span>
     </dt>
     <dd>'ON' or 'OFF'</dd>
@@ -210,13 +207,13 @@
 
   <h4>Dimmable Light Bulb</h4>
   <dl class="message-properties">
-    <dt
-      >payload.powerState
+    <dt>
+      payload.powerState
       <span class="property-type">string</span>
     </dt>
     <dd>'ON' or 'OFF'</dd>
-    <dt
-      >payload.brightness
+    <dt>
+      payload.brightness
       <span class="property-type">int</span>
     </dt>
     <dd>Brightness in % (0...100)</dd>
@@ -224,69 +221,68 @@
 
   <h4>Color Changing Light Bulb</h4>
   <dl class="message-properties">
-    <dt
-      >payload.powerState
+    <dt>
+      payload.powerState
       <span class="property-type">string</span>
     </dt>
     <dd>'ON' or 'OFF'</dd>
-    <dt
-      >payload.brightness
+    <dt>
+      payload.brightness
       <span class="property-type">int</span>
     </dt>
     <dd>Brightness in % (0...100)</dd>
-    <dt
-      >payload.lightMode
+    <dt>
+      payload.lightMode
       <span class="property-type">string</span>
     </dt>
     <dd>
       <ul>
         <li>'temp': colorTemperatureInKelvin attribute is applied</li>
-        <li
-          >'hsb': color attribute is applied. For convenience, the color will
+        <li>
+          'hsb': color attribute is applied. For convenience, the color will
           also be populated as <code>payload.color_rgb</code>,
-          <code>payload.color_hex</code>, and
-          <code>payload.color_cmyk</code>.</li
-        >
+          <code>payload.color_hex</code>, and <code>payload.color_cmyk</code>.
+        </li>
       </ul>
     </dd>
-    <dt
-      >payload.colorTemperatureInKelvin
+    <dt>
+      payload.colorTemperatureInKelvin
       <span class="property-type">int</span>
     </dt>
     <dd>Color Temperature in Kelvin (1000...10000)</dd>
-    <dt
-      >payload.color
+    <dt>
+      payload.color
       <span class="property-type">object</span>
     </dt>
     <dd>Color expressed as hue, saturation and brightness (hsb)</dd>
-    <dt
-      >payload.color.hue
+    <dt>
+      payload.color.hue
       <span class="property-type">int</span>
     </dt>
     <dd>Hue (0...360)</dd>
-    <dt
-      >payload.color.saturation
+    <dt>
+      payload.color.saturation
       <span class="property-type">float</span>
     </dt>
     <dd>Saturation (0.0...1.0)</dd>
-    <dt
-      >payload.color.brightness
+    <dt>
+      payload.color.brightness
       <span class="property-type">float</span>
     </dt>
     <dd>Brightness (0.0...1.0)</dd>
 
-    <dt
-      >payload.color_rgb
+    <dt>
+      payload.color_rgb
       <span class="property-type">array(3)</span>
     </dt>
     <dd>RGB representation of <code>payload.color</code> (0...255)</dd>
-    <dt
-      >payload.color_hex
+    <dt>
+      payload.color_hex
       <span class="property-type">string</span>
     </dt>
     <dd>Hexadecimal representation of <code>payload.color</code></dd>
-    <dt
-      >payload.color_cmyk
+    <dt>
+      payload.color_cmyk
       <span class="property-type">array(4)</span>
     </dt>
     <dd>CMYK representation of <code>payload.color</code> (0...100)</dd>
@@ -294,13 +290,13 @@
 
   <h4>Dimmer Switch</h4>
   <dl class="message-properties">
-    <dt
-      >payload.powerState
+    <dt>
+      payload.powerState
       <span class="property-type">string</span>
     </dt>
     <dd>'ON' or 'OFF'</dd>
-    <dt
-      >payload.brightness
+    <dt>
+      payload.brightness
       <span class="property-type">int</span>
     </dt>
     <dd>Brightness in % (0...100)</dd>
@@ -308,8 +304,8 @@
 
   <h4>Blinds</h4>
   <dl class="message-properties">
-    <dt
-      >payload.mode
+    <dt>
+      payload.mode
       <span class="property-type">string</span>
     </dt>
     <dd>'Position.Up' or 'Position.Down'</dd>
@@ -317,8 +313,8 @@
 
   <h4>Garage Door Opener</h4>
   <dl class="message-properties">
-    <dt
-      >payload.mode
+    <dt>
+      payload.mode
       <span class="property-type">string</span>
     </dt>
     <dd>'Position.Up' or 'Position.Down'</dd>
