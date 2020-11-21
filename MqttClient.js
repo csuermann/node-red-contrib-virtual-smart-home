@@ -6,7 +6,7 @@ function MqttClient(options, callbacksObj) {
   this.client = null
 
   this.rater = new RateLimiter({
-    highWaterMark: 5,
+    highWaterMark: 3,
     intervalInSec: 60,
     onExhaustionCb: () => {
       this.disconnect()
@@ -24,6 +24,7 @@ function MqttClient(options, callbacksObj) {
     this.client = MQTT.connect('mqtts://' + this.options.host, this.options)
 
     this.client.on('connect', this.handleOnConnect.bind(this))
+    //this.client.on('reconnect', this.handleOnReconnect.bind(this))
     this.client.on('close', this.handleOnDisconnect)
     this.client.on('offline', this.handleOnDisconnect)
     this.client.on('error', this.handleOnError)
@@ -32,7 +33,12 @@ function MqttClient(options, callbacksObj) {
 
   this.handleOnConnect = function () {
     this.rater.execute(() => callbacksObj['onConnect']())
+    //callbacksObj['onConnect']()
   }
+
+  // this.handleOnReconnect = function () {
+  //   this.rater.execute(() => console.log('...reconnecting...'))
+  // }
 
   this.handleOnDisconnect = function () {
     callbacksObj['onDisconnect']()
