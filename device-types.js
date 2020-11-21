@@ -2,7 +2,7 @@ const convert = require('color-convert')
 
 //---VALIDATORS---
 
-const powerState = val => {
+const powerState = (val) => {
   const isValid = val == 'ON' || val == 'OFF'
   if (!isValid) {
     return false
@@ -10,7 +10,7 @@ const powerState = val => {
   return { key: 'powerState', value: val }
 }
 
-const brightness = val => {
+const brightness = (val) => {
   const isValid = Number.isInteger(val) && val >= 0 && val <= 100
   if (!isValid) {
     return false
@@ -18,7 +18,15 @@ const brightness = val => {
   return { key: 'brightness', value: val }
 }
 
-const colorTemperatureInKelvin = val => {
+const percentage = (val) => {
+  const isValid = Number.isInteger(val) && val >= 0 && val <= 100
+  if (!isValid) {
+    return false
+  }
+  return { key: 'percentage', value: val }
+}
+
+const colorTemperatureInKelvin = (val) => {
   const isValid = Number.isInteger(val) && val >= 1000 && val <= 10000
   if (!isValid) {
     return false
@@ -26,7 +34,7 @@ const colorTemperatureInKelvin = val => {
   return { key: 'colorTemperatureInKelvin', value: val }
 }
 
-const color = val => {
+const color = (val) => {
   if (!typeof val == 'object') {
     return false
   }
@@ -58,12 +66,12 @@ const color = val => {
     value: {
       hue: val.hue,
       saturation: val.saturation,
-      brightness: val.brightness
-    }
+      brightness: val.brightness,
+    },
   }
 }
 
-const color_rgb = val => {
+const color_rgb = (val) => {
   if (!typeof val == 'array' || val.length !== 3) {
     return false
   }
@@ -90,12 +98,12 @@ const color_rgb = val => {
     value: {
       hue: hsb[0],
       saturation: hsb[1] / 100,
-      brightness: hsb[2] / 100
-    }
+      brightness: hsb[2] / 100,
+    },
   }
 }
 
-const color_cmyk = val => {
+const color_cmyk = (val) => {
   if (!typeof val == 'array' || val.length !== 4) {
     return false
   }
@@ -125,12 +133,12 @@ const color_cmyk = val => {
     value: {
       hue: hsb[0],
       saturation: hsb[1] / 100,
-      brightness: hsb[2] / 100
-    }
+      brightness: hsb[2] / 100,
+    },
   }
 }
 
-const color_hex = val => {
+const color_hex = (val) => {
   if (!/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(val)) {
     return false
   }
@@ -142,12 +150,12 @@ const color_hex = val => {
     value: {
       hue: hsb[0],
       saturation: hsb[1] / 100,
-      brightness: hsb[2] / 100
-    }
+      brightness: hsb[2] / 100,
+    },
   }
 }
 
-const lightMode = val => {
+const lightMode = (val) => {
   const isValid = val == 'hsb' || val == 'temp'
   if (!isValid) {
     return false
@@ -155,7 +163,7 @@ const lightMode = val => {
   return { key: 'lightMode', value: val }
 }
 
-const position = val => {
+const position = (val) => {
   const isValid = val == 'Position.Up' || val == 'Position.Down'
   if (!isValid) {
     return false
@@ -165,7 +173,7 @@ const position = val => {
 
 //---DECORATORS---
 
-const defaultDecorator = localState => {
+const defaultDecorator = (localState) => {
   localState.name = localState.friendlyName
   localState.type = localState.template
   delete localState.friendlyName
@@ -174,7 +182,7 @@ const defaultDecorator = localState => {
   return localState
 }
 
-const colorChangingLightDecorator = localState => {
+const colorChangingLightDecorator = (localState) => {
   localState = defaultDecorator(localState)
 
   localState['color_rgb'] = convert.hsv.rgb(
@@ -204,34 +212,34 @@ const types = {
   SWITCH: {
     defaultState: {
       source: 'device',
-      powerState: 'OFF'
+      powerState: 'OFF',
     },
     validators: {
-      powerState
+      powerState,
     },
-    decorator: defaultDecorator
+    decorator: defaultDecorator,
   },
   PLUG: {
     defaultState: {
       source: 'device',
-      powerState: 'OFF'
+      powerState: 'OFF',
     },
     validators: {
-      powerState
+      powerState,
     },
-    decorator: defaultDecorator
+    decorator: defaultDecorator,
   },
   DIMMABLE_LIGHT_BULB: {
     defaultState: {
       source: 'device',
       powerState: 'OFF',
-      brightness: 100
+      brightness: 100,
     },
     validators: {
       powerState,
-      brightness
+      brightness,
     },
-    decorator: defaultDecorator
+    decorator: defaultDecorator,
   },
   COLOR_CHANGING_LIGHT_BULB: {
     defaultState: {
@@ -240,7 +248,7 @@ const types = {
       brightness: 100,
       colorTemperatureInKelvin: 2200,
       lightMode: 'temp',
-      color: { hue: 60, saturation: 1, brightness: 1 }
+      color: { hue: 60, saturation: 1, brightness: 1 },
     },
     validators: {
       powerState,
@@ -250,62 +258,64 @@ const types = {
       color_rgb,
       color_cmyk,
       color,
-      lightMode
+      lightMode,
     },
-    decorator: colorChangingLightDecorator
+    decorator: colorChangingLightDecorator,
   },
   DIMMER_SWITCH: {
     defaultState: {
       source: 'device',
       powerState: 'OFF',
-      brightness: 100
+      brightness: 100,
     },
     validators: {
       powerState,
-      brightness
+      brightness,
     },
-    decorator: defaultDecorator
+    decorator: defaultDecorator,
   },
   BLINDS: {
     defaultState: {
       source: 'device',
       mode: 'Position.Up',
-      instance: 'Blinds.Position'
+      instance: 'Blinds.Position',
+      percentage: 100,
     },
     validators: {
-      mode: position
+      mode: position,
+      percentage,
     },
-    decorator: defaultDecorator
+    decorator: defaultDecorator,
   },
   GARAGE_DOOR_OPENER: {
     defaultState: {
       source: 'device',
       mode: 'Position.Up',
-      instance: 'GarageDoor.Position'
+      instance: 'GarageDoor.Position',
     },
     validators: {
-      mode: position
+      mode: position,
     },
-    decorator: defaultDecorator
-  }
+    decorator: defaultDecorator,
+  },
 }
 
 //---HELPERS---
 
-function getValidators (template) {
+function getValidators(template) {
   return types[template].validators
 }
 
-function getDecorator (template) {
+function getDecorator(template) {
   return types[template].decorator
 }
 
-function getDefaultState (template) {
+function getDefaultState(template) {
   return types[template].defaultState
 }
 
 module.exports = {
   getValidators,
   getDecorator,
-  getDefaultState
+  getDefaultState,
 }
