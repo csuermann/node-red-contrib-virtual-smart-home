@@ -103,7 +103,7 @@ module.exports = function (RED) {
       }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
-        send({ payload: decorator(getLocalState()) })
+        send({ payload: decorator(getLocalState(), true) })
       }
 
       if (done) {

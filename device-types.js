@@ -173,17 +173,21 @@ const position = (val) => {
 
 //---DECORATORS---
 
-const defaultDecorator = (localState) => {
+const defaultDecorator = (localState, isPassthrough = false) => {
   localState.name = localState.friendlyName
   localState.type = localState.template
   delete localState.friendlyName
   delete localState.template
 
+  if (isPassthrough) {
+    delete localState.directive
+  }
+
   return localState
 }
 
-const colorChangingLightDecorator = (localState) => {
-  localState = defaultDecorator(localState)
+const colorChangingLightDecorator = (localState, isPassthrough = false) => {
+  localState = defaultDecorator(localState, isPassthrough)
 
   localState['color_rgb'] = convert.hsv.rgb(
     localState.color.hue,
