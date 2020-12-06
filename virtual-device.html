@@ -3,6 +3,7 @@
     category: 'virtual smart home',
     defaults: {
       name: { value: '', required: true },
+      topic: { value: '', required: false },
       connection: { type: 'vsh-connection', required: true },
       template: { value: 'SWITCH', required: true },
       passthrough: { value: false },
@@ -44,6 +45,11 @@
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
+    <input type="text" id="node-input-topic" placeholder="Topic" />
   </div>
 
   <div class="form-row">
@@ -124,6 +130,13 @@
   </dl>
 
   <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>
+      topic
+      <span class="property-type">string</span>
+    </dt>
+    <dd>topic string as configured in the virtual device node</dd>
+  </dl>
   <dl class="message-properties">
     <dt>
       payload

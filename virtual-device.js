@@ -13,13 +13,11 @@ module.exports = function (RED) {
 
     const node = this
 
-    const nodeId = 'vshd-' + node.id.replace('.', '')
+    const deviceId = 'vshd-' + node.id.replace('.', '')
 
     const connectionNode = RED.nodes.getNode(config.connection)
 
     let localState = getDefaultState(config.template)
-    localState['template'] = config.template
-    localState['friendlyName'] = config.name || config.template.toLowerCase()
 
     const validators = getValidators(config.template)
     const decorator = getDecorator(config.template)
@@ -66,7 +64,7 @@ module.exports = function (RED) {
     if (connectionNode) {
       //connection is configured
       //register callbacks. This way connectionNode can communicate with us:
-      connectionNode.registerChildNode(nodeId, {
+      connectionNode.registerChildNode(deviceId, {
         setStatus: (status) => node.status(status),
         getLocalState,
         setLocalState,
@@ -78,7 +76,12 @@ module.exports = function (RED) {
         },
         emitLocalState: () => {
           const msg = {
-            payload: decorator(getLocalState()),
+            topic: config.topic,
+            payload: decorator({
+              localState: getLocalState(),
+              template: config.template,
+              friendlyName: config.name,
+            }),
           }
           node.send(msg)
         },
@@ -98,12 +101,20 @@ module.exports = function (RED) {
         setLocalState(newLocalState)
 
         rater.execute(() =>
-          connectionNode.updateShadow({ nodeId, type: 'desired' })
+          connectionNode.updateShadow({ deviceId, type: 'desired' })
         )
       }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
-        send({ payload: decorator(getLocalState(), true) })
+        send({
+          topic: config.topic,
+          payload: decorator({
+            localState: getLocalState(),
+            template: config.template,
+            friendlyName: config.name,
+            isPassthrough: true,
+          }),
+        })
       }
 
       if (done) {
@@ -113,7 +124,7 @@ module.exports = function (RED) {
 
     node.on('close', async function (removed, done) {
       if (connectionNode) {
-        await connectionNode.unregisterChildNode(nodeId)
+        await connectionNode.unregisterChildNode(deviceId)
       }
       node.status({})
       rater.destroy()

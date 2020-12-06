@@ -1,4 +1,5 @@
 const { Base64 } = require('js-base64')
+const debounce = require('debounce')
 const MqttClient = require('./MqttClient')
 const VSH_VERSION = require('./version')
 
@@ -17,11 +18,18 @@ module.exports = function (RED) {
     this.isKilled = false
     this.killedStatusText = 'KILLED'
 
+    this.stats = {
+      lastStartup: new Date().getTime(),
+      connectionCount: 0,
+      inboundMsgCount: 0,
+      outboundMsgCount: 0,
+    }
+
     this.jobQueue = []
 
     this.jobQueueExecutor = setInterval(() => {
       this.jobQueue = this.jobQueue.filter((job) => job() == false)
-    }, 3000)
+    }, 2000)
 
     this.execOrQueueJob = function (job) {
       if (job() == false) {
@@ -49,7 +57,7 @@ module.exports = function (RED) {
           return false
         }
 
-        this.requestShadowForNode(nodeId)
+        this.requestShadowDebounced()
       }
 
       this.execOrQueueJob(requestShadowJob)
@@ -64,12 +72,24 @@ module.exports = function (RED) {
       }
     }
 
+    this.getLocalDevices = function () {
+      const localDevices = {}
+
+      for (const nodeId in this.childNodes) {
+        localDevices[nodeId] = this.childNodes[nodeId].getDeviceConfig()
+      }
+
+      return localDevices
+    }
+
     this.execCallbackForAll = function (eventName, eventDetails) {
+      const result = {}
       for (const nodeId in this.childNodes) {
         if (this.childNodes[nodeId][eventName]) {
-          this.childNodes[nodeId][eventName](eventDetails)
+          result[nodeId] = this.childNodes[nodeId][eventName](eventDetails)
         }
       }
+      return result
     }
 
     this.execCallbackForOne = function (nodeId, eventName, eventDetails) {
@@ -78,95 +98,140 @@ module.exports = function (RED) {
       }
     }
 
-    this.requestShadowForAllChildNodes = function () {
-      for (const nodeId in this.childNodes) {
-        this.requestShadowForNode(nodeId)
-      }
+    this.requestShadow = function () {
+      this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
     }
 
-    this.requestShadowForNode = function (nodeId) {
-      this.mqttClient.publish(
-        `$aws/things/${this.credentials.thingId}/shadow/name/${nodeId}/get`,
-        {}
+    this.publish = async function (topic, message) {
+      this.stats.outboundMsgCount++
+      return await this.mqttClient.publish(topic, message)
+    }
+
+    this.requestShadowDebounced = debounce(this.requestShadow, 2500)
+
+    this.updateShadow = function ({ deviceId, type }) {
+      const localDeviceState = this.execCallbackForOne(
+        deviceId,
+        'getLocalState'
       )
-    }
-
-    this.updateShadow = function ({ nodeId, type }) {
-      const localDeviceState = this.execCallbackForOne(nodeId, 'getLocalState')
       const payload = {
-        state: { reported: localDeviceState },
+        state: {
+          reported: { devices: { [deviceId]: { state: localDeviceState } } },
+        },
       }
 
       if (type === 'desired') {
-        payload.state['desired'] = localDeviceState
+        payload.state['desired'] = {
+          devices: { [deviceId]: { state: localDeviceState } },
+        }
       }
 
-      this.mqttClient.publish(
-        `$aws/things/${this.credentials.thingId}/shadow/name/${nodeId}/update`,
+      this.publish(
+        `$aws/things/${this.credentials.thingId}/shadow/update`,
         payload
       )
     }
 
-    this.discover = function (nodeId) {
-      const { friendlyName, template } = this.execCallbackForOne(
-        nodeId,
-        'getDeviceConfig'
-      )
+    this.bulkDiscover = function (devices, mode = 'discover') {
+      const payload = []
 
-      this.mqttClient.publish(`vsh/${this.credentials.thingId}/discover`, {
-        deviceId: nodeId,
-        friendlyName,
-        template,
-      })
+      for (const deviceId in devices) {
+        if (devices[deviceId] !== null) {
+          payload.push({
+            deviceId,
+            friendlyName: devices[deviceId]['friendlyName'],
+            template: devices[deviceId]['template'],
+          })
+        }
+      }
+
+      this.publish(`vsh2/${this.credentials.thingId}/${mode}`, payload)
     }
 
-    this.handleGetAccepted = function (nodeId, message) {
-      if (message.state.reported) {
-        const { friendlyName, template } = this.execCallbackForOne(
-          nodeId,
-          'getDeviceConfig'
-        )
+    this.handleGetAccepted = function (message) {
+      const localDevices = this.getLocalDevices()
+      const shadowDevices = message.state.reported?.devices || {}
 
-        if (message.state.reported.template !== template) {
-          //device type (template) has changed! Invalidate shadow (will be recreated by handleDeleteAccepted())
-          this.mqttClient.publish(
-            `$aws/things/${this.credentials.thingId}/shadow/name/${nodeId}/delete`,
-            {}
-          )
-        } else if (message.state.reported.friendlyName !== friendlyName) {
-          //name has changed!
-          this.updateShadow({ nodeId, type: 'reported' })
-          this.discover(nodeId)
+      const toBeDiscoveredDevices = {}
+
+      for (const deviceId in localDevices) {
+        if (
+          !shadowDevices.hasOwnProperty(deviceId) ||
+          shadowDevices[deviceId]['template'] !==
+            localDevices[deviceId]['template'] ||
+          shadowDevices[deviceId]['friendlyName'] !==
+            localDevices[deviceId]['friendlyName']
+        ) {
+          toBeDiscoveredDevices[deviceId] = localDevices[deviceId]
+          toBeDiscoveredDevices[deviceId]['state'] = null
         } else {
           //override local state only if neither template nor name changed!
           this.execCallbackForOne(
-            nodeId,
+            deviceId,
             'setLocalState',
-            message.state.reported
+            shadowDevices[deviceId]['state'] || {}
           )
+        }
+      }
+
+      const toBeUndiscoveredDevices = {}
+
+      for (const deviceId in shadowDevices) {
+        if (!localDevices.hasOwnProperty(deviceId)) {
+          toBeUndiscoveredDevices[deviceId] = shadowDevices[deviceId]
+          toBeDiscoveredDevices[deviceId] = null
+        }
+      }
+
+      if (Object.keys(toBeDiscoveredDevices).length > 0) {
+        this.publish(`$aws/things/${this.credentials.thingId}/shadow/update`, {
+          state: { reported: { devices: toBeDiscoveredDevices } },
+        })
+
+        this.bulkDiscover(toBeDiscoveredDevices)
+      }
+
+      if (Object.keys(toBeUndiscoveredDevices).length > 0) {
+        this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
+      }
+    }
+
+    this.handleDelta = function (message) {
+      const devices = message.state.devices || {}
+
+      for (const deviceId in devices) {
+        if (devices[deviceId]['state']) {
+          this.execCallbackForOne(
+            deviceId,
+            'setLocalState',
+            devices[deviceId]['state']
+          )
+          this.execCallbackForOne(deviceId, 'emitLocalState')
+          this.updateShadow({ deviceId, type: 'reported' })
         }
       }
     }
 
-    this.handleGetRejected = function (nodeId) {
-      //shadow for the device does not yet exist! Let's create it:
-      this.updateShadow({ nodeId, type: 'reported' })
-      this.discover(nodeId)
+    this.handlePing = function () {
+      this.publish(`vsh2/${this.credentials.thingId}/pong`, {
+        thingId: this.credentials.thingId,
+        email: this.credentials.email,
+        vsh_version: VSH_VERSION,
+        nr_version: RED.version(),
+        secondsSinceStartup: Math.floor(
+          (new Date().getTime() - this.stats.lastStartup) / 1000
+        ),
+        ...this.stats,
+        deviceCount: Object.keys(this.childNodes).length,
+        devices: this.execCallbackForAll('getDeviceConfig'),
+      })
     }
 
-    this.handleUpdateAccepted = function (nodeId, message) {
-      if (message.state.desired && !message.state.reported) {
-        //update must have been initiated from Alexa!
-        this.execCallbackForOne(nodeId, 'setLocalState', message.state.desired)
-        this.execCallbackForOne(nodeId, 'emitLocalState')
-        this.updateShadow({ nodeId, type: 'reported' })
-      }
-    }
-
-    this.handleDeleteAccepted = function (nodeId) {
-      //re-instantiate shadow from local state:
-      this.updateShadow({ nodeId, type: 'reported' })
-      this.discover(nodeId)
+    this.handleKilled = function (reason) {
+      console.warn('CONNECTION KILLED! Reason:', reason || 'undefined')
+      this.isKilled = true
+      this.killedStatusText = reason ? reason : 'KILLED'
+      this.disconnect()
     }
 
     this.connectAndSubscribe = async function () {
@@ -187,7 +252,7 @@ module.exports = function (RED) {
         keepalive: 90,
         rejectUnauthorized: false,
         will: {
-          topic: `vsh/${this.credentials.thingId}/update`,
+          topic: `vsh2/${this.credentials.thingId}/update`,
           payload: JSON.stringify({
             state: { reported: { connected: false } },
           }),
@@ -197,6 +262,7 @@ module.exports = function (RED) {
 
       this.mqttClient = new MqttClient(options, {
         onConnect: () => {
+          this.stats.connectionCount++
           this.isConnected = true
           this.isError = false
           this.execCallbackForAll('setStatus', {
@@ -205,15 +271,18 @@ module.exports = function (RED) {
             text: 'online',
           })
 
-          this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
-            state: {
-              reported: {
-                connected: true,
-                vsh_version: VSH_VERSION,
-                nr_version: RED.version(),
+          this.publish(
+            `$aws/things/${this.credentials.thingId}/shadow/update`,
+            {
+              state: {
+                reported: {
+                  connected: true,
+                  vsh_version: VSH_VERSION,
+                  nr_version: RED.version(),
+                },
               },
-            },
-          })
+            }
+          )
         },
 
         onDisconnect: () => {
@@ -242,32 +311,28 @@ module.exports = function (RED) {
         },
 
         onMessage: (topic, message) => {
-          //find out which child node the message is for:
-          const match = topic.match(/vshd-[^\/]+/)
-          if (match) {
-            const nodeId = match[0]
-
-            //find out which action to perform:
-            if (topic.includes('/get/accepted')) {
-              this.handleGetAccepted(nodeId, message)
-            } else if (topic.includes('/get/rejected')) {
-              this.handleGetRejected(nodeId, message)
-            } else if (topic.includes('/delete/accepted')) {
-              this.handleDeleteAccepted(nodeId)
-            } else if (topic.includes('/update/accepted')) {
-              this.handleUpdateAccepted(nodeId, message)
-            }
-          } else if (
-            topic == `vsh/${this.credentials.thingId}/kill` ||
-            topic == `vsh/version/${VSH_VERSION}/kill`
-          ) {
-            console.warn(
-              'CONNECTION KILLED! Reason:',
-              message.reason || 'undefined'
-            )
-            this.isKilled = true
-            this.killedStatusText = message.reason ? message.reason : 'KILLED'
-            this.disconnect()
+          this.stats.inboundMsgCount++
+          switch (topic) {
+            case `$aws/things/${this.credentials.thingId}/shadow/get/accepted`:
+              this.handleGetAccepted(message)
+              break
+            case `$aws/things/${this.credentials.thingId}/shadow/update/delta`:
+              this.handleDelta(message)
+              break
+            case `vsh2/${this.credentials.thingId}/kill`:
+            case `vsh2/version/${VSH_VERSION}/kill`:
+              this.handleKilled(message.reason)
+              break
+            case `vsh2/ping`:
+            case `vsh2/${this.credentials.thingId}/ping`:
+              this.handlePing()
+              break
+            default:
+              console.log(
+                'received message that I cannot handle yet!',
+                topic,
+                message
+              )
           }
         },
       })
@@ -275,12 +340,12 @@ module.exports = function (RED) {
       this.mqttClient.connect()
 
       const topicsToSubscribe = [
-        `$aws/things/${this.credentials.thingId}/shadow/name/+/delete/accepted`,
-        `$aws/things/${this.credentials.thingId}/shadow/name/+/get/accepted`,
-        `$aws/things/${this.credentials.thingId}/shadow/name/+/get/rejected`,
-        `$aws/things/${this.credentials.thingId}/shadow/name/+/update/accepted`,
-        `vsh/${this.credentials.thingId}/kill`,
-        `vsh/version/${VSH_VERSION}/kill`,
+        `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
+        `$aws/things/${this.credentials.thingId}/shadow/update/delta`,
+        `vsh2/ping`,
+        `vsh2/${this.credentials.thingId}/ping`,
+        `vsh2/${this.credentials.thingId}/kill`,
+        `vsh2/version/${VSH_VERSION}/kill`,
       ]
 
       await this.mqttClient.subscribe(topicsToSubscribe)
@@ -293,9 +358,12 @@ module.exports = function (RED) {
 
       this.isDisconnecting = true
 
-      await this.mqttClient.publish(`vsh/${this.credentials.thingId}/update`, {
-        state: { reported: { connected: false } },
-      })
+      await this.publish(
+        `$aws/things/${this.credentials.thingId}/shadow/update`,
+        {
+          state: { reported: { connected: false } },
+        }
+      )
       await this.mqttClient.disconnect()
       this.isSubscribed = false
     }
