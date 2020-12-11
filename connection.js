@@ -115,29 +115,25 @@ module.exports = function (RED) {
         'getLocalState'
       )
       const payload = {
-        state: {
-          reported: { devices: { [deviceId]: { state: localDeviceState } } },
-        },
+        state: { reported: localDeviceState },
       }
 
       if (type === 'desired') {
-        payload.state['desired'] = {
-          devices: { [deviceId]: { state: localDeviceState } },
-        }
+        payload.state['desired'] = localDeviceState
       }
 
-      this.publish(
-        `$aws/things/${this.credentials.thingId}/shadow/update`,
+      this.mqttClient.publish(
+        `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
         payload
       )
     }
 
     this.bulkDiscover = function (devices, mode = 'discover') {
-      const payload = []
+      const payload = { devices: [] }
 
       for (const deviceId in devices) {
         if (devices[deviceId] !== null) {
-          payload.push({
+          payload['devices'].push({
             deviceId,
             friendlyName: devices[deviceId]['friendlyName'],
             template: devices[deviceId]['template'],
@@ -145,7 +141,7 @@ module.exports = function (RED) {
         }
       }
 
-      this.publish(`vsh2/${this.credentials.thingId}/${mode}`, payload)
+      this.publish(`vsh/${this.credentials.thingId}/bulk${mode}`, payload)
     }
 
     this.handleGetAccepted = function (message) {
@@ -163,14 +159,6 @@ module.exports = function (RED) {
             localDevices[deviceId]['friendlyName']
         ) {
           toBeDiscoveredDevices[deviceId] = localDevices[deviceId]
-          toBeDiscoveredDevices[deviceId]['state'] = null
-        } else {
-          //override local state only if neither template nor name changed!
-          this.execCallbackForOne(
-            deviceId,
-            'setLocalState',
-            shadowDevices[deviceId]['state'] || {}
-          )
         }
       }
 
@@ -196,24 +184,14 @@ module.exports = function (RED) {
       }
     }
 
-    this.handleDelta = function (message) {
-      const devices = message.state.devices || {}
-
-      for (const deviceId in devices) {
-        if (devices[deviceId]['state']) {
-          this.execCallbackForOne(
-            deviceId,
-            'setLocalState',
-            devices[deviceId]['state']
-          )
-          this.execCallbackForOne(deviceId, 'emitLocalState')
-          this.updateShadow({ deviceId, type: 'reported' })
-        }
-      }
+    this.handleDelta = function (deviceId, message) {
+      this.execCallbackForOne(deviceId, 'setLocalState', message.state)
+      this.execCallbackForOne(deviceId, 'emitLocalState')
+      this.updateShadow({ deviceId, type: 'reported' })
     }
 
     this.handlePing = function () {
-      this.publish(`vsh2/${this.credentials.thingId}/pong`, {
+      this.publish(`vsh/${this.credentials.thingId}/pong`, {
         thingId: this.credentials.thingId,
         email: this.credentials.email,
         vsh_version: VSH_VERSION,
@@ -227,11 +205,22 @@ module.exports = function (RED) {
       })
     }
 
-    this.handleKilled = function (reason) {
+    this.handleKill = function (reason) {
       console.warn('CONNECTION KILLED! Reason:', reason || 'undefined')
       this.isKilled = true
       this.killedStatusText = reason ? reason : 'KILLED'
       this.disconnect()
+    }
+
+    this.handleService = function (message) {
+      switch (message.operation) {
+        case 'ping':
+          this.handlePing()
+          break
+        case 'kill':
+          this.handleKill(message.reason)
+          break
+      }
     }
 
     this.connectAndSubscribe = async function () {
@@ -252,7 +241,7 @@ module.exports = function (RED) {
         keepalive: 90,
         rejectUnauthorized: false,
         will: {
-          topic: `vsh2/${this.credentials.thingId}/update`,
+          topic: `vsh/${this.credentials.thingId}/update`,
           payload: JSON.stringify({
             state: { reported: { connected: false } },
           }),
@@ -316,23 +305,32 @@ module.exports = function (RED) {
             case `$aws/things/${this.credentials.thingId}/shadow/get/accepted`:
               this.handleGetAccepted(message)
               break
-            case `$aws/things/${this.credentials.thingId}/shadow/update/delta`:
-              this.handleDelta(message)
-              break
-            case `vsh2/${this.credentials.thingId}/kill`:
-            case `vsh2/version/${VSH_VERSION}/kill`:
-              this.handleKilled(message.reason)
-              break
-            case `vsh2/ping`:
-            case `vsh2/${this.credentials.thingId}/ping`:
-              this.handlePing()
+            case `vsh/service`:
+            case `vsh/version/${VSH_VERSION}/service`:
+            case `vsh/${this.credentials.thingId}/service`:
+              this.handleService(message)
               break
             default:
-              console.log(
-                'received message that I cannot handle yet!',
-                topic,
-                message
-              )
+              const match = topic.match(/vshd-[^\/]+/)
+              if (match) {
+                const deviceId = match[0]
+
+                if (topic.includes('/update/delta')) {
+                  this.handleDelta(deviceId, message)
+                } else {
+                  console.log(
+                    'received device-related message that I cannot handle yet!',
+                    topic,
+                    message
+                  )
+                }
+              } else {
+                console.log(
+                  'received thing-related message that I cannot handle yet!',
+                  topic,
+                  message
+                )
+              }
           }
         },
       })
@@ -341,11 +339,10 @@ module.exports = function (RED) {
 
       const topicsToSubscribe = [
         `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-        `$aws/things/${this.credentials.thingId}/shadow/update/delta`,
-        `vsh2/ping`,
-        `vsh2/${this.credentials.thingId}/ping`,
-        `vsh2/${this.credentials.thingId}/kill`,
-        `vsh2/version/${VSH_VERSION}/kill`,
+        `$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`,
+        `vsh/service`,
+        `vsh/version/${VSH_VERSION}/+`,
+        `vsh/${this.credentials.thingId}/service`,
       ]
 
       await this.mqttClient.subscribe(topicsToSubscribe)

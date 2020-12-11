@@ -182,6 +182,9 @@ const defaultDecorator = ({
   localState.name = friendlyName
   localState.type = template
 
+  delete localState.template
+  delete localState.updatedAt
+
   if (isPassthrough) {
     delete localState.directive
   }
@@ -328,7 +331,9 @@ function getDecorator(template) {
 }
 
 function getDefaultState(template) {
-  return types[template].defaultState
+  const defaultState = types[template].defaultState
+  defaultState['template'] = template
+  return defaultState
 }
 
 module.exports = {
