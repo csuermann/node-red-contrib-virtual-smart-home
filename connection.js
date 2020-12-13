@@ -144,7 +144,8 @@ module.exports = function (RED) {
 
     this.handleGetAccepted = function (message) {
       const localDevices = this.getLocalDevices()
-      const shadowDevices = message.state.reported?.devices || {}
+      const shadowDevices =
+        (message.state.reported && message.state.reported.devices) || {}
 
       const toBeDiscoveredDevices = {}
 
@@ -193,7 +194,7 @@ module.exports = function (RED) {
     // }
 
     this.handleUpdateFromAlexa = function (deviceId, message) {
-      console.log('handleUpdateFromAlexa:message:::', message)
+      //console.log('handleUpdateFromAlexa:message:::', message)
 
       const newLocalState = this.execCallbackForOne(
         deviceId,
