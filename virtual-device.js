@@ -39,10 +39,10 @@ module.exports = function (RED) {
       return { ...localState }
     }
 
-    const setLocalState = function (state) {
-      localState = merge(getLocalState(), state)
-      const nodeContext = node.context()
-      nodeContext.set('state', localState)
+    const setLocalState = function (targetState) {
+      localState = merge(getLocalState(), targetState)
+      node.context().set('state', localState)
+      return localState
     }
 
     const validateState = function (state) {
@@ -98,10 +98,13 @@ module.exports = function (RED) {
         isIncomingMsgProcessingAllowed &&
         !deepEql(oldLocalState, newLocalState)
       ) {
-        setLocalState(newLocalState)
-
+        const confirmedNewLocalState = setLocalState(newLocalState)
         rater.execute(() =>
-          connectionNode.updateShadow({ deviceId, type: 'desired' })
+          connectionNode.updateShadow({
+            state: confirmedNewLocalState,
+            deviceId,
+            type: 'desired',
+          })
         )
       }
 

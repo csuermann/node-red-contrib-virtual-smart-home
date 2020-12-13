@@ -109,17 +109,13 @@ module.exports = function (RED) {
 
     this.requestShadowDebounced = debounce(this.requestShadow, 2500)
 
-    this.updateShadow = function ({ deviceId, type }) {
-      const localDeviceState = this.execCallbackForOne(
-        deviceId,
-        'getLocalState'
-      )
+    this.updateShadow = function ({ state, deviceId, type }) {
       const payload = {
-        state: { reported: localDeviceState },
+        state: { reported: state },
       }
 
       if (type === 'desired') {
-        payload.state['desired'] = localDeviceState
+        payload.state['desired'] = state
       }
 
       this.mqttClient.publish(
@@ -141,7 +137,9 @@ module.exports = function (RED) {
         }
       }
 
-      this.publish(`vsh/${this.credentials.thingId}/bulk${mode}`, payload)
+      if (payload.devices.length > 0) {
+        this.publish(`vsh/${this.credentials.thingId}/bulk${mode}`, payload)
+      }
     }
 
     this.handleGetAccepted = function (message) {
@@ -179,15 +177,31 @@ module.exports = function (RED) {
         this.bulkDiscover(toBeDiscoveredDevices)
       }
 
-      if (Object.keys(toBeUndiscoveredDevices).length > 0) {
-        this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
-      }
+      this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
     }
 
-    this.handleDelta = function (deviceId, message) {
-      this.execCallbackForOne(deviceId, 'setLocalState', message.state)
+    // this.handleDelta = function (deviceId, message) {
+    //   console.log('handleDelta:message:::', message)
+
+    //   const newLocalState = this.execCallbackForOne(
+    //     deviceId,
+    //     'setLocalState',
+    //     message.state
+    //   )
+    //   this.execCallbackForOne(deviceId, 'emitLocalState')
+    //   this.updateShadow({ state: newLocalState, deviceId, type: 'reported' })
+    // }
+
+    this.handleUpdateFromAlexa = function (deviceId, message) {
+      console.log('handleUpdateFromAlexa:message:::', message)
+
+      const newLocalState = this.execCallbackForOne(
+        deviceId,
+        'setLocalState',
+        message.state
+      )
       this.execCallbackForOne(deviceId, 'emitLocalState')
-      this.updateShadow({ deviceId, type: 'reported' })
+      this.updateShadow({ state: newLocalState, deviceId, type: 'reported' })
     }
 
     this.handlePing = function () {
@@ -315,7 +329,10 @@ module.exports = function (RED) {
               if (match) {
                 const deviceId = match[0]
 
-                if (topic.includes('/update/delta')) {
+                //if (topic.includes('/update/accepted')) {
+                if (topic.includes('/update')) {
+                  this.handleUpdateFromAlexa(deviceId, message)
+                } else if (topic.includes('/update/delta')) {
                   this.handleDelta(deviceId, message)
                 } else {
                   console.log(
@@ -339,7 +356,9 @@ module.exports = function (RED) {
 
       const topicsToSubscribe = [
         `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-        `$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`,
+        //`$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`,
+        //`$aws/things/${this.credentials.thingId}/shadow/name/+/update/accepted`,
+        `vsh/${this.credentials.thingId}/+/update`,
         `vsh/service`,
         `vsh/version/${VSH_VERSION}/+`,
         `vsh/${this.credentials.thingId}/service`,

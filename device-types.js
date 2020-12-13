@@ -231,7 +231,6 @@ const colorChangingLightDecorator = ({
 const types = {
   SWITCH: {
     defaultState: {
-      source: 'device',
       powerState: 'OFF',
     },
     validators: {
@@ -241,7 +240,6 @@ const types = {
   },
   PLUG: {
     defaultState: {
-      source: 'device',
       powerState: 'OFF',
     },
     validators: {
@@ -251,7 +249,6 @@ const types = {
   },
   DIMMABLE_LIGHT_BULB: {
     defaultState: {
-      source: 'device',
       powerState: 'OFF',
       brightness: 100,
     },
@@ -263,7 +260,6 @@ const types = {
   },
   COLOR_CHANGING_LIGHT_BULB: {
     defaultState: {
-      source: 'device',
       powerState: 'OFF',
       brightness: 100,
       colorTemperatureInKelvin: 2200,
@@ -284,7 +280,6 @@ const types = {
   },
   DIMMER_SWITCH: {
     defaultState: {
-      source: 'device',
       powerState: 'OFF',
       brightness: 100,
     },
@@ -296,7 +291,6 @@ const types = {
   },
   BLINDS: {
     defaultState: {
-      source: 'device',
       mode: 'Position.Up',
       instance: 'Blinds.Position',
       percentage: 100,
@@ -309,7 +303,6 @@ const types = {
   },
   GARAGE_DOOR_OPENER: {
     defaultState: {
-      source: 'device',
       mode: 'Position.Up',
       instance: 'GarageDoor.Position',
     },
@@ -333,6 +326,7 @@ function getDecorator(template) {
 function getDefaultState(template) {
   const defaultState = types[template].defaultState
   defaultState['template'] = template
+  defaultState['source'] = 'alexa'
   return defaultState
 }
 
