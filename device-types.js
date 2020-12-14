@@ -198,12 +198,12 @@ const colorChangingLightDecorator = ({
   friendlyName,
   isPassthrough = false,
 }) => {
-  localState = defaultDecorator(
+  localState = defaultDecorator({
     localState,
     template,
     friendlyName,
-    isPassthrough
-  )
+    isPassthrough,
+  })
 
   localState['color_rgb'] = convert.hsv.rgb(
     localState.color.hue,
