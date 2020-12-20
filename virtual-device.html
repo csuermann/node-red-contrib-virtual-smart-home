@@ -1,4 +1,8 @@
 <script type="text/javascript">
+  function vshOnEditPrepare() {
+    setTimeout(() => $('#donation').fadeIn('slow'), 2000)
+  }
+
   RED.nodes.registerType('vsh-virtual-device', {
     category: 'virtual smart home',
     defaults: {
@@ -16,7 +20,7 @@
     label: function () {
       return this.name || 'virtual device'
     },
-    oneditprepare: () => setTimeout(() => $('#donation').fadeIn('slow'), 2000),
+    oneditprepare: vshOnEditPrepare,
   })
 </script>
 
@@ -53,6 +57,10 @@
   </div>
 
   <div class="form-row">
+    <div style="margin-left: 105px; color:orange; width:70%; font-weight:bold">
+      Create <i>one</i> connection per Amazon account!
+    </div>
+
     <label for="node-input-connection"
       ><i class="fa fa-globe"></i> Connection</label
     >
