@@ -87,7 +87,11 @@ Please ensure that your setup does not send too many messages to Alexa. Othewise
 Detailed docs are shipped as part of the Node-RED package and available through
 the 'help' panel.
 
-## Warranty
+## Terms of Use
 
 This package comes without any warranty. Use it, enjoy it, but all at your own
-risk.
+risk. If you are satisfied with this project, please contribute your share for the backend infrastructure via [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url). Thank you!
+
+__NOTE__: Devices that have not been online for 30 days will be permanently deleted without prior warning. Their certificates will be invalidated and can no longer be used to connect virtual devices.
+
+Accounts without any activity for 60 days will also be deleted and can no longer be used to control virtual devices.

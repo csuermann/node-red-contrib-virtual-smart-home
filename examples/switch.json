@@ -4,7 +4,7 @@
     "type": "subflow",
     "name": "device state",
     "info": "",
-    "category": "",
+    "category": "subflows",
     "in": [{ "x": 60, "y": 80, "wires": [{ "id": "b643ba4b.ed8568" }] }],
     "out": [],
     "env": [],
