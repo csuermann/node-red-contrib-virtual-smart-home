@@ -68,6 +68,7 @@ module.exports = function (RED) {
 
       if (Object.keys(this.childNodes).length == 0) {
         //last child node is unregistering!
+        //setTimeout(this.disconnect.bind(this), 2000)
         await this.disconnect()
       }
     }
@@ -180,18 +181,6 @@ module.exports = function (RED) {
 
       this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
     }
-
-    // this.handleDelta = function (deviceId, message) {
-    //   console.log('handleDelta:message:::', message)
-
-    //   const newLocalState = this.execCallbackForOne(
-    //     deviceId,
-    //     'setLocalState',
-    //     message.state
-    //   )
-    //   this.execCallbackForOne(deviceId, 'emitLocalState')
-    //   this.updateShadow({ state: newLocalState, deviceId, type: 'reported' })
-    // }
 
     this.handleUpdateFromAlexa = function (deviceId, message) {
       //console.log('handleUpdateFromAlexa:message:::', message)
@@ -357,8 +346,6 @@ module.exports = function (RED) {
 
       const topicsToSubscribe = [
         `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-        //`$aws/things/${this.credentials.thingId}/shadow/name/+/update/delta`,
-        //`$aws/things/${this.credentials.thingId}/shadow/name/+/update/accepted`,
         `vsh/${this.credentials.thingId}/+/update`,
         `vsh/service`,
         `vsh/version/${VSH_VERSION}/+`,
@@ -369,6 +356,7 @@ module.exports = function (RED) {
     }
 
     this.disconnect = async function () {
+      //console.log('this.disconnect!!!')
       if (this.isDisconnecting) {
         return
       }
@@ -386,11 +374,15 @@ module.exports = function (RED) {
     }
 
     this.on('close', async function (removed, done) {
+      if (!this.credentials.thingId) {
+        return done()
+      }
+
       clearInterval(this.jobQueueExecutor)
       try {
         await this.disconnect()
       } catch (e) {
-        console.log(e)
+        console.log('connection.js:this:on:close::', e)
       }
 
       this.execCallbackForAll('onDisconnect')

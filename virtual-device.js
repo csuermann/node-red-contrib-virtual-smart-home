@@ -131,7 +131,7 @@ module.exports = function (RED) {
       }
       node.status({})
       rater.destroy()
-      done()
+      return done()
     })
   }
 

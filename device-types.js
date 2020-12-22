@@ -155,6 +155,70 @@ const color_hex = (val) => {
   }
 }
 
+const color_xyz = (val) => {
+  if (!typeof val == 'array' || val.length !== 3) {
+    return false
+  }
+
+  const isValid =
+    Number.isInteger(val[0]) &&
+    val[0] >= 0 &&
+    val[0] <= 100 &&
+    Number.isInteger(val[1]) &&
+    val[1] >= 0 &&
+    val[1] <= 100 &&
+    Number.isInteger(val[2]) &&
+    val[2] >= 0 &&
+    val[2] <= 100
+
+  if (!isValid) {
+    return false
+  }
+
+  const hsb = convert.xyz.hsv([val[0], val[1], val[2]])
+
+  return {
+    key: 'color',
+    value: {
+      hue: hsb[0],
+      saturation: hsb[1] / 100,
+      brightness: hsb[2] / 100,
+    },
+  }
+}
+
+const color_lab = (val) => {
+  if (!typeof val == 'array' || val.length !== 3) {
+    return false
+  }
+
+  const isValid =
+    Number.isInteger(val[0]) &&
+    val[0] >= -100 &&
+    val[0] <= 100 &&
+    Number.isInteger(val[1]) &&
+    val[1] >= -100 &&
+    val[1] <= 100 &&
+    Number.isInteger(val[2]) &&
+    val[2] >= -100 &&
+    val[2] <= 100
+
+  if (!isValid) {
+    return false
+  }
+
+  const hsb = convert.lab.hsv([val[0], val[1], val[2]])
+
+  return {
+    key: 'color',
+    value: {
+      hue: hsb[0],
+      saturation: hsb[1] / 100,
+      brightness: hsb[2] / 100,
+    },
+  }
+}
+
 const lightMode = (val) => {
   const isValid = val == 'hsb' || val == 'temp'
   if (!isValid) {
@@ -223,6 +287,18 @@ const colorChangingLightDecorator = ({
     localState.color.brightness * 100
   )
 
+  localState['color_lab'] = convert.hsv.lab(
+    localState.color.hue,
+    localState.color.saturation * 100,
+    localState.color.brightness * 100
+  )
+
+  localState['color_xyz'] = convert.hsv.xyz(
+    localState.color.hue,
+    localState.color.saturation * 100,
+    localState.color.brightness * 100
+  )
+
   return localState
 }
 
@@ -273,6 +349,8 @@ const types = {
       color_hex,
       color_rgb,
       color_cmyk,
+      color_lab,
+      color_xyz,
       color,
       lightMode,
     },
