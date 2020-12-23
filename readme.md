@@ -20,13 +20,14 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
 ## Highlights
 
 - supports a growing set of device types
-  - Switch
-  - Plug
-  - Dimmable Light Bulb
-  - Color Changing Light Bulb
-  - Dimmer Switch
   - Blinds
+  - Color Changing Light Bulb
+  - Dimmable Light Bulb
+  - Dimmer Switch
   - Garage Door Opener
+  - Plug
+  - Switch
+  - Temperature Sensor
 - no separate account needed. Just link your existing Amazon account.
 - new virtual devices can simply be dragged onto the Node-RED canvas and will
   proactively be discovered by Alexa. No need to ask Alexa to discover devices.
