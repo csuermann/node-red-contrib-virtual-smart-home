@@ -87,6 +87,10 @@ Please ensure that your setup does not send too many messages to Alexa. Othewise
 Detailed docs are shipped as part of the Node-RED package and available through
 the 'help' panel.
 
+## Examples
+
+Example flows that illustrate the payload structure can be imported from the Node-RED import menu (Import > Examples > node-red-contrib-virtual-smart-home). They can also be found in the [examples](https://github.com/csuermann/node-red-contrib-virtual-smart-home/tree/master/examples) folder.
+
 ## Terms of Use
 
 This package comes without any warranty. Use it, enjoy it, but all at your own
