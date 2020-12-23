@@ -79,6 +79,7 @@
       <option value="DIMMER_SWITCH">Dimmer Switch</option>
       <option value="BLINDS">Blinds</option>
       <option value="GARAGE_DOOR_OPENER">Garage Door Opener</option>
+      <option value="TEMPERATURE_SENSOR">Temperature Sensor</option>
     </select>
   </div>
 
@@ -219,36 +220,18 @@
     </dd>
   </dl>
 
-  <h4>Switch</h4>
+  <h4>Blinds</h4>
   <dl class="message-properties">
     <dt>
-      payload.powerState
+      payload.mode
       <span class="property-type">string</span>
     </dt>
-    <dd>'ON' or 'OFF'</dd>
-  </dl>
-
-  <h4>Plug</h4>
-  <dl class="message-properties">
+    <dd>'Position.Up' or 'Position.Down'</dd>
     <dt>
-      payload.powerState
-      <span class="property-type">string</span>
-    </dt>
-    <dd>'ON' or 'OFF'</dd>
-  </dl>
-
-  <h4>Dimmable Light Bulb</h4>
-  <dl class="message-properties">
-    <dt>
-      payload.powerState
-      <span class="property-type">string</span>
-    </dt>
-    <dd>'ON' or 'OFF'</dd>
-    <dt>
-      payload.brightness
+      payload.percentage
       <span class="property-type">int</span>
     </dt>
-    <dd>Brightness in % (0...100)</dd>
+    <dd>Position in % (0...100). 100 = Position.Up</dd>
   </dl>
 
   <h4>Color Changing Light Bulb</h4>
@@ -302,7 +285,6 @@
       <span class="property-type">float</span>
     </dt>
     <dd>Brightness (0.0...1.0)</dd>
-
     <dt>
       payload.color_rgb
       <span class="property-type">array(3)</span>
@@ -318,6 +300,30 @@
       <span class="property-type">array(4)</span>
     </dt>
     <dd>CMYK representation of <code>payload.color</code> (0...100)</dd>
+    <dt>
+      payload.color_lab
+      <span class="property-type">array(3)</span>
+    </dt>
+    <dd>[EXPERIMENTAL] LAB representation of <code>payload.color</code></dd>
+    <dt>
+      payload.color_xyz
+      <span class="property-type">array(3)</span>
+    </dt>
+    <dd>[EXPERIMENTAL] XYZ representation of <code>payload.color</code></dd>
+  </dl>
+
+  <h4>Dimmable Light Bulb</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.powerState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'ON' or 'OFF'</dd>
+    <dt>
+      payload.brightness
+      <span class="property-type">int</span>
+    </dt>
+    <dd>Brightness in % (0...100)</dd>
   </dl>
 
   <h4>Dimmer Switch</h4>
@@ -334,20 +340,6 @@
     <dd>Brightness in % (0...100)</dd>
   </dl>
 
-  <h4>Blinds</h4>
-  <dl class="message-properties">
-    <dt>
-      payload.mode
-      <span class="property-type">string</span>
-    </dt>
-    <dd>'Position.Up' or 'Position.Down'</dd>
-    <dt>
-      payload.percentage
-      <span class="property-type">int</span>
-    </dt>
-    <dd>Position in % (0...100). 100 = Position.Up</dd>
-  </dl>
-
   <h4>Garage Door Opener</h4>
   <dl class="message-properties">
     <dt>
@@ -355,5 +347,40 @@
       <span class="property-type">string</span>
     </dt>
     <dd>'Position.Up' or 'Position.Down'</dd>
+  </dl>
+
+  <h4>Plug</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.powerState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'ON' or 'OFF'</dd>
+  </dl>
+
+  <h4>Switch</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.powerState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'ON' or 'OFF'</dd>
+  </dl>
+
+  <h4>Temperatur Sensor</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.temperature
+      <span class="property-type">float</span>
+    </dt>
+    <dd>Temperature</dd>
+    <dt>
+      payload.scale
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Scale / unit of temperature. Allowed values: 'CELSIUS', 'FAHRENHEIT',
+      'KELVIN'
+    </dd>
   </dl>
 </script>

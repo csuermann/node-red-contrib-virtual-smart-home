@@ -235,6 +235,23 @@ const position = (val) => {
   return { key: 'position', value: val }
 }
 
+const temperatureValue = (val) => {
+  const floatValue = Number.parseFloat(val)
+  const isValid = floatValue !== NaN
+  if (!isValid) {
+    return false
+  }
+  return { key: 'temperature', value: floatValue }
+}
+
+const temperatureScale = (val) => {
+  const isValid = val === 'CELSIUS' || val === 'FAHRENHEIT' || val === 'KELVIN'
+  if (!isValid) {
+    return false
+  }
+  return { key: 'scale', value: val }
+}
+
 //---DECORATORS---
 
 const defaultDecorator = ({
@@ -364,6 +381,17 @@ const types = {
     validators: {
       powerState,
       brightness,
+    },
+    decorator: defaultDecorator,
+  },
+  TEMPERATURE_SENSOR: {
+    defaultState: {
+      temperature: 0,
+      scale: 'CELSIUS',
+    },
+    validators: {
+      temperature: temperatureValue,
+      scale: temperatureScale,
     },
     decorator: defaultDecorator,
   },
