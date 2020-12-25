@@ -92,6 +92,16 @@ the 'help' panel.
 
 Example flows that illustrate the payload structure can be imported from the Node-RED import menu (Import > Examples > node-red-contrib-virtual-smart-home). They can also be found in the [examples](https://github.com/csuermann/node-red-contrib-virtual-smart-home/tree/master/examples) folder.
 
+## Share the Love!
+
+I dedicated endless hours to this project and really hope it adds value for you! Nothing is more rewarding to me than your feedback. So if you are a happy user, please
+- rate the 'virtual smart home' skill on the Alexa skill store
+- rate the 'virtual smart home' [Node-RED package](https://flows.nodered.org/node/node-red-contrib-virtual-smart-home)
+- mention this package in your next blog post / podcast / youtube
+- [donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url) a few bucks to help cover the infrastructure costs.
+
+__THANK YOU!__
+
 ## Terms of Use
 
 This package comes without any warranty. Use it, enjoy it, but all at your own

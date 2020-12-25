@@ -36,8 +36,21 @@
     width: 90%;
   }
 
-  #donaton h1 {
+  #donation > h1 {
     line-height: normal;
+  }
+
+  #donation > h2 {
+    margin-top: 50px;
+  }
+
+  #donation > ul > li {
+    list-style-position: inside;
+  }
+
+  #donation > ul > li a {
+    text-decoration: underline;
+    color: #253b80;
   }
 
   #donation img {
@@ -98,16 +111,26 @@
   <div id="donation">
     <h1>Please Support</h1>
     <p>
-      Your <i>virtual smart home</i> can only function as long as someone is
+      Your <i>virtual smart home</i> can only function as long as I am
       paying the bills for the backend infrastructure.
     </p>
-    <p>If you are satisfied with this project, please contribute your share.</p>
-    <p>Thank you!</p>
+    <p>If you are satisfied with this project, please help me to keep the system up.</p>
     <a
       target="_blank"
       href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url"
       ><img src="icons/node-red-contrib-virtual-smart-home/donate.png"
     /></a>
+    <h2>... and Spread the Love</h2>
+    <p>
+      I dedicated endless hours to this project and really hope it adds value for you!
+      Nothing is more rewarding to me than your feedback. So if you are a happy user, please
+      <ul>
+        <li>rate the <i>virtual smart home</i> skill on the <a href="https://skills-store.amazon.com/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy">Alexa skill store</a></li>
+        <li>rate the <i>virtual smart home</i> <a href="https://flows.nodered.org/node/node-red-contrib-virtual-smart-home">Node-RED package</a></li>
+        <li>mention this package in your next blog post / podcast / YouTube</li>
+      </ul>
+    </p>
+    <h1>THANK YOU</h1>
   </div>
 </script>
 
