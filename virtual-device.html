@@ -89,6 +89,7 @@
       <option value="BLINDS">Blinds</option>
       <option value="GARAGE_DOOR_OPENER">Garage Door Opener</option>
       <option value="TEMPERATURE_SENSOR">Temperature Sensor</option>
+      <option value="SCENE">Scene</option>
     </select>
   </div>
 
@@ -386,7 +387,23 @@
     <dd>'ON' or 'OFF'</dd>
   </dl>
 
-  <h4>Temperatur Sensor</h4>
+  <h4>Scene</h4>
+  <p>
+    Scene nodes do not accept inbound messages and can only be triggered by
+    Alexa.
+  </p>
+  <dl class="message-properties">
+    <dt>
+      payload.isActivated
+      <span class="property-type">boolean</span>
+    </dt>
+    <dd>
+      <code>true</code> when the scene was activated, <code>false</code> when
+      the scene was deactivated
+    </dd>
+  </dl>
+
+  <h4>Temperature Sensor</h4>
   <dl class="message-properties">
     <dt>
       payload.temperature

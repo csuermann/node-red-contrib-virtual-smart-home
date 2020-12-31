@@ -417,6 +417,13 @@ const types = {
     },
     decorator: defaultDecorator,
   },
+  SCENE: {
+    defaultState: {
+      isActivated: false,
+    },
+    validators: {},
+    decorator: defaultDecorator,
+  },
 }
 
 //---HELPERS---

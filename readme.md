@@ -27,6 +27,7 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
   - Garage Door Opener
   - Plug
   - Switch
+  - Scene
   - Temperature Sensor
 - no separate account needed. Just link your existing Amazon account.
 - new virtual devices can simply be dragged onto the Node-RED canvas and will
