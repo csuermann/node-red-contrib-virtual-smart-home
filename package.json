@@ -4,7 +4,7 @@
   "description": "A Node-RED node that represents a 'virtual device' which can be controlled via Alexa. Requires the virtual smart home skill to be enabled for your Amazon account.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepack": "echo \"module.exports = '$npm_package_version'\" > version.js"
+    "prepack": "echo \"module.exports = '$npm_package_version'\" > version.js && echo \"$npm_package_version\" > ./icons/version.txt"
   },
   "repository": {
     "type": "git",

@@ -18,7 +18,7 @@
       return response.json()
     }
 
-    async function execGetRequest(url, headers) {
+    async function execGetRequest(url, headers = {}) {
       const response = await fetch(url, {
         method: 'GET',
         mode: 'cors',
@@ -30,6 +30,20 @@
         redirect: 'follow',
       })
       return response.json()
+    }
+
+    async function getInstalledVshVersion() {
+      const response = await fetch(
+        './icons/node-red-contrib-virtual-smart-home/version.txt',
+        {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache',
+          credentials: 'same-origin',
+        }
+      )
+
+      return (await response.text()).trim()
     }
 
     async function execDeleteRequest(url, headers = {}, data = {}) {
@@ -134,11 +148,12 @@
       $('#node-config-input-accessTokenExpiry').val(accessTokenExpiryTimestamp)
     }
 
-    function provisionDevice(accessToken) {
+    function provisionDevice(accessToken, installedVshVersion) {
       return execPostRequest(
         'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/provision',
         {
           accessToken: accessToken,
+          vshVersion: installedVshVersion,
         }
       )
     }
@@ -147,6 +162,12 @@
       return execGetRequest(
         'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/devices',
         { Authorization: accessToken }
+      )
+    }
+
+    function checkVersion(version) {
+      return execGetRequest(
+        `https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/check_version?version=${version}`
       )
     }
 
@@ -250,6 +271,14 @@
 
     async function oneditprepare() {
       if (!this.credentials.email) {
+        const installedVshVersion = await getInstalledVshVersion()
+
+        const versionCheckResult = await checkVersion(installedVshVersion)
+
+        if (!versionCheckResult.isAllowedVersion) {
+          return showError(versionCheckResult.updateHint)
+        }
+
         try {
           const {
             device_code,
@@ -272,8 +301,7 @@
             if (new Date() > expiresAt) {
               stopPolling()
               $('#device-code').hide()
-              showError('code expired')
-              return
+              return showError('code expired')
             }
 
             try {
@@ -289,7 +317,8 @@
               console.log('deviceTokenResponse', deviceTokenResponse)
 
               const provisionData = await provisionDevice(
-                deviceTokenResponse.access_token
+                deviceTokenResponse.access_token,
+                installedVshVersion
               )
 
               if (provisionData.error) {

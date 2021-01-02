@@ -68,7 +68,6 @@ module.exports = function (RED) {
 
       if (Object.keys(this.childNodes).length == 0) {
         //last child node is unregistering!
-        //setTimeout(this.disconnect.bind(this), 2000)
         await this.disconnect()
       }
     }
