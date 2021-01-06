@@ -139,11 +139,13 @@ const color_cmyk = (val) => {
 }
 
 const color_hex = (val) => {
-  if (!/^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(val)) {
+  const match = `${val}`.match(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
+
+  if (!match) {
     return false
   }
 
-  const hsb = convert.hex.hsv(val)
+  const hsb = convert.hex.hsv(match[1])
 
   return {
     key: 'color',
@@ -292,11 +294,13 @@ const colorChangingLightDecorator = ({
     localState.color.brightness * 100
   )
 
-  localState['color_hex'] = convert.hsv.hex(
-    localState.color.hue,
-    localState.color.saturation * 100,
-    localState.color.brightness * 100
-  )
+  localState['color_hex'] =
+    '#' +
+    convert.hsv.hex(
+      localState.color.hue,
+      localState.color.saturation * 100,
+      localState.color.brightness * 100
+    )
 
   localState['color_cmyk'] = convert.hsv.cmyk(
     localState.color.hue,
