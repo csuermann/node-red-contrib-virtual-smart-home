@@ -1,0 +1,104 @@
+[
+  {
+    "id": "ffb9dd82.8b261",
+    "type": "vsh-virtual-device",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Pizza Oven",
+    "topic": "pizza/temp",
+    "connection": "",
+    "template": "TEMPERATURE_SENSOR",
+    "passthrough": false,
+    "x": 590,
+    "y": 580,
+    "wires": [[]]
+  },
+  {
+    "id": "a10ef407.c4ae38",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "220.5 °C",
+    "props": [
+      {
+        "p": "payload.temperature",
+        "v": "220.5",
+        "vt": "num"
+      },
+      {
+        "p": "payload.scale",
+        "v": "CELSIUS",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 300,
+    "y": 580,
+    "wires": [["ffb9dd82.8b261"]]
+  },
+  {
+    "id": "2e4d92c8.68fe8e",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "430 °F",
+    "props": [
+      {
+        "p": "payload.temperature",
+        "v": "430",
+        "vt": "num"
+      },
+      {
+        "p": "payload.scale",
+        "v": "FAHRENHEIT",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payloadType": "str",
+    "x": 290,
+    "y": 620,
+    "wires": [["ffb9dd82.8b261"]]
+  },
+  {
+    "id": "1c169029.57791",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "495 K",
+    "props": [
+      {
+        "p": "payload.temperature",
+        "v": "495",
+        "vt": "num"
+      },
+      {
+        "p": "payload.scale",
+        "v": "KELVIN",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 290,
+    "y": 660,
+    "wires": [["ffb9dd82.8b261"]]
+  },
+  {
+    "id": "abb1247e.0195d8",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "TEMPERATURE SENSOR",
+    "info": "",
+    "x": 330,
+    "y": 520,
+    "wires": []
+  }
+]
