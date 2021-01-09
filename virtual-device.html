@@ -11,6 +11,7 @@
       connection: { type: 'vsh-connection', required: true },
       template: { value: 'SWITCH', required: true },
       passthrough: { value: false },
+      diff: { value: false },
     },
     inputs: 1,
     outputs: 1,
@@ -101,7 +102,19 @@
       id="node-input-passthrough"
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
-    />
+    /> Emit state on incoming message
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-diff"
+      ><i class="fa fa-clone"></i> Diff</label
+    >
+    <input
+      type="checkbox"
+      id="node-input-diff"
+      style="display:inline-block;width:22px;vertical-align:top;"
+      autocomplete="off"
+    /> Emit only changed state attributes
   </div>
 
   <div id="donation">
@@ -113,7 +126,7 @@
     <p>If you are satisfied with this project, please help me to keep the system up.</p>
     <a
       target="_blank"
-      href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url"
+      href="https://paypal.me/cornelius/5"
       ><img src="icons/node-red-contrib-virtual-smart-home/donate.png"
     /></a>
     <h2>... and Spread the Love</h2>

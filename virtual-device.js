@@ -35,17 +35,63 @@ module.exports = function (RED) {
       },
     })
 
-    const getLocalState = function () {
-      return { ...localState }
+    const diffState = (oldState, newState) => {
+      const diff = {}
+
+      for (const propName in newState) {
+        if (!deepEql(oldState[propName], newState[propName])) {
+          diff[propName] = newState[propName]
+        }
+      }
+
+      return diff
     }
 
-    const setLocalState = function (targetState) {
-      localState = merge(getLocalState(), targetState)
+    const getLocalState = () => ({ ...localState })
+
+    const setLocalState = (targetState) => {
+      const oldLocalState = getLocalState()
+      localState = merge(oldLocalState, targetState)
+      const decoratedOldState = decorator({
+        localState: oldLocalState,
+        template: config.template,
+        friendlyName: config.name,
+      })
+      const decoratedNewState = decorator({
+        localState: localState,
+        template: config.template,
+        friendlyName: config.name,
+      })
       node.context().set('state', localState)
+      node
+        .context()
+        .set('diff', diffState(decoratedOldState, decoratedNewState))
       return localState
     }
 
-    const validateState = function (state) {
+    const emitLocalState = () => {
+      let payload
+
+      if (config.diff) {
+        payload = node.context().get('diff')
+      } else {
+        payload = decorator({
+          localState: getLocalState(),
+          template: config.template,
+          friendlyName: config.name,
+        })
+      }
+
+      if (Object.keys(payload).length > 0) {
+        const msg = {
+          topic: config.topic,
+          payload,
+        }
+        node.send(msg)
+      }
+    }
+
+    const validateState = (state) => {
       const approvedState = {}
 
       for (const key in state) {
@@ -68,22 +114,12 @@ module.exports = function (RED) {
         setStatus: (status) => node.status(status),
         getLocalState,
         setLocalState,
+        emitLocalState,
         getDeviceConfig: () => {
           return {
             friendlyName: config.name || config.template.toLowerCase(),
             template: config.template,
           }
-        },
-        emitLocalState: () => {
-          const msg = {
-            topic: config.topic,
-            payload: decorator({
-              localState: getLocalState(),
-              template: config.template,
-              friendlyName: config.name,
-            }),
-          }
-          node.send(msg)
         },
       })
     }
@@ -93,12 +129,12 @@ module.exports = function (RED) {
       const approvedState = validateState(msg.payload)
       const mergedState = merge(oldLocalState, approvedState)
       const newLocalState = { ...mergedState, source: 'device' }
+      const confirmedNewLocalState = setLocalState(newLocalState)
 
       if (
         isIncomingMsgProcessingAllowed &&
         !deepEql(oldLocalState, newLocalState)
       ) {
-        const confirmedNewLocalState = setLocalState(newLocalState)
         rater.execute(() =>
           connectionNode.updateShadow({
             state: confirmedNewLocalState,
@@ -109,15 +145,7 @@ module.exports = function (RED) {
       }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
-        send({
-          topic: config.topic,
-          payload: decorator({
-            localState: getLocalState(),
-            template: config.template,
-            friendlyName: config.name,
-            isPassthrough: true,
-          }),
-        })
+        emitLocalState()
       }
 
       if (done) {
