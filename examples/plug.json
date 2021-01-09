@@ -13,8 +13,8 @@
     "payload": "{\"powerState\":\"ON\"}",
     "payloadType": "json",
     "x": 830,
-    "y": 2760,
-    "wires": [["8003b75d.414958"]]
+    "y": 3120,
+    "wires": [["50f53bed.7bf204"]]
   },
   {
     "id": "7187b738.ca5778",
@@ -30,34 +30,34 @@
     "payload": "{\"powerState\":\"OFF\"}",
     "payloadType": "json",
     "x": 830,
-    "y": 2800,
-    "wires": [["8003b75d.414958"]]
+    "y": 3160,
+    "wires": [["50f53bed.7bf204"]]
   },
   {
-    "id": "8003b75d.414958",
+    "id": "50f53bed.7bf204",
     "type": "vsh-virtual-device",
     "z": "7ecdfb0b.fa7794",
-    "name": "coffee maker",
-    "topic": "switch/coffeemaker",
+    "name": "projector",
+    "topic": "plug/projector",
     "connection": "",
-    "template": "SWITCH",
+    "template": "PLUG",
     "passthrough": true,
-    "x": 1130,
-    "y": 2760,
-    "wires": [["f09a40da.e58f6"]]
+    "x": 1120,
+    "y": 3120,
+    "wires": [["96685bfa.aba9f8"]]
   },
   {
-    "id": "80b7c3c.dd4364",
+    "id": "3bbc5c97.55cdd4",
     "type": "comment",
     "z": "7ecdfb0b.fa7794",
-    "name": "SWITCH",
+    "name": "PLUG",
     "info": "",
-    "x": 820,
-    "y": 2600,
+    "x": 810,
+    "y": 2960,
     "wires": []
   },
   {
-    "id": "f09a40da.e58f6",
+    "id": "96685bfa.aba9f8",
     "type": "debug",
     "z": "7ecdfb0b.fa7794",
     "name": "",
@@ -69,27 +69,27 @@
     "statusVal": "",
     "statusType": "auto",
     "x": 1410,
-    "y": 2760,
+    "y": 3120,
     "wires": []
   },
   {
-    "id": "9bc6a99f.d2a648",
+    "id": "b679be37.a5656",
     "type": "comment",
     "z": "7ecdfb0b.fa7794",
-    "name": "Alexa, turn on the coffee maker.",
+    "name": "Alexa, turn on the projector.",
     "info": "",
-    "x": 930,
-    "y": 2640,
+    "x": 920,
+    "y": 3000,
     "wires": []
   },
   {
-    "id": "5c89af58.821f9",
+    "id": "67c1de90.3894e",
     "type": "comment",
     "z": "7ecdfb0b.fa7794",
-    "name": "Alexa, turn off the coffee maker.",
+    "name": "Alexa, turn off the projector.",
     "info": "",
-    "x": 930,
-    "y": 2680,
+    "x": 920,
+    "y": 3040,
     "wires": []
   }
 ]

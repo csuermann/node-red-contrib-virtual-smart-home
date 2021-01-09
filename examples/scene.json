@@ -1,0 +1,61 @@
+[
+  {
+    "id": "8003b75d.414958",
+    "type": "vsh-virtual-device",
+    "z": "7ecdfb0b.fa7794",
+    "name": "kitchen party",
+    "topic": "scene/kitchenparty",
+    "connection": "",
+    "template": "SCENE",
+    "passthrough": true,
+    "x": 830,
+    "y": 2760,
+    "wires": [["f09a40da.e58f6"]]
+  },
+  {
+    "id": "80b7c3c.dd4364",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "SCENE",
+    "info": "",
+    "x": 810,
+    "y": 2600,
+    "wires": []
+  },
+  {
+    "id": "f09a40da.e58f6",
+    "type": "debug",
+    "z": "7ecdfb0b.fa7794",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1110,
+    "y": 2760,
+    "wires": []
+  },
+  {
+    "id": "9bc6a99f.d2a648",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, turn on kitchen party.",
+    "info": "",
+    "x": 920,
+    "y": 2640,
+    "wires": []
+  },
+  {
+    "id": "5c89af58.821f9",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, turn off kitchen party.",
+    "info": "",
+    "x": 920,
+    "y": 2680,
+    "wires": []
+  }
+]

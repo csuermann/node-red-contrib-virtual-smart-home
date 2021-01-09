@@ -1,49 +1,8 @@
 [
   {
-    "id": "2415de34.a57552",
-    "type": "subflow",
-    "name": "device state",
-    "info": "",
-    "category": "subflows",
-    "in": [{ "x": 60, "y": 80, "wires": [{ "id": "b643ba4b.ed8568" }] }],
-    "out": [],
-    "env": [],
-    "color": "#FDF0C2",
-    "icon": "node-red-contrib-virtual-smart-home/vsh_icon.svg",
-    "status": {
-      "x": 340,
-      "y": 160,
-      "wires": [{ "id": "481bce2f.15694", "port": 0 }]
-    }
-  },
-  {
-    "id": "b643ba4b.ed8568",
-    "type": "function",
-    "z": "2415de34.a57552",
-    "name": "state",
-    "func": "node.status({\n    text: JSON.stringify(msg.payload)\n})\n\nreturn msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "initialize": "",
-    "finalize": "",
-    "x": 190,
-    "y": 80,
-    "wires": [[]]
-  },
-  {
-    "id": "481bce2f.15694",
-    "type": "status",
-    "z": "2415de34.a57552",
-    "name": "",
-    "scope": ["b643ba4b.ed8568"],
-    "x": 200,
-    "y": 160,
-    "wires": [[]]
-  },
-  {
     "id": "1deb9367.51a3fd",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "7ecdfb0b.fa7794",
     "name": "on",
     "props": [{ "p": "payload" }],
     "repeat": "",
@@ -53,14 +12,14 @@
     "topic": "",
     "payload": "{\"powerState\":\"ON\"}",
     "payloadType": "json",
-    "x": 150,
-    "y": 400,
+    "x": 830,
+    "y": 2360,
     "wires": [["1de955b6.491d3a"]]
   },
   {
     "id": "dab12600.fd0d08",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "7ecdfb0b.fa7794",
     "name": "off",
     "props": [{ "p": "payload" }],
     "repeat": "",
@@ -70,36 +29,37 @@
     "topic": "",
     "payload": "{\"powerState\":\"OFF\"}",
     "payloadType": "json",
-    "x": 150,
-    "y": 440,
+    "x": 830,
+    "y": 2400,
     "wires": [["1de955b6.491d3a"]]
   },
   {
     "id": "1de955b6.491d3a",
     "type": "vsh-virtual-device",
-    "z": "b27e9fc0.1db62",
-    "name": "my virtual light",
+    "z": "7ecdfb0b.fa7794",
+    "name": "kitchen",
+    "topic": "kitchen/light",
     "connection": "",
     "template": "DIMMABLE_LIGHT_BULB",
     "passthrough": true,
-    "x": 460,
-    "y": 400,
-    "wires": [["c402af75.7847", "b2ebf02b.86ef4"]]
+    "x": 1120,
+    "y": 2360,
+    "wires": [["c402af75.7847"]]
   },
   {
     "id": "6375e148.f86cc",
     "type": "comment",
-    "z": "b27e9fc0.1db62",
+    "z": "7ecdfb0b.fa7794",
     "name": "DIMMABLE LIGHT BULB",
     "info": "",
-    "x": 190,
-    "y": 340,
+    "x": 870,
+    "y": 2120,
     "wires": []
   },
   {
     "id": "c402af75.7847",
     "type": "debug",
-    "z": "b27e9fc0.1db62",
+    "z": "7ecdfb0b.fa7794",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -108,24 +68,14 @@
     "complete": "false",
     "statusVal": "",
     "statusType": "auto",
-    "x": 730,
-    "y": 400,
-    "wires": []
-  },
-  {
-    "id": "b2ebf02b.86ef4",
-    "type": "subflow:2415de34.a57552",
-    "z": "b27e9fc0.1db62",
-    "name": "",
-    "env": [],
-    "x": 730,
-    "y": 440,
+    "x": 1410,
+    "y": 2360,
     "wires": []
   },
   {
     "id": "2bb6a27f.f9fd7e",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
+    "z": "7ecdfb0b.fa7794",
     "name": "60%",
     "props": [{ "p": "payload" }],
     "repeat": "",
@@ -135,8 +85,48 @@
     "topic": "",
     "payload": "{\"powerState\":\"ON\",\"brightness\":60}",
     "payloadType": "json",
-    "x": 150,
-    "y": 480,
+    "x": 830,
+    "y": 2440,
     "wires": [["1de955b6.491d3a"]]
+  },
+  {
+    "id": "a2e1af48.ab3c2",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, turn on kitchen light.",
+    "info": "",
+    "x": 910,
+    "y": 2160,
+    "wires": []
+  },
+  {
+    "id": "394a1805.f60018",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, turn off kitchen light.",
+    "info": "",
+    "x": 920,
+    "y": 2200,
+    "wires": []
+  },
+  {
+    "id": "71e3b7d5.1eb6c8",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, dim the kitchen light.",
+    "info": "",
+    "x": 920,
+    "y": 2240,
+    "wires": []
+  },
+  {
+    "id": "f54cb37b.d5251",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, set the kitchen light to sixty percent.",
+    "info": "",
+    "x": 960,
+    "y": 2280,
+    "wires": []
   }
 ]

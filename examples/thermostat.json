@@ -1,0 +1,153 @@
+[
+  {
+    "id": "f8d7ccba.de9cf",
+    "type": "vsh-virtual-device",
+    "z": "7ecdfb0b.fa7794",
+    "name": "bedroom thermostat",
+    "topic": "bedroom/thermostat",
+    "connection": "",
+    "template": "THERMOSTAT",
+    "passthrough": true,
+    "x": 940,
+    "y": 940,
+    "wires": [["185af96.c50b507"]]
+  },
+  {
+    "id": "6ae812d4.64f2ac",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "current temp = 19.7 °C",
+    "props": [
+      { "p": "payload.temperature", "v": "19.7", "vt": "num" },
+      { "p": "payload.scale", "v": "CELSIUS", "vt": "str" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 660,
+    "y": 940,
+    "wires": [["f8d7ccba.de9cf"]]
+  },
+  {
+    "id": "185af96.c50b507",
+    "type": "debug",
+    "z": "7ecdfb0b.fa7794",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1190,
+    "y": 940,
+    "wires": []
+  },
+  {
+    "id": "366a3ec7.f45d32",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "current temp = 22 °C",
+    "props": [
+      { "p": "payload.temperature", "v": "22", "vt": "num" },
+      { "p": "payload.scale", "v": "CELSIUS", "vt": "str" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 660,
+    "y": 980,
+    "wires": [["f8d7ccba.de9cf"]]
+  },
+  {
+    "id": "34e9d23d.def9ce",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "target temp = 20 °C",
+    "props": [
+      { "p": "payload.targetTemperature", "v": "20", "vt": "num" },
+      { "p": "payload.targetScale", "v": "CELSIUS", "vt": "str" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 650,
+    "y": 1060,
+    "wires": [["f8d7ccba.de9cf"]]
+  },
+  {
+    "id": "202115cf.212b8a",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "target temp = 22.5 °C",
+    "props": [
+      { "p": "payload.targetTemperature", "v": "22.5", "vt": "num" },
+      { "p": "payload.targetScale", "v": "CELSIUS", "vt": "str" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 660,
+    "y": 1100,
+    "wires": [["f8d7ccba.de9cf"]]
+  },
+  {
+    "id": "3871c53e.5e060a",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "THERMOSTAT",
+    "info": "",
+    "x": 640,
+    "y": 700,
+    "wires": []
+  },
+  {
+    "id": "94404dca.ad50b",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, make it warmer in here.",
+    "info": "",
+    "x": 720,
+    "y": 780,
+    "wires": []
+  },
+  {
+    "id": "cb3a71d8.b0511",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, make it cooler in here.",
+    "info": "",
+    "x": 720,
+    "y": 820,
+    "wires": []
+  },
+  {
+    "id": "305cc496.f4bdbc",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, set bedroom thermostat to twenty.",
+    "info": "",
+    "x": 760,
+    "y": 740,
+    "wires": []
+  },
+  {
+    "id": "f742ce9a.db0b6",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, what's the temperature of bedroom thermostat?",
+    "info": "",
+    "x": 800,
+    "y": 860,
+    "wires": []
+  }
+]

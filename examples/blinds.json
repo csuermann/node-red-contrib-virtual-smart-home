@@ -1,70 +1,10 @@
 [
   {
-    "id": "2415de34.a57552",
-    "type": "subflow",
-    "name": "device state",
-    "info": "",
-    "category": "subflows",
-    "in": [
-      {
-        "x": 60,
-        "y": 80,
-        "wires": [
-          {
-            "id": "b643ba4b.ed8568"
-          }
-        ]
-      }
-    ],
-    "out": [],
-    "env": [],
-    "color": "#FDF0C2",
-    "icon": "node-red-contrib-virtual-smart-home/vsh_icon.svg",
-    "status": {
-      "x": 340,
-      "y": 160,
-      "wires": [
-        {
-          "id": "481bce2f.15694",
-          "port": 0
-        }
-      ]
-    }
-  },
-  {
-    "id": "b643ba4b.ed8568",
-    "type": "function",
-    "z": "2415de34.a57552",
-    "name": "state",
-    "func": "node.status({\n    text: JSON.stringify(msg.payload)\n})\n\nreturn msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "initialize": "",
-    "finalize": "",
-    "x": 190,
-    "y": 80,
-    "wires": [[]]
-  },
-  {
-    "id": "481bce2f.15694",
-    "type": "status",
-    "z": "2415de34.a57552",
-    "name": "",
-    "scope": ["b643ba4b.ed8568"],
-    "x": 200,
-    "y": 160,
-    "wires": [[]]
-  },
-  {
     "id": "6dc99a3c.4197a4",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
-    "name": "up",
-    "props": [
-      {
-        "p": "payload"
-      }
-    ],
+    "z": "7ecdfb0b.fa7794",
+    "name": "raise",
+    "props": [{ "p": "payload" }],
     "repeat": "",
     "crontab": "",
     "once": false,
@@ -72,36 +12,37 @@
     "topic": "",
     "payload": "{\"mode\":\"Position.Up\"}",
     "payloadType": "json",
-    "x": 150,
-    "y": 1040,
+    "x": 830,
+    "y": 560,
     "wires": [["64d2e5d6.21833c"]]
   },
   {
     "id": "64d2e5d6.21833c",
     "type": "vsh-virtual-device",
-    "z": "b27e9fc0.1db62",
-    "name": "my virtual blinds",
+    "z": "7ecdfb0b.fa7794",
+    "name": "living room blinds",
+    "topic": "living/blinds",
     "connection": "",
     "template": "BLINDS",
     "passthrough": true,
-    "x": 460,
-    "y": 1040,
-    "wires": [["2d80deef.8e3972", "33d4b041.83837"]]
+    "x": 1150,
+    "y": 560,
+    "wires": [["2d80deef.8e3972"]]
   },
   {
     "id": "3e0fcb72.ccee14",
     "type": "comment",
-    "z": "b27e9fc0.1db62",
+    "z": "7ecdfb0b.fa7794",
     "name": "BLINDS",
     "info": "",
-    "x": 130,
-    "y": 980,
+    "x": 830,
+    "y": 360,
     "wires": []
   },
   {
     "id": "2d80deef.8e3972",
     "type": "debug",
-    "z": "b27e9fc0.1db62",
+    "z": "7ecdfb0b.fa7794",
     "name": "",
     "active": true,
     "tosidebar": true,
@@ -110,30 +51,16 @@
     "complete": "false",
     "statusVal": "",
     "statusType": "auto",
-    "x": 730,
-    "y": 1040,
-    "wires": []
-  },
-  {
-    "id": "33d4b041.83837",
-    "type": "subflow:2415de34.a57552",
-    "z": "b27e9fc0.1db62",
-    "name": "",
-    "env": [],
-    "x": 730,
-    "y": 1080,
+    "x": 1410,
+    "y": 560,
     "wires": []
   },
   {
     "id": "7e1e991d.512e38",
     "type": "inject",
-    "z": "b27e9fc0.1db62",
-    "name": "down",
-    "props": [
-      {
-        "p": "payload"
-      }
-    ],
+    "z": "7ecdfb0b.fa7794",
+    "name": "lower",
+    "props": [{ "p": "payload" }],
     "repeat": "",
     "crontab": "",
     "once": false,
@@ -141,8 +68,55 @@
     "topic": "",
     "payload": "{\"mode\":\"Position.Down\"}",
     "payloadType": "json",
-    "x": 150,
-    "y": 1080,
+    "x": 830,
+    "y": 600,
+    "wires": [["64d2e5d6.21833c"]]
+  },
+  {
+    "id": "d24ebbfc.4cf308",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, lower the living room blinds.",
+    "info": "",
+    "x": 960,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "f2a86d27.3b8d8",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, raise the living room blinds.",
+    "info": "",
+    "x": 960,
+    "y": 440,
+    "wires": []
+  },
+  {
+    "id": "2a745415.fab0ac",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, set the living room blinds to fifty percent.",
+    "info": "",
+    "x": 1000,
+    "y": 480,
+    "wires": []
+  },
+  {
+    "id": "1c7c18b4.d92fa7",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "50%",
+    "props": [{ "p": "payload" }],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "{\"percentage\":50}",
+    "payloadType": "json",
+    "x": 830,
+    "y": 640,
     "wires": [["64d2e5d6.21833c"]]
   }
 ]
