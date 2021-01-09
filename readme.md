@@ -29,6 +29,7 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
   - Switch
   - Scene
   - Temperature Sensor
+  - Thermostat
 - no separate account needed. Just link your existing Amazon account.
 - new virtual devices can simply be dragged onto the Node-RED canvas and will
   proactively be discovered by Alexa. No need to ask Alexa to discover devices.
@@ -106,7 +107,7 @@ __THANK YOU!__
 ## Terms of Use
 
 This package comes without any warranty. Use it, enjoy it, but all at your own
-risk. If you are satisfied with this project, please contribute your share for the backend infrastructure via [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url). Thank you!
+risk. If you are satisfied with this project, please contribute your share for the backend infrastructure via [donation](https://paypal.me/cornelius/5). Thank you!
 
 __NOTE__: Devices that have not been online for 30 days will be permanently deleted without prior warning. Their certificates will be invalidated and can no longer be used to connect virtual devices.
 
