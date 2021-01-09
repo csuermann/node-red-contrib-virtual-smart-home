@@ -88,6 +88,7 @@
       <option value="SCENE">Scene</option>
       <option value="SWITCH">Switch</option>
       <option value="TEMPERATURE_SENSOR">Temperature Sensor</option>
+      <option value="THERMOSTAT">Thermostat</option>
     </select>
   </div>
 
@@ -411,6 +412,36 @@
       <span class="property-type">float</span>
     </dt>
     <dd>Temperature</dd>
+    <dt>
+      payload.scale
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Scale / unit of temperature. Allowed values: 'CELSIUS', 'FAHRENHEIT',
+      'KELVIN'
+    </dd>
+  </dl>
+
+  <h4>Thermostat</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.targetTemperature
+      <span class="property-type">float</span>
+    </dt>
+    <dd>Target temperature</dd>
+    <dt>
+      payload.targetScale
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Scale / unit of targetTemperature. Allowed values: 'CELSIUS',
+      'FAHRENHEIT', 'KELVIN'
+    </dd>
+    <dt>
+      payload.temperature
+      <span class="property-type">float</span>
+    </dt>
+    <dd>Measured temperature</dd>
     <dt>
       payload.scale
       <span class="property-type">string</span>

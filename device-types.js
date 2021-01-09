@@ -326,32 +326,15 @@ const colorChangingLightDecorator = ({
 //---TYPES---
 
 const types = {
-  SWITCH: {
+  BLINDS: {
     defaultState: {
-      powerState: 'OFF',
+      mode: 'Position.Up',
+      instance: 'Blinds.Position',
+      percentage: 100,
     },
     validators: {
-      powerState,
-    },
-    decorator: defaultDecorator,
-  },
-  PLUG: {
-    defaultState: {
-      powerState: 'OFF',
-    },
-    validators: {
-      powerState,
-    },
-    decorator: defaultDecorator,
-  },
-  DIMMABLE_LIGHT_BULB: {
-    defaultState: {
-      powerState: 'OFF',
-      brightness: 100,
-    },
-    validators: {
-      powerState,
-      brightness,
+      mode: position,
+      percentage,
     },
     decorator: defaultDecorator,
   },
@@ -377,6 +360,17 @@ const types = {
     },
     decorator: colorChangingLightDecorator,
   },
+  DIMMABLE_LIGHT_BULB: {
+    defaultState: {
+      powerState: 'OFF',
+      brightness: 100,
+    },
+    validators: {
+      powerState,
+      brightness,
+    },
+    decorator: defaultDecorator,
+  },
   DIMMER_SWITCH: {
     defaultState: {
       powerState: 'OFF',
@@ -385,6 +379,41 @@ const types = {
     validators: {
       powerState,
       brightness,
+    },
+    decorator: defaultDecorator,
+  },
+  GARAGE_DOOR_OPENER: {
+    defaultState: {
+      mode: 'Position.Up',
+      instance: 'GarageDoor.Position',
+    },
+    validators: {
+      mode: position,
+    },
+    decorator: defaultDecorator,
+  },
+  PLUG: {
+    defaultState: {
+      powerState: 'OFF',
+    },
+    validators: {
+      powerState,
+    },
+    decorator: defaultDecorator,
+  },
+  SCENE: {
+    defaultState: {
+      isActivated: false,
+    },
+    validators: {},
+    decorator: defaultDecorator,
+  },
+  SWITCH: {
+    defaultState: {
+      powerState: 'OFF',
+    },
+    validators: {
+      powerState,
     },
     decorator: defaultDecorator,
   },
@@ -399,33 +428,19 @@ const types = {
     },
     decorator: defaultDecorator,
   },
-  BLINDS: {
+  THERMOSTAT: {
     defaultState: {
-      mode: 'Position.Up',
-      instance: 'Blinds.Position',
-      percentage: 100,
+      temperature: 0,
+      scale: 'CELSIUS',
+      targetTemperature: 0,
+      targetScale: 'CELSIUS',
     },
     validators: {
-      mode: position,
-      percentage,
+      temperature: temperatureValue,
+      scale: temperatureScale,
+      targetTemperature: temperatureValue,
+      targetScale: temperatureScale,
     },
-    decorator: defaultDecorator,
-  },
-  GARAGE_DOOR_OPENER: {
-    defaultState: {
-      mode: 'Position.Up',
-      instance: 'GarageDoor.Position',
-    },
-    validators: {
-      mode: position,
-    },
-    decorator: defaultDecorator,
-  },
-  SCENE: {
-    defaultState: {
-      isActivated: false,
-    },
-    validators: {},
     decorator: defaultDecorator,
   },
 }
