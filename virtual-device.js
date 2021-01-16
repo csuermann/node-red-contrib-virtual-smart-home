@@ -20,7 +20,7 @@ module.exports = function (RED) {
     let localState = getDefaultState(config.template)
 
     const validators = getValidators(config.template)
-    const decorator = getDecorator(config.template)
+    const decorator = getDecorator(config.template, config.diff)
 
     let isIncomingMsgProcessingAllowed = true
 
@@ -35,18 +35,6 @@ module.exports = function (RED) {
       },
     })
 
-    const diffState = (oldState, newState) => {
-      const diff = {}
-
-      for (const propName in newState) {
-        if (!deepEql(oldState[propName], newState[propName])) {
-          diff[propName] = newState[propName]
-        }
-      }
-
-      return diff
-    }
-
     const getLocalState = () => ({ ...localState })
 
     const setLocalState = (targetState) => {
@@ -57,30 +45,20 @@ module.exports = function (RED) {
         template: config.template,
         friendlyName: config.name,
       })
-      const decoratedNewState = decorator({
-        localState: localState,
-        template: config.template,
-        friendlyName: config.name,
-      })
+
       node.context().set('state', localState)
-      node
-        .context()
-        .set('diff', diffState(decoratedOldState, decoratedNewState))
+
       return localState
     }
 
     const emitLocalState = () => {
       let payload
 
-      if (config.diff) {
-        payload = node.context().get('diff')
-      } else {
-        payload = decorator({
-          localState: getLocalState(),
-          template: config.template,
-          friendlyName: config.name,
-        })
-      }
+      payload = decorator({
+        localState: getLocalState(),
+        template: config.template,
+        friendlyName: config.name,
+      })
 
       if (Object.keys(payload).length > 0) {
         const msg = {
@@ -127,6 +105,7 @@ module.exports = function (RED) {
     node.on('input', function (msg, send, done) {
       const oldLocalState = getLocalState()
       const approvedState = validateState(msg.payload)
+      approvedState['directive'] = 'OverrideLocalState'
       const mergedState = merge(oldLocalState, approvedState)
       const newLocalState = { ...mergedState, source: 'device' }
       const confirmedNewLocalState = setLocalState(newLocalState)

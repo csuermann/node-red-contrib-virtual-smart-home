@@ -256,6 +256,52 @@ const temperatureScale = (val) => {
 
 //---DECORATORS---
 
+const diffDecoratorFactory = (anotherDecorator) => {
+  const directiveToAttributesMap = {
+    TurnOn: ['powerState'],
+    TurnOff: ['powerState'],
+    AdjustBrightness: ['brightness'],
+    SetBrightness: ['brightness'],
+    SetColor: [
+      'color',
+      'lightMode',
+      'color_rgb',
+      'color_hex',
+      'color_cmyk',
+      'color_lab',
+      'color_xyz',
+    ],
+    SetColorTemperature: ['colorTemperatureInKelvin', 'lightMode'],
+    IncreaseColorTemperature: ['colorTemperatureInKelvin', 'lightMode'],
+    DecreaseColorTemperature: ['colorTemperatureInKelvin', 'lightMode'],
+    SetPercentage: ['percentage'],
+    Lock: ['lockState'],
+    Unlock: ['lockState'],
+    SetMode: ['mode', 'instance'],
+    Activate: ['isActivated'],
+    Deactivate: ['isActivated'],
+    SetTargetTemperature: ['targetTemperature', 'targetScale'],
+    AdjustTargetTemperature: ['targetTemperature', 'targetScale'],
+  }
+
+  return (decoratorParams) => {
+    const decoratedState = anotherDecorator(decoratorParams)
+    const directive =
+      decoratorParams.localState.directive || 'OverrideLocalState'
+
+    if (!directiveToAttributesMap[directive]) {
+      return decoratedState
+    }
+
+    const attribsToKeep = ['directive', ...directiveToAttributesMap[directive]]
+
+    return attribsToKeep.reduce((acc, attrib) => {
+      acc[attrib] = decoratedState[attrib]
+      return acc
+    }, {})
+  }
+}
+
 const defaultDecorator = ({
   localState,
   template,
@@ -266,7 +312,6 @@ const defaultDecorator = ({
   localState.type = template
 
   delete localState.template
-  delete localState.updatedAt
 
   if (isPassthrough) {
     delete localState.directive
@@ -451,8 +496,14 @@ function getValidators(template) {
   return types[template].validators
 }
 
-function getDecorator(template) {
-  return types[template].decorator
+function getDecorator(template, isDiffEnabled) {
+  const decorator = types[template].decorator
+
+  if (isDiffEnabled) {
+    return diffDecoratorFactory(decorator)
+  } else {
+    return decorator
+  }
 }
 
 function getDefaultState(template) {

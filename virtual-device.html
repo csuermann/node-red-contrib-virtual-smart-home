@@ -114,7 +114,7 @@
       id="node-input-diff"
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
-    /> Emit only changed state attributes
+    /> Emit only attributes set by Alexa
   </div>
 
   <div id="donation">
@@ -150,11 +150,19 @@
     via the Alexa app) and outputs a <code>msg</code> object containing the
     updated device state as <code>payload</code>.
   </p>
+
+  <p>
+    If the &quot;Diff&quot; option is enabled, the outgoing msg object will only
+    contain those attributes that were set by the Alexa command. For example,
+    &quot;Alexa, dim the light to fifty percent&quot; results in only the
+    'directive' and 'brightness' attributes being emitted.
+  </p>
+
   <p>
     The node also accepts incoming messages that can be used to inform Alexa
     about local device changes, which will then be reflected in the Alexa app.
-    If the passthrough option is enabled, this will also trigger an outgoing
-    message, just like when the node gets invoked via Alexa. In this case
+    If the &quot;Passthrough&quot; option is enabled, this will also trigger an
+    outgoing message with the complete current local state. In this case
     <code>payload.source</code> is set to 'device' instead of 'alexa'.
   </p>
 
