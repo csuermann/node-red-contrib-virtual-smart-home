@@ -27,7 +27,7 @@ const percentage = (val) => {
 }
 
 const speed = (val) => {
-  const isValid = Number.isInteger(val) && val >= 0 && val <= 10
+  const isValid = Number.isInteger(val) && val >= 1 && val <= 10
   if (!isValid) {
     return false
   }
@@ -440,7 +440,7 @@ const types = {
   FAN: {
     defaultState: {
       powerState: 'OFF',
-      speed: 0,
+      speed: 1,
     },
     validators: {
       powerState,
