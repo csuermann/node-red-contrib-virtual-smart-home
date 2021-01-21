@@ -84,6 +84,7 @@
       <option value="COLOR_CHANGING_LIGHT_BULB">Color Changing Light Bulb</option>
       <option value="DIMMABLE_LIGHT_BULB">Dimmable Light Bulb</option>
       <option value="DIMMER_SWITCH">Dimmer Switch</option>
+      <option value="FAN">Fan</option>
       <option value="GARAGE_DOOR_OPENER">Garage Door Opener</option>
       <option value="PLUG">Plug</option>
       <option value="SCENE">Scene</option>
@@ -381,6 +382,20 @@
       <span class="property-type">int</span>
     </dt>
     <dd>Brightness in % (0...100)</dd>
+  </dl>
+
+  <h4>Fan</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.powerState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'ON' or 'OFF'</dd>
+    <dt>
+      payload.speed
+      <span class="property-type">int</span>
+    </dt>
+    <dd>Fan speed (0...10)</dd>
   </dl>
 
   <h4>Garage Door Opener</h4>

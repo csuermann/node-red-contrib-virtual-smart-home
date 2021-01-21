@@ -26,6 +26,14 @@ const percentage = (val) => {
   return { key: 'percentage', value: val }
 }
 
+const speed = (val) => {
+  const isValid = Number.isInteger(val) && val >= 0 && val <= 10
+  if (!isValid) {
+    return false
+  }
+  return { key: 'speed', value: val }
+}
+
 const colorTemperatureInKelvin = (val) => {
   const isValid = Number.isInteger(val) && val >= 1000 && val <= 10000
   if (!isValid) {
@@ -278,6 +286,8 @@ const diffDecoratorFactory = (anotherDecorator) => {
     Lock: ['lockState'],
     Unlock: ['lockState'],
     SetMode: ['mode', 'instance'],
+    AdjustRangeValue: ['speed'],
+    SetRangeValue: ['speed'],
     Activate: ['isActivated'],
     Deactivate: ['isActivated'],
     SetTargetTemperature: ['targetTemperature', 'targetScale'],
@@ -424,6 +434,17 @@ const types = {
     validators: {
       powerState,
       brightness,
+    },
+    decorator: defaultDecorator,
+  },
+  FAN: {
+    defaultState: {
+      powerState: 'OFF',
+      speed: 0,
+    },
+    validators: {
+      powerState,
+      speed,
     },
     decorator: defaultDecorator,
   },
