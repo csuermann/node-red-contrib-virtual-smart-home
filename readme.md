@@ -93,7 +93,7 @@ the 'help' panel.
 
 ## Examples
 
-Example flows that illustrate the payload structure can be imported from the Node-RED import menu (Import > Examples > node-red-contrib-virtual-smart-home). They can also be found in the [examples](https://github.com/csuermann/node-red-contrib-virtual-smart-home/tree/master/examples) folder.
+Example flows that illustrate the payload structure and voice invocation phrases can be imported from the Node-RED import menu (Import > Examples > node-red-contrib-virtual-smart-home). They can also be found in the [examples](https://github.com/csuermann/node-red-contrib-virtual-smart-home/tree/master/examples) folder.
 
 ## Share the Love!
 
@@ -104,6 +104,38 @@ I dedicated endless hours to this project and really hope it adds value for you!
 - [donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url) a few bucks to help cover the infrastructure costs.
 
 __THANK YOU!__
+
+## FAQ
+
+1.  Q:  Which voice commands can I use to control my devices with Alexa?
+    
+    A:  Take a look at the [example flows](https://github.com/csuermann/node-red-contrib-virtual-smart-home/tree/master/examples) which you can import from the Node-RED import menu (Import > Examples > node-red-contrib-virtual-smart-home).
+
+1.  Q:  Why do my devices suddenly fail to connect and show up as 'offline'?
+
+    A:  If your device was not connected to the VSH backend for more than 30 days its certificate will be revoked. You can fix that by deleting the old connection, creating a new one and linking your virtual devices to the new one. All your devices should then get re-discovered by Alexa.
+
+1.  Q:  Why do some of my devices show up as duplicates in the Alexa app?
+
+    A:  Your duplicate devices might belong to a vsh-connection that no longer exists. You can delete them manually on the connection page where they probably show up with a shaded background, indicating they belong to another vsh-connection.
+
+1.  Q:  Why does VSH not work offline?
+
+    A:  Alexa lives in the cloud. When you ask Alexa to control one of your devices, your voice is sent to Amazon servers for processing. Amazon's servers then try to make sense of what you said and which skill to invoke. If you said "Alexa, dim the kitchen light to fifty percent!", Alexa will realize that 'kitchen light' belongs to the VSH skill and invoke the VSH backend with a 'directive' containing the command that was understood (e.g. 'SetBrightness'). The VSH skill backend then sends a message to your connected virtual device which triggers an outgoing msg object with the device state for you to make use of. This requires your VSH devices to be online.
+
+1.  Q:  What do you do with my data?
+
+    A:  The VSH backend only stores metadata about your configured devices needed for VSH to function and your basic profile information provided by Amazon when you enabled the skill. Neither your Amazon password nor your voice prompts or your location is ever shared with VSH. I also have no interest in analyzing your usage patterns although this _would technically_ be possible.
+
+1.  Q:  Can you add feature X, please?
+
+    A:  I'm always eager to hear your ideas! Please [file a ticket](https://github.com/csuermann/node-red-contrib-virtual-smart-home/issues/new).
+
+1.  Q:  Where can I ask a question that hasn't been addressed yet?
+
+    A:  Check out [existing issues](https://github.com/csuermann/node-red-contrib-virtual-smart-home/issues) on GitHub or [file a new ticket](https://github.com/csuermann/node-red-contrib-virtual-smart-home/issues/new).
+
+
 
 ## Terms of Use
 
