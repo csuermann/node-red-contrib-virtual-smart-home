@@ -4,32 +4,34 @@
     let registeredDeviceCount = 0
 
     async function execPostRequest(url, data = {}) {
-      const response = await fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        redirect: 'follow',
-        body: JSON.stringify(data),
-      })
-      return response.json()
+      return (
+        await fetch(url, {
+          method: 'POST',
+          mode: 'cors',
+          cache: 'no-cache',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          redirect: 'follow',
+          body: JSON.stringify(data),
+        })
+      ).json()
     }
 
     async function execGetRequest(url, headers = {}) {
-      const response = await fetch(url, {
-        method: 'GET',
-        mode: 'cors',
-        cache: 'no-cache',
-        credentials: 'same-origin',
-        headers: {
-          ...headers,
-        },
-        redirect: 'follow',
-      })
-      return response.json()
+      return (
+        await fetch(url, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-cache',
+          credentials: 'same-origin',
+          headers: {
+            ...headers,
+          },
+          redirect: 'follow',
+        })
+      ).json()
     }
 
     async function getInstalledVshVersion() {
@@ -47,19 +49,20 @@
     }
 
     async function execDeleteRequest(url, headers = {}, data = {}) {
-      const response = await fetch(url, {
-        method: 'DELETE',
-        mode: 'cors',
-        cache: 'no-cache',
-        credentials: 'same-origin',
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json',
-        },
-        redirect: 'follow',
-        body: JSON.stringify(data),
-      })
-      return response.json()
+      return (
+        await fetch(url, {
+          method: 'DELETE',
+          mode: 'cors',
+          cache: 'no-cache',
+          credentials: 'same-origin',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+          redirect: 'follow',
+          body: JSON.stringify(data),
+        })
+      ).json()
     }
 
     function fetchDeviceCode() {
@@ -90,7 +93,7 @@
       return $('#node-config-input-accessToken').val()
     }
 
-    function fetchFreshAccessToken(refreshToken) {
+    async function fetchFreshAccessToken(refreshToken) {
       const url = 'https://api.amazon.com/auth/o2/token'
       const data = {
         grant_type: 'refresh_token',
@@ -99,7 +102,13 @@
           'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
       }
 
-      return execPostRequest(url, data)
+      const resp = await execPostRequest(url, data)
+
+      if (!resp.access_token) {
+        throw new Error('could not fetch access token')
+      } else {
+        return resp
+      }
     }
 
     async function fetchDeviceToken(device_code, user_code) {
