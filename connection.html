@@ -63,23 +63,14 @@
     }
 
     function fetchDeviceCode() {
-      const settings = {
-        url: 'https://api.amazon.com/auth/o2/create/codepair',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        data: {
-          response_type: 'device_code',
-          client_id:
-            'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
-          scope: 'profile',
-        },
+      const url = 'https://api.amazon.com/auth/o2/create/codepair'
+      const data = {
+        response_type: 'device_code',
+        client_id:
+          'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
+        scope: 'profile',
       }
-
-      return new Promise((resolve, reject) => {
-        $.ajax(settings).done(resolve).fail(reject)
-      })
+      return execPostRequest(url, data)
     }
 
     async function ensureValidAccessToken() {
@@ -100,42 +91,34 @@
     }
 
     function fetchFreshAccessToken(refreshToken) {
-      const settings = {
-        url: 'https://api.amazon.com/auth/o2/token',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        data: {
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-          client_id:
-            'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
-        },
+      const url = 'https://api.amazon.com/auth/o2/token'
+      const data = {
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id:
+          'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
       }
 
-      return new Promise((resolve, reject) => {
-        $.ajax(settings).done(resolve).fail(reject)
-      })
+      return execPostRequest(url, data)
     }
 
-    function fetchDeviceToken(device_code, user_code) {
-      return new Promise((resolve, reject) => {
-        const settings = {
-          url: 'https://api.amazon.com/auth/o2/token',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          data: {
-            grant_type: 'device_code',
-            device_code,
-            user_code,
-          },
-        }
+    async function fetchDeviceToken(device_code, user_code) {
+      const url = 'https://api.amazon.com/auth/o2/token'
+      const data = {
+        grant_type: 'device_code',
+        device_code,
+        user_code,
+      }
 
-        $.ajax(settings).done(resolve).fail(reject)
-      })
+      const resp = await execPostRequest(url, data)
+
+      if (resp.error && resp.error == 'authorization_pending') {
+        const err = new Error('authorization_pending')
+        err.status = 400
+        throw err
+      } else {
+        return resp
+      }
     }
 
     function populateTokenData({ access_token, refresh_token, expires_in }) {

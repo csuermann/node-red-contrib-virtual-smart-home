@@ -103,6 +103,10 @@ module.exports = function (RED) {
     }
 
     this.publish = async function (topic, message) {
+      if (!this.mqttClient) {
+        return
+      }
+
       this.stats.outboundMsgCount++
       return await this.mqttClient.publish(topic, message)
     }
@@ -368,7 +372,11 @@ module.exports = function (RED) {
           state: { reported: { connected: false } },
         }
       )
-      await this.mqttClient.disconnect()
+
+      if (this.mqttClient) {
+        await this.mqttClient.disconnect()
+      }
+
       this.isSubscribed = false
     }
 
