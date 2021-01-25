@@ -242,7 +242,7 @@ const position = (val) => {
   if (!isValid) {
     return false
   }
-  return { key: 'position', value: val }
+  return { key: 'mode', value: val }
 }
 
 const temperatureValue = (val) => {

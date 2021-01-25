@@ -115,6 +115,8 @@ __THANK YOU!__
 
     A:  If your device was not connected to the VSH backend for more than 30 days its certificate will be revoked. You can fix that by deleting the old connection, creating a new one and linking your virtual devices to the new one. All your devices should then get re-discovered by Alexa.
 
+    Another reason could be that you are using an outdated version of VSH. Please update to the latest version (e.g using the Node-RED palette manager).
+
 1.  Q:  Why do some of my devices show up as duplicates in the Alexa app?
 
     A:  Your duplicate devices might belong to a vsh-connection that no longer exists. You can delete them manually on the connection page where they probably show up with a shaded background, indicating they belong to another vsh-connection.
