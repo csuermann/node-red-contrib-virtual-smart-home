@@ -2,6 +2,18 @@ const convert = require('color-convert')
 
 //---VALIDATORS---
 
+const wrapValidator = (validatorFn, outputStateKey) => {
+  return (val) => {
+    const validationResult = validatorFn(val)
+
+    if (!validationResult) {
+      return false
+    }
+
+    return { key: outputStateKey, value: validationResult.value }
+  }
+}
+
 const powerState = (val) => {
   const isValid = val == 'ON' || val == 'OFF'
   if (!isValid) {
@@ -242,7 +254,7 @@ const position = (val) => {
   if (!isValid) {
     return false
   }
-  return { key: 'mode', value: val }
+  return { key: 'position', value: val }
 }
 
 const temperatureValue = (val) => {
@@ -405,11 +417,11 @@ const types = {
       powerState,
       brightness,
       colorTemperatureInKelvin,
-      color_hex,
-      color_rgb,
-      color_cmyk,
-      color_lab,
-      color_xyz,
+      color_hex: wrapValidator(color_hex, 'color'),
+      color_rgb: wrapValidator(color_rgb, 'color'),
+      color_cmyk: wrapValidator(color_cmyk, 'color'),
+      color_lab: wrapValidator(color_lab, 'color'),
+      color_xyz: wrapValidator(color_xyz, 'color'),
       color,
       lightMode,
     },
@@ -454,7 +466,7 @@ const types = {
       instance: 'GarageDoor.Position',
     },
     validators: {
-      mode: position,
+      mode: wrapValidator(position, 'mode'),
     },
     decorator: defaultDecorator,
   },
@@ -504,8 +516,8 @@ const types = {
     validators: {
       temperature: temperatureValue,
       scale: temperatureScale,
-      targetTemperature: temperatureValue,
-      targetScale: temperatureScale,
+      targetTemperature: wrapValidator(temperatureValue, 'targetTemperature'),
+      targetScale: wrapValidator(temperatureScale, 'targetScale'),
     },
     decorator: defaultDecorator,
   },
