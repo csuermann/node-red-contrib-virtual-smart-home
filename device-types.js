@@ -395,12 +395,9 @@ const colorChangingLightDecorator = ({
 const types = {
   BLINDS: {
     defaultState: {
-      mode: 'Position.Up',
-      instance: 'Blinds.Position',
       percentage: 100,
     },
     validators: {
-      mode: position,
       percentage,
     },
     decorator: defaultDecorator,
