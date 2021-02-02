@@ -315,7 +315,12 @@ const diffDecoratorFactory = (anotherDecorator) => {
       return decoratedState
     }
 
-    const attribsToKeep = ['directive', ...directiveToAttributesMap[directive]]
+    const attribsToKeep = [
+      'directive',
+      'name',
+      'source',
+      ...directiveToAttributesMap[directive],
+    ]
 
     return attribsToKeep.reduce((acc, attrib) => {
       acc[attrib] = decoratedState[attrib]
