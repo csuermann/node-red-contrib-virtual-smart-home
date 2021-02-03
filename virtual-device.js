@@ -103,6 +103,18 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg, send, done) {
+      if (config.filter && msg.payload.name !== config.name) {
+        if (done) {
+          done()
+        }
+        console.log(
+          `ignoring inbound msg because msg.payload.name (${
+            msg.payload.name ? `'${msg.payload.name}'` : '<undefined>'
+          }) does not match '${config.name}'`
+        )
+        return
+      }
+
       const oldLocalState = getLocalState()
       const approvedState = validateState(msg.payload)
       approvedState['directive'] = 'OverrideLocalState'
