@@ -286,7 +286,6 @@
           $('#user-code').html(user_code)
           $('#verification-uri').attr('href', verification_uri)
           $('#verification-uri').html(verification_uri)
-          $('#expiry').html(expiresAt)
           $('#refresh-interval').html(interval)
 
           pollingIntervalId = setInterval(async () => {
@@ -442,10 +441,23 @@
 
   #user-code {
     font-family: 'Courier New', Courier, monospace;
+    font-size: 140%;
+    font-weight: bold;
+    color: #3737bd;
   }
 
   #device-code a {
     text-decoration: underline !important;
+  }
+
+  #device-code .step {
+    height: 25px;
+    width: 25px;
+    line-height: 25px;
+    color: rgb(236, 233, 233);
+    background-color: rgb(114, 137, 160);
+    border-radius: 50%;
+    display: inline-block;
   }
 </style>
 
@@ -467,20 +479,35 @@
       that connection instead of creating another one!
     </p>
     <p>
-      The connection must be linked to the same Amazon Alexa account that was /
-      will be used to activate the 'virtual smart home' skill.
+      Follow these steps to link this connection to the <i>same</i> Amazon Alexa
+      account that was used to activate the 'virtual smart home' skill.
     </p>
+
     <p>
+      <span class="step">1</span>
+      <br />
       Go to
-      <a id="verification-uri" href="" target="_blank">VERIFICATION_URI</a> on
-      your smartphone, computer, or tablet and enter this code after logging in:
+      <a id="verification-uri" href="" target="_blank">VERIFICATION_URI</a>
     </p>
-    <h2 id="user-code">USER_CODE</h2>
     <p>
-      Once you entered the code, the linking process may take up to
-      <span id="refresh-interval">REFRESH-INTERVAL</span> seconds.
+      <span class="step">2</span>
+      <br />
+      Enter this code (after logging in)
+      <br />
+      <span id="user-code">USER_CODE</span>
     </p>
-    <p>The code expires <span id="expiry">EXPIRY</span>.</p>
+    <p>
+      <span class="step">3</span>
+      <br />
+      Wait up to <span id="refresh-interval">REFRESH-INTERVAL</span> seconds for
+      this message to disappear
+    </p>
+    <p>
+      <span class="step">4</span>
+      <br />
+      Close this dialog by clicking the &quot;Add&quot; / &quot;Update&quot;
+      button
+    </p>
   </div>
 
   <div id="provisioned">
