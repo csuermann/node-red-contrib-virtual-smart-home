@@ -111,6 +111,16 @@ __THANK YOU!__
     
     A:  Take a look at the [example flows](https://github.com/csuermann/node-red-contrib-virtual-smart-home/tree/master/examples) which you can import from the Node-RED import menu (Import > Examples > node-red-contrib-virtual-smart-home).
 
+    Here are some of the most often used commands:
+    - Alexa, switch on / off DEVICE-NAME
+    - Alexa, set DEVICE-NAME to X percent
+    - Alexa, set DEVICE-NAME to Warm white / Soft white / Daylight white / Cool white / Red / Crimson / Salmon / Orange / Gold / Yellow / Green / Turquoise / Cyan / Sky blue / Blue / Purple / Magenta / Pink / Lavendar
+    - Alexa, open / close DEVICE-NAME
+
+1.  Q:  How can I control devices in a specific room?
+    
+    A:  You can create rooms in the Alexa app and assign your devices to them. Create a room which groups together an Alexa device (e.g. Echo) and some virtual lights. You can then control all those lights simply by speaking "Alexa, switch off the light" into the Alexa device.
+
 1.  Q:  Why do my devices suddenly fail to connect and show up as 'offline'?
 
     A:  If your device was not connected to the VSH backend for more than 30 days its certificate will be revoked. You can fix that by deleting the old connection, creating a new one and linking your virtual devices to the new one. All your devices should then get re-discovered by Alexa.
@@ -120,6 +130,10 @@ __THANK YOU!__
 1.  Q:  Why do some of my devices show up as duplicates in the Alexa app?
 
     A:  Your duplicate devices might belong to a vsh-connection that no longer exists. You can delete them manually on the connection page where they probably show up with a shaded background, indicating they belong to another vsh-connection.
+
+1.  Q:  I deleted a virtual device but Alexa keeps rediscovering it!
+
+    A:  You probably deleted the device in the Alexa app instead of Node-RED. Open the connection page which lists all known devices and click the trash icon next to the device you want to delete. 
 
 1.  Q:  Why does VSH not work offline?
 
