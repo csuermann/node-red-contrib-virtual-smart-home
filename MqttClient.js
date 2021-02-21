@@ -1,14 +1,29 @@
 const MQTT = require('async-mqtt')
-const RateLimiter = require('./RateLimiter')
+//const RateLimiter = require('./RateLimiter')
+const RateLimiter = require('./RateLimiter2')
 
 function MqttClient(options, callbacksObj) {
   this.options = options
   this.client = null
 
-  this.rater = new RateLimiter({
-    highWaterMark: 3,
-    intervalInSec: 60,
-    onExhaustionCb: () => {
+  // this.rater = new RateLimiter({
+  //   highWaterMark: 3,
+  //   intervalInSec: 60,
+  //   onExhaustionCb: () => {
+  //     this.disconnect()
+  //     console.log(
+  //       'Too many connection attempts to the virtual smart home backend. Please try restarting your flows, Node-RED or even your entire system.'
+  //     )
+  //     setTimeout(
+  //       () => this.handleOnError({ code: 'connection quota exhausted' }),
+  //       2000
+  //     )
+  //   },
+  // })
+
+  this.rater = new RateLimiter(
+    [{ period: 60000, limit: 4, penalty: 0 }],
+    (group) => {
       this.disconnect()
       console.log(
         'Too many connection attempts to the virtual smart home backend. Please try restarting your flows, Node-RED or even your entire system.'
@@ -17,14 +32,13 @@ function MqttClient(options, callbacksObj) {
         () => this.handleOnError({ code: 'connection quota exhausted' }),
         2000
       )
-    },
-  })
+    }
+  )
 
   this.connect = function () {
     this.client = MQTT.connect('mqtts://' + this.options.host, this.options)
 
     this.client.on('connect', this.handleOnConnect.bind(this))
-    //this.client.on('reconnect', this.handleOnReconnect.bind(this))
     this.client.on('close', this.handleOnDisconnect)
     this.client.on('offline', this.handleOnDisconnect)
     this.client.on('error', this.handleOnError)
@@ -32,13 +46,9 @@ function MqttClient(options, callbacksObj) {
   }
 
   this.handleOnConnect = function () {
-    this.rater.execute(() => callbacksObj['onConnect']())
-    //callbacksObj['onConnect']()
+    //this.rater.execute(() => callbacksObj['onConnect']())
+    this.rater.execute('onConnect_group', () => callbacksObj['onConnect']())
   }
-
-  // this.handleOnReconnect = function () {
-  //   this.rater.execute(() => console.log('...reconnecting...'))
-  // }
 
   this.handleOnDisconnect = function () {
     callbacksObj['onDisconnect']()

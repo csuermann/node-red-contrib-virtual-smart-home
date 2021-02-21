@@ -1,6 +1,7 @@
 const { Base64 } = require('js-base64')
 const debounce = require('debounce')
 const MqttClient = require('./MqttClient')
+const RateLimiter = require('./RateLimiter2')
 const VSH_VERSION = require('./version')
 
 module.exports = function (RED) {
@@ -8,6 +9,11 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config)
 
     const node = this
+
+    this.rater = new RateLimiter([
+      { period: 1 * 60 * 1000, limit: 12, penalty: 1, repeat: 3 }, //for 3 min: Limit to 12 req / min
+      { period: 10 * 60 * 1000, limit: 1, penalty: 1 }, //afterward: Limit to 1 req / 10 min
+    ])
 
     this.mqttClient = undefined
     this.childNodes = {}
@@ -122,10 +128,16 @@ module.exports = function (RED) {
         payload.state['desired'] = state
       }
 
-      this.mqttClient.publish(
-        `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
-        payload
-      )
+      const publishCb = () => {
+        this.mqttClient.publish(
+          `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
+          payload
+        )
+      }
+
+      if (!this.isDisconnecting) {
+        this.rater.execute(`${deviceId}`, publishCb.bind(this))
+      }
     }
 
     this.bulkDiscover = function (devices, mode = 'discover') {
@@ -381,6 +393,8 @@ module.exports = function (RED) {
     }
 
     this.on('close', async function (removed, done) {
+      this.rater.destroy()
+
       if (!this.credentials.thingId) {
         return done()
       }
