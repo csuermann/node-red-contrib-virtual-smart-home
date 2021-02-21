@@ -129,14 +129,18 @@ module.exports = function (RED) {
       }
 
       const publishCb = () => {
-        this.mqttClient.publish(
-          `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
-          payload
-        )
+        if (!this.isDisconnecting) {
+          this.mqttClient.publish(
+            `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
+            payload
+          )
+        }
       }
 
-      if (!this.isDisconnecting) {
+      if (type === 'desired') {
         this.rater.execute(`${deviceId}`, publishCb.bind(this))
+      } else {
+        publishCb()
       }
     }
 
