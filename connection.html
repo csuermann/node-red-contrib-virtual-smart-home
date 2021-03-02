@@ -365,6 +365,7 @@
         name: { value: '' },
         port: { value: '', required: true },
         accessTokenExpiry: { value: 0 },
+        debug: { value: false },
       },
       credentials: {
         refreshToken: { type: 'text' },
@@ -631,6 +632,18 @@
         id="node-config-input-thingId"
         readonly
         placeholder="Thing ID"
+      />
+    </div>
+
+    <div class="form-row">
+      <label for="node-config-input-debug"
+        ><i class="fa fa-bug"></i> Debug</label
+      >
+      <input
+        type="checkbox"
+        id="node-config-input-debug"
+        style="display:inline-block;width:22px;vertical-align:top;"
+        autocomplete="off"
       />
     </div>
   </div>

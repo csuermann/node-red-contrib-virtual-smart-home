@@ -1,11 +1,16 @@
 'use strict'
 
-function RateLimiter(iterations, onExhaustionCb) {
+function RateLimiter(
+  iterations,
+  onExhaustionCb = undefined,
+  logger = undefined
+) {
   this.iterations = iterations
   this.isFirstIteration = true
   this.onExhaustionCb = onExhaustionCb
   this.groups = {}
   this.limit = 0
+  this.logger = logger || function (logMsg) {}
 
   this.nextIteration = function () {
     let newConfig
@@ -64,11 +69,19 @@ function RateLimiter(iterations, onExhaustionCb) {
         }
       }
 
+      let remainingBeforeReset = this.groups[group].remaining
+
       this.groups[group].remaining = this.limit - this.groups[group].penaltySum
 
       //always allow at least one request per iteration
       if (this.groups[group].remaining <= 0) {
         this.groups[group].remaining = 1
+      }
+
+      if (remainingBeforeReset != this.groups[group].remaining) {
+        this.logger(
+          `resetting quota for group '${group}' to ${this.groups[group].remaining}`
+        )
       }
 
       this.groups[group].executions = 0
@@ -92,8 +105,12 @@ RateLimiter.prototype.execute = function (group, callback) {
     callback()
   }
 
-  if (this.groups[group].remaining == 0 && this.onExhaustionCb) {
-    this.onExhaustionCb(group)
+  if (this.groups[group].remaining == 0) {
+    this.logger(`quota for group '${group}' exhausted`)
+
+    if (this.onExhaustionCb) {
+      this.onExhaustionCb(group)
+    }
   }
 }
 

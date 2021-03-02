@@ -10,10 +10,23 @@ module.exports = function (RED) {
 
     const node = this
 
-    this.rater = new RateLimiter([
-      { period: 1 * 60 * 1000, limit: 12, penalty: 1, repeat: 3 }, //for 3 min: Limit to 12 req / min
-      { period: 10 * 60 * 1000, limit: 1, penalty: 1 }, //afterward: Limit to 1 req / 10 min
-    ])
+    this.logger = config.debug
+      ? (logMessage, variable = undefined) => {
+          console.log(`vsh-connection ${config.name || '<???>'}: ${logMessage}`)
+          if (variable) {
+            console.log(JSON.stringify(variable, null, 4))
+          }
+        }
+      : (logMessage, variable) => {}
+
+    this.rater = new RateLimiter(
+      [
+        { period: 1 * 60 * 1000, limit: 12, penalty: 1, repeat: 3 }, //for 3 min: Limit to 12 req / min
+        { period: 10 * 60 * 1000, limit: 1, penalty: 1 }, //afterward: Limit to 1 req / 10 min
+      ],
+      null, //= callback
+      this.logger
+    )
 
     this.mqttClient = undefined
     this.childNodes = {}
@@ -114,6 +127,9 @@ module.exports = function (RED) {
       }
 
       this.stats.outboundMsgCount++
+
+      this.logger(`MQTT publish to topic ${topic}`, message)
+
       return await this.mqttClient.publish(topic, message)
     }
 
@@ -130,7 +146,8 @@ module.exports = function (RED) {
 
       const publishCb = () => {
         if (!this.isDisconnecting) {
-          this.mqttClient.publish(
+          //this.mqttClient.publish(topic, payload)
+          this.publish(
             `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
             payload
           )
@@ -274,6 +291,7 @@ module.exports = function (RED) {
 
       this.mqttClient = new MqttClient(options, {
         onConnect: () => {
+          this.logger('MQTT connecting')
           this.stats.connectionCount++
           this.isConnected = true
           this.isError = false
@@ -298,6 +316,7 @@ module.exports = function (RED) {
         },
 
         onDisconnect: () => {
+          this.logger('MQTT disconnected')
           this.isConnected = false
           if (!this.isError) {
             this.execCallbackForAll('setStatus', {
@@ -323,6 +342,7 @@ module.exports = function (RED) {
         },
 
         onMessage: (topic, message) => {
+          this.logger(`MQTT message received on topic ${topic}`, message)
           this.stats.inboundMsgCount++
           switch (topic) {
             case `$aws/things/${this.credentials.thingId}/shadow/get/accepted`:
@@ -371,14 +391,17 @@ module.exports = function (RED) {
         `vsh/${this.credentials.thingId}/service`,
       ]
 
+      this.logger('MQTT subscribe to topics', topicsToSubscribe)
+
       await this.mqttClient.subscribe(topicsToSubscribe)
     }
 
     this.disconnect = async function () {
-      //console.log('this.disconnect!!!')
       if (this.isDisconnecting) {
         return
       }
+
+      this.logger('MQTT disconnecting')
 
       this.isDisconnecting = true
 

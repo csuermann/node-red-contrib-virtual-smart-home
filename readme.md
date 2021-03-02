@@ -143,6 +143,10 @@ __THANK YOU!__
 
     A:  The VSH backend only stores metadata about your configured devices needed for VSH to function and your basic profile information provided by Amazon when you enabled the skill. Neither your Amazon password nor your voice prompts or your location is ever shared with VSH. I also have no interest in analyzing your usage patterns although this _would technically_ be possible.
 
+1.  Q:  Where can I see what data is being sent to / received from the backend?
+
+    A:  Activate the `Debug` option on the connection page and observe the output logged to stdout.
+
 1.  Q:  Can you add feature X, please?
 
     A:  I'm always eager to hear your ideas! Please [file a ticket](https://github.com/csuermann/node-red-contrib-virtual-smart-home/issues/new).
