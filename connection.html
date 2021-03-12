@@ -69,8 +69,7 @@
       const url = 'https://api.amazon.com/auth/o2/create/codepair'
       const data = {
         response_type: 'device_code',
-        client_id:
-          'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
+        client_id: RED.settings.vshConnectionLwaClientId,
         scope: 'profile',
       }
       return execPostRequest(url, data)
@@ -98,8 +97,7 @@
       const data = {
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
-        client_id:
-          'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
+        client_id: RED.settings.vshConnectionLwaClientId,
       }
 
       const resp = await execPostRequest(url, data)
@@ -142,7 +140,7 @@
 
     function provisionDevice(accessToken, installedVshVersion) {
       return execPostRequest(
-        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/provision',
+        RED.settings.vshConnectionBackendBaseUrl + '/provision',
         {
           accessToken: accessToken,
           vshVersion: installedVshVersion,
@@ -152,14 +150,14 @@
 
     function getRegisteredDevices(accessToken) {
       return execGetRequest(
-        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/devices',
+        RED.settings.vshConnectionBackendBaseUrl + '/devices',
         { Authorization: accessToken }
       )
     }
 
     function checkVersion(version) {
       return execGetRequest(
-        `https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/check_version?version=${version}`
+        `${RED.settings.vshConnectionBackendBaseUrl}/check_version?version=${version}`
       )
     }
 
@@ -186,7 +184,7 @@
       const accessToken = await ensureValidAccessToken()
 
       const deleteResult = await execDeleteRequest(
-        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev/device',
+        RED.settings.vshConnectionBackendBaseUrl + '/device',
         { Authorization: accessToken },
         { thingId, deviceId }
       )

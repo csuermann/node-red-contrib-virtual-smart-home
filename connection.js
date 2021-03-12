@@ -449,5 +449,17 @@ module.exports = function (RED) {
       server: { type: 'text' },
       privateKey: { type: 'text' },
     },
+    settings: {
+      vshConnectionBackendBaseUrl: {
+        //= RED.settings.vshConnectionBackendBaseUrl
+        value: 'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev',
+        exportable: true,
+      },
+      vshConnectionLwaClientId: {
+        //= RED.settings.vshConnectionLwaClientId
+        value: 'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
+        exportable: true,
+      },
+    },
   })
 }
