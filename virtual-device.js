@@ -1,7 +1,5 @@
 const merge = require('deepmerge')
 const deepEql = require('deep-eql')
-//const RateLimiter = require('./RateLimiter')
-//const RateLimiter = require('./RateLimiter2')
 const {
   getValidators,
   getDecorator,
@@ -24,30 +22,6 @@ module.exports = function (RED) {
     const decorator = getDecorator(config.template, config.diff)
 
     let isIncomingMsgProcessingAllowed = true
-
-    // const rater = new RateLimiter({
-    //   highWaterMark: 15,
-    //   intervalInSec: 180,
-    //   onExhaustionCb: () => {
-    //     isIncomingMsgProcessingAllowed = false
-    //     console.log(
-    //       'Blocking device state sync to Alexa from now on! Quota exhausted!'
-    //     )
-    //   },
-    // })
-
-    // const rater = new RateLimiter(
-    //   [
-    //     { period: 60000, limit: 10, repeat: 1 },
-    //     { period: 60000, limit: 5 },
-    //   ],
-    //   (deviceName) => {
-    //     isIncomingMsgProcessingAllowed = false
-    //     console.log(
-    //       `Blocking device state sync to Alexa for ${deviceName} from now on! Quota exhausted!`
-    //     )
-    //   }
-    // )
 
     const getLocalState = () => ({ ...localState })
 
@@ -140,21 +114,11 @@ module.exports = function (RED) {
         isIncomingMsgProcessingAllowed &&
         !deepEql(oldLocalState, newLocalState)
       ) {
-        // rater.execute(() =>
-        //   connectionNode.updateShadow({
-        //     state: confirmedNewLocalState,
-        //     deviceId,
-        //     type: 'desired',
-        //   })
-        // )
-
-        //rater.execute(`${config.name}`, () =>
         connectionNode.updateShadow({
           state: confirmedNewLocalState,
           deviceId,
           type: 'desired',
         })
-        //)
       }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
@@ -171,7 +135,6 @@ module.exports = function (RED) {
         await connectionNode.unregisterChildNode(deviceId)
       }
       node.status({})
-      //rater.destroy()
       return done()
     })
   }
