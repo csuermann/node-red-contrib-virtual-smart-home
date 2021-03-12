@@ -198,16 +198,23 @@
     async function displayRegisteredDevices() {
       $('#registered-devices').show()
 
-      const accessToken = await ensureValidAccessToken()
+      try {
+        const accessToken = await ensureValidAccessToken()
 
-      let registeredDevices = await getRegisteredDevices(accessToken)
+        let registeredDevices = await getRegisteredDevices(accessToken)
 
-      registeredDeviceCount = registeredDevices.length
+        registeredDeviceCount = registeredDevices.length
 
-      $('#loading').hide()
+        $('#loading').hide()
 
-      if (registeredDevices.length == 0) {
-        $('#empty').show()
+        if (registeredDevices.length == 0) {
+          $('#empty').show()
+          return
+        }
+      } catch (e) {
+        console.log('loading device list failed!', e.message)
+        $('#loading').hide()
+        $('#loading-failed').show()
         return
       }
 
@@ -331,6 +338,10 @@
 
               $('#provisioned').show()
 
+              if (RED.settings.vshConnectionShowSettings) {
+                $('.hidden').show()
+              }
+
               console.log('provisionData', provisionData)
             } catch (e) {
               if (e.status != 400) {
@@ -348,6 +359,9 @@
         }
       } else {
         $('#provisioned').show()
+        if (RED.settings.vshConnectionShowSettings) {
+          $('.hidden').show()
+        }
         displayRegisteredDevices()
       }
     }
@@ -390,6 +404,7 @@
   #provisioned,
   #registered-devices,
   #device-list-table,
+  #loading-failed,
   #device-code,
   #empty,
   #error {
@@ -398,6 +413,10 @@
 
   .hidden {
     display: none;
+  }
+
+  #registered-devices > #loading-failed {
+    color: red;
   }
 
   #device-code,
@@ -649,6 +668,7 @@
   <div id="registered-devices">
     <h1>Registered Devices</h1>
     <div id="loading">...loading...</div>
+    <div id="loading-failed">Loading device list failed!</div>
     <div id="empty">
       There are currently no devices registered for this account
     </div>

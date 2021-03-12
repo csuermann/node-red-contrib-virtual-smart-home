@@ -460,6 +460,11 @@ module.exports = function (RED) {
         value: 'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
         exportable: true,
       },
+      vshConnectionShowSettings: {
+        //= RED.settings.vshConnectionShowSettings
+        value: false,
+        exportable: true,
+      },
     },
   })
 }
