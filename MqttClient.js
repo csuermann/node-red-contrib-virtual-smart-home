@@ -1,25 +1,9 @@
 const MQTT = require('async-mqtt')
-//const RateLimiter = require('./RateLimiter')
 const RateLimiter = require('./RateLimiter2')
 
 function MqttClient(options, callbacksObj) {
   this.options = options
   this.client = null
-
-  // this.rater = new RateLimiter({
-  //   highWaterMark: 3,
-  //   intervalInSec: 60,
-  //   onExhaustionCb: () => {
-  //     this.disconnect()
-  //     console.log(
-  //       'Too many connection attempts to the virtual smart home backend. Please try restarting your flows, Node-RED or even your entire system.'
-  //     )
-  //     setTimeout(
-  //       () => this.handleOnError({ code: 'connection quota exhausted' }),
-  //       2000
-  //     )
-  //   },
-  // })
 
   this.rater = new RateLimiter(
     [{ period: 60000, limit: 4, penalty: 0 }],
@@ -46,7 +30,6 @@ function MqttClient(options, callbacksObj) {
   }
 
   this.handleOnConnect = function () {
-    //this.rater.execute(() => callbacksObj['onConnect']())
     this.rater.execute('onConnect_group', () => callbacksObj['onConnect']())
   }
 

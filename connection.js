@@ -397,7 +397,7 @@ module.exports = function (RED) {
     }
 
     this.disconnect = async function () {
-      if (this.isDisconnecting) {
+      if (!this.isConnected || this.isDisconnecting) {
         return
       }
 
