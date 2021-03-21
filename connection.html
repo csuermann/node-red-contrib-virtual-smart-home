@@ -198,10 +198,12 @@
     async function displayRegisteredDevices() {
       $('#registered-devices').show()
 
+      let registeredDevices
+
       try {
         const accessToken = await ensureValidAccessToken()
 
-        let registeredDevices = await getRegisteredDevices(accessToken)
+        registeredDevices = await getRegisteredDevices(accessToken)
 
         registeredDeviceCount = registeredDevices.length
 
