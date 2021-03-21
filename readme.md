@@ -147,6 +147,10 @@ __THANK YOU!__
 
     A:  Activate the `Debug` option on the connection page and observe the output logged to stdout.
 
+1.  Q:  Can I run my own backend?
+
+    A:  Yes! Check out the [backend repository](https://github.com/csuermann/virtual-smart-home/tree/sandbox) and follow the instructions precisely.
+
 1.  Q:  Can you add feature X, please?
 
     A:  I'm always eager to hear your ideas! Please [file a ticket](https://github.com/csuermann/node-red-contrib-virtual-smart-home/issues/new).
