@@ -65,11 +65,25 @@
       ).json()
     }
 
+    function getBackendUrl() {
+      return (
+        $('#node-config-input-backendUrl').val() ||
+        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev'
+      )
+    }
+
+    function getLwaClientId() {
+      return (
+        $('#node-config-input-lwaClientId').val() ||
+        'amzn1.application-oa2-client.ZZZ_3f1bb07133854b078261ad43f2484c18'
+      )
+    }
+
     function fetchDeviceCode() {
       const url = 'https://api.amazon.com/auth/o2/create/codepair'
       const data = {
         response_type: 'device_code',
-        client_id: RED.settings.vshConnectionLwaClientId,
+        client_id: $('#node-config-input-lwaClientId').val() || '',
         scope: 'profile',
       }
       return execPostRequest(url, data)
@@ -97,7 +111,7 @@
       const data = {
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
-        client_id: RED.settings.vshConnectionLwaClientId,
+        client_id: $('#node-config-input-lwaClientId').val() || 'xxx',
       }
 
       const resp = await execPostRequest(url, data)
@@ -139,25 +153,23 @@
     }
 
     function provisionDevice(accessToken, installedVshVersion) {
-      return execPostRequest(
-        RED.settings.vshConnectionBackendBaseUrl + '/provision',
-        {
-          accessToken: accessToken,
-          vshVersion: installedVshVersion,
-        }
-      )
+      return execPostRequest(getBackendUrl() + '/provision', {
+        accessToken: accessToken,
+        vshVersion: installedVshVersion,
+      })
     }
 
     function getRegisteredDevices(accessToken) {
-      return execGetRequest(
-        RED.settings.vshConnectionBackendBaseUrl + '/devices',
-        { Authorization: accessToken }
-      )
+      return execGetRequest(getBackendUrl() + '/devices', {
+        Authorization: accessToken,
+      })
     }
 
     function checkVersion(version) {
       return execGetRequest(
-        `${RED.settings.vshConnectionBackendBaseUrl}/check_version?version=${version}`
+        `${$(
+          '#node-config-input-backendUrl'
+        ).val()}/check_version?version=${version}`
       )
     }
 
@@ -184,7 +196,7 @@
       const accessToken = await ensureValidAccessToken()
 
       const deleteResult = await execDeleteRequest(
-        RED.settings.vshConnectionBackendBaseUrl + '/device',
+        getBackendUrl() + '/device',
         { Authorization: accessToken },
         { thingId, deviceId }
       )
@@ -268,24 +280,51 @@
       $('#device-list-table').show()
     }
 
+    function reactOnConfigChanged() {
+      stopPolling()
+      $('#device-code').hide()
+      showError('Configuration changed! Save changes and re-open this dialog!')
+    }
+
     async function oneditprepare() {
+      if (RED.settings.vshConnectionShowSettings) {
+        $('.hidden').show()
+      }
+
+      $('#node-config-input-backendUrl').val(getBackendUrl())
+      $('#node-config-input-lwaClientId').val(getLwaClientId())
+
+      $('#node-config-input-backendUrl').focusin(reactOnConfigChanged)
+      $('#node-config-input-lwaClientId').focusin(reactOnConfigChanged)
+
       if (!this.credentials.email) {
-        const installedVshVersion = await getInstalledVshVersion()
+        $('#backendUrlAndLwaClientId').show()
 
-        const versionCheckResult = await checkVersion(installedVshVersion)
+        try {
+          const installedVshVersion = await getInstalledVshVersion()
+          const versionCheckResult = await checkVersion(installedVshVersion)
 
-        if (!versionCheckResult.isAllowedVersion) {
-          return showError(versionCheckResult.updateHint)
+          if (!versionCheckResult.isAllowedVersion) {
+            return showError(versionCheckResult.updateHint)
+          }
+        } catch (e) {
+          return showError('Could not connect to backend!')
         }
 
         try {
           const {
+            error_description,
             device_code,
             expires_in,
             interval,
             user_code,
             verification_uri,
           } = await fetchDeviceCode()
+
+          if (error_description) {
+            //return showError(error)
+            throw new Error(error_description)
+          }
 
           const now = new Date()
           const expiresAt = new Date(now.getTime() + expires_in * 1000)
@@ -340,10 +379,6 @@
 
               $('#provisioned').show()
 
-              if (RED.settings.vshConnectionShowSettings) {
-                $('.hidden').show()
-              }
-
               console.log('provisionData', provisionData)
             } catch (e) {
               if (e.status != 400) {
@@ -357,7 +392,7 @@
 
           $('#device-code').show()
         } catch (e) {
-          alert(e)
+          showError(e.message)
         }
       } else {
         $('#provisioned').show()
@@ -380,6 +415,14 @@
         port: { value: '', required: true },
         accessTokenExpiry: { value: 0 },
         debug: { value: false },
+        backendUrl: {
+          value: '',
+          required: true,
+        },
+        lwaClientId: {
+          value: '',
+          required: true,
+        },
       },
       credentials: {
         refreshToken: { type: 'text' },
@@ -408,6 +451,7 @@
   #device-list-table,
   #loading-failed,
   #device-code,
+  #backendUrlAndLwaClientId,
   #empty,
   #error {
     display: none;
@@ -485,6 +529,29 @@
   <div class="form-row">
     <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-config-input-name" placeholder="Name" />
+  </div>
+
+  <div id="backendUrlAndLwaClientId">
+    <div class="form-row hidden">
+      <label for="node-config-input-backendUrl"
+        ><i class="fa fa-server"></i> Backend URL</label
+      >
+      <input
+        type="text"
+        id="node-config-input-backendUrl"
+        placeholder="Backend URL"
+      />
+    </div>
+    <div class="form-row hidden">
+      <label for="node-config-input-lwaClientId"
+        ><i class="fa fa-amazon"></i> LWA Client Id</label
+      >
+      <input
+        type="text"
+        id="node-config-input-lwaClientId"
+        placeholder="LWA Client Id"
+      />
+    </div>
   </div>
 
   <div id="error">
