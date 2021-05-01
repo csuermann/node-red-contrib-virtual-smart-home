@@ -177,7 +177,9 @@
     about local device changes, which will then be reflected in the Alexa app.
     If the &quot;Passthrough&quot; option is enabled, this will also trigger an
     outgoing message with the complete current local state. In this case
-    <code>payload.source</code> is set to 'device' instead of 'alexa'.
+    <code>payload.source</code> is set to 'device' instead of 'alexa'. If the
+    inbound message has a <code>topic</code> attribute, its value will be
+    present in the outbound msg instead of the topic configured in the editor.
   </p>
 
   <h3>Inputs</h3>

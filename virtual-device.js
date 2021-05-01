@@ -39,7 +39,7 @@ module.exports = function (RED) {
       return localState
     }
 
-    const emitLocalState = () => {
+    const emitLocalState = (topic = null) => {
       let payload
 
       payload = decorator({
@@ -50,7 +50,7 @@ module.exports = function (RED) {
 
       if (Object.keys(payload).length > 0) {
         const msg = {
-          topic: config.topic,
+          topic: topic ? topic : config.topic,
           payload,
         }
         node.send(msg)
@@ -122,7 +122,7 @@ module.exports = function (RED) {
       }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
-        emitLocalState()
+        emitLocalState(msg.topic)
       }
 
       if (done) {
