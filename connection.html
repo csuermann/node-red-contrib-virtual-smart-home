@@ -300,8 +300,10 @@
       if (!this.credentials.email) {
         $('#backendUrlAndLwaClientId').show()
 
+        let installedVshVersion
+
         try {
-          const installedVshVersion = await getInstalledVshVersion()
+          installedVshVersion = await getInstalledVshVersion()
           const versionCheckResult = await checkVersion(installedVshVersion)
 
           if (!versionCheckResult.isAllowedVersion) {
