@@ -12,305 +12,150 @@ const directives = {
     brightness: request.directive.payload.brightness,
     powerState: request.directive.payload.brightness > 0 ? 'ON' : 'OFF',
   }),
-  // SetPercentage: (request, currentState) => {
-  //   const newState = { percentage: request.directive.payload.percentage }
-  //   const newProperties = []
-  //   newProperties.push(
-  //     makeProperty(
-  //       'Alexa.PercentageController',
-  //       'percentage',
-  //       request.directive.payload.percentage
-  //     )
-  //   )
-  //   if (request.directive.endpoint.cookie.template === 'BLINDS') {
-  //     const instance = 'Blinds.Position'
-  //     const mode =
-  //       request.directive.payload.percentage == 100
-  //         ? 'Position.Up'
-  //         : 'Position.Down'
-  //     newProperties.push(
-  //       makeProperty('Alexa.ModeController', 'mode', mode, instance)
-  //     )
-  //     newState['instance'] = instance
-  //     newState['mode'] = mode
-  //   }
-  //   return {
-  //     newProperties,
-  //     newState,
-  //   }
-  // },
-  // AdjustBrightness: (request, currentState) => {
-  //   const currentBrightness = currentState.state.reported?.brightness || 50
-  //   let newBrightness =
-  //     currentBrightness + request.directive.payload.brightnessDelta
-  //   if (newBrightness < 0) {
-  //     newBrightness = 0
-  //   } else if (newBrightness > 100) {
-  //     newBrightness = 100
-  //   }
-  //   return {
-  //     newProperties: [
-  //       makeProperty('Alexa.BrightnessController', 'brightness', newBrightness),
-  //       makeProperty(
-  //         'Alexa.PowerController',
-  //         'powerState',
-  //         newBrightness > 0 ? 'ON' : 'OFF'
-  //       ),
-  //     ],
-  //     newState: {
-  //       brightness: newBrightness,
-  //       powerState: newBrightness > 0 ? 'ON' : 'OFF',
-  //     },
-  //   }
-  // },
-  // SetColor: (request, currentState) => ({
-  //   newProperties: [
-  //     makeProperty(
-  //       'Alexa.ColorController',
-  //       'color',
-  //       request.directive.payload.color
-  //     ),
-  //     makeProperty('Alexa.PowerController', 'powerState', 'ON'),
-  //   ],
-  //   newState: {
-  //     color: request.directive.payload.color,
-  //     lightMode: 'hsb',
-  //     powerState: 'ON',
-  //   },
-  // }),
-  // SetColorTemperature: (request, currentState) => ({
-  //   newProperties: [
-  //     makeProperty(
-  //       'Alexa.ColorTemperatureController',
-  //       'colorTemperatureInKelvin',
-  //       request.directive.payload.colorTemperatureInKelvin
-  //     ),
-  //     makeProperty('Alexa.PowerController', 'powerState', 'ON'),
-  //   ],
-  //   newState: {
-  //     colorTemperatureInKelvin:
-  //       request.directive.payload.colorTemperatureInKelvin,
-  //     lightMode: 'temp',
-  //     powerState: 'ON',
-  //   },
-  // }),
-  // IncreaseColorTemperature: (request, currentState) => {
-  //   const currentTemp = shadow.state?.reported?.colorTemperatureInKelvin || 4000
-  //   const supportedTemps = [
-  //     2200, // warm, warm white
-  //     2700, // incandescent, soft white
-  //     4000, // white
-  //     5500, // daylight, daylight white
-  //     7000, // cool, cool white
-  //   ]
-  //   const newTemp = supportedTemps.find((t) => t > currentTemp) || 10000
-  //   return {
-  //     newProperties: [
-  //       makeProperty(
-  //         'Alexa.ColorTemperatureController',
-  //         'colorTemperatureInKelvin',
-  //         newTemp
-  //       ),
-  //     ],
-  //     newState: {
-  //       colorTemperatureInKelvin: newTemp,
-  //       lightMode: 'temp',
-  //     },
-  //   }
-  // },
-  // DecreaseColorTemperature: (request, currentState) => {
-  //   const currentTemp = shadow.state?.reported?.colorTemperatureInKelvin || 4000
-  //   const supportedTemps = [
-  //     2200, // warm, warm white
-  //     2700, // incandescent, soft white
-  //     4000, // white
-  //     5500, // daylight, daylight white
-  //     7000, // cool, cool white
-  //   ]
-  //   const newTemp = supportedTemps.find((t) => t < currentTemp) || 1000
-  //   return {
-  //     newProperties: [
-  //       makeProperty(
-  //         'Alexa.ColorTemperatureController',
-  //         'colorTemperatureInKelvin',
-  //         newTemp
-  //       ),
-  //     ],
-  //     newState: {
-  //       colorTemperatureInKelvin: newTemp,
-  //       lightMode: 'temp',
-  //     },
-  //   }
-  // },
-  // // Lock: (request, currentState) => ({
-  // //   newProperties: [
-  // //     makeProperty('Alexa.LockController', 'lockState', 'LOCKED')
-  // //   ],
-  // //   newState: { lockState: 'LOCKED' }
-  // // }),
-  // // Unlock: (request, currentState) => ({
-  // //   newProperties: [
-  // //     makeProperty('Alexa.LockController', 'lockState', 'UNLOCKED')
-  // //   ],
-  // //   newState: { lockState: 'UNLOCKED' }
-  // // }),
-  // SetMode: (request, currentState) => {
-  //   const newProperties = [
-  //     makeProperty(
-  //       'Alexa.ModeController',
-  //       'mode',
-  //       request.directive.payload.mode,
-  //       request.directive.header.instance
-  //     ),
-  //   ]
-  //   const newState = {
-  //     mode: request.directive.payload.mode,
-  //     instance: request.directive.header.instance,
-  //   }
-  //   if (request.directive.endpoint.cookie.template === 'BLINDS') {
-  //     const percentage =
-  //       request.directive.payload.mode === 'Position.Up' ? 100 : 0
-  //     newProperties.push(
-  //       makeProperty('Alexa.PercentageController', 'percentage', percentage)
-  //     )
-  //     newState['percentage'] = percentage
-  //   }
-  //   return {
-  //     newProperties,
-  //     newState,
-  //   }
-  // },
-  // Activate: (request, currentState) => ({
-  //   newProperties: [],
-  //   newState: {
-  //     isActivated: true,
-  //   },
-  // }),
-  // Deactivate: (request, currentState) => ({
-  //   newProperties: [],
-  //   newState: {
-  //     isActivated: false,
-  //   },
-  // }),
-  // AdjustTargetTemperature: (request, currentState) => {
-  //   const currentTargetTemp = shadow.state.reported?.targetTemperature || 0
-  //   const newTargetTemp =
-  //     currentTargetTemp + request.directive.payload.targetSetpointDelta.value
-  //   return {
-  //     newProperties: [
-  //       makeProperty('Alexa.ThermostatController', 'targetSetpoint', {
-  //         value: newTargetTemp,
-  //         scale: request.directive.payload.targetSetpointDelta.scale,
-  //       }),
-  //     ],
-  //     newState: {
-  //       targetTemperature: newTargetTemp,
-  //     },
-  //   }
-  // },
-  // SetTargetTemperature: (request, currentState) => ({
-  //   newProperties: [
-  //     makeProperty(
-  //       'Alexa.ThermostatController',
-  //       'targetSetpoint',
-  //       request.directive.payload.targetSetpoint
-  //     ),
-  //     makeProperty('Alexa.ThermostatController', 'thermostatMode', 'AUTO'),
-  //   ],
-  //   newState: {
-  //     targetTemperature: request.directive.payload.targetSetpoint.value,
-  //     targetScale: request.directive.payload.targetSetpoint.scale,
-  //   },
-  // }),
-  // AdjustRangeValue: (request, currentState) => {
-  //   const deviceType = request.directive.endpoint.cookie.template
-  //   if (deviceType === 'FAN') {
-  //     const currentSpeed = shadow.state?.reported?.speed || 0
-  //     let newSpeed = currentSpeed + request.directive.payload.rangeValueDelta
-  //     if (newSpeed < 0) {
-  //       newSpeed = 0
-  //     } else if (newSpeed > 10) {
-  //       newSpeed = 10
-  //     }
-  //     return {
-  //       newProperties: [
-  //         makeProperty(
-  //           'Alexa.RangeController',
-  //           'rangeValue',
-  //           newSpeed,
-  //           request.directive.header.instance
-  //         ),
-  //         makeProperty(
-  //           'Alexa.PowerController',
-  //           'powerState',
-  //           newSpeed > 0 ? 'ON' : 'OFF'
-  //         ),
-  //       ],
-  //       newState: {
-  //         speed: newSpeed,
-  //         powerState: newSpeed > 0 ? 'ON' : 'OFF',
-  //       },
-  //     }
-  //   } else if (deviceType === 'BLINDS') {
-  //     const currentPercentage = shadow.state?.reported?.percentage || 100
-  //     let newPercentage =
-  //       currentPercentage + request.directive.payload.rangeValueDelta
-  //     if (newPercentage < 0) {
-  //       newPercentage = 0
-  //     } else if (newPercentage > 100) {
-  //       newPercentage = 100
-  //     }
-  //     return {
-  //       newProperties: [
-  //         makeProperty(
-  //           'Alexa.RangeController',
-  //           'rangeValue',
-  //           newPercentage,
-  //           request.directive.header.instance
-  //         ),
-  //       ],
-  //       newState: {
-  //         percentage: newPercentage,
-  //       },
-  //     }
-  //   }
-  // },
-  // SetRangeValue: (request, currentState) => {
-  //   const newProperties = [
-  //     makeProperty(
-  //       'Alexa.RangeController',
-  //       'rangeValue',
-  //       request.directive.payload.rangeValue,
-  //       request.directive.header.instance
-  //     ),
-  //   ]
-  //   let newState = {}
-  //   if (request.directive.endpoint.cookie.template === 'FAN') {
-  //     newProperties.push(
-  //       makeProperty(
-  //         'Alexa.PowerController',
-  //         'powerState',
-  //         request.directive.payload.rangeValue > 0 ? 'ON' : 'OFF'
-  //       )
-  //     )
-  //     newState = {
-  //       speed: request.directive.payload.rangeValue,
-  //       powerState: request.directive.payload.rangeValue > 0 ? 'ON' : 'OFF',
-  //     }
-  //   } else if (request.directive.endpoint.cookie.template === 'BLINDS') {
-  //     newState = {
-  //       percentage: request.directive.payload.rangeValue,
-  //       mode:
-  //         request.directive.payload.rangeValue == 100
-  //           ? 'Position.Up'
-  //           : 'Position.Down',
-  //     }
-  //   }
-  //   return {
-  //     newProperties,
-  //     newState,
-  //   }
-  // },
+
+  SetPercentage: (request, currentState) => {
+    const newState = { percentage: request.directive.payload.percentage }
+
+    if (currentState.template === 'BLINDS') {
+      newState['instance'] = 'Blinds.Position'
+      newState['mode'] =
+        request.directive.payload.percentage == 100
+          ? 'Position.Up'
+          : 'Position.Down'
+    }
+
+    return newState
+  },
+  AdjustBrightness: (request, currentState) => {
+    let newBrightness =
+      currentState.brightness + request.directive.payload.brightnessDelta
+    if (newBrightness < 0) {
+      newBrightness = 0
+    } else if (newBrightness > 100) {
+      newBrightness = 100
+    }
+    return {
+      brightness: newBrightness,
+      powerState: newBrightness > 0 ? 'ON' : 'OFF',
+    }
+  },
+  SetColor: (request, currentState) => ({
+    color: request.directive.payload.color,
+    lightMode: 'hsb',
+    powerState: 'ON',
+  }),
+  SetColorTemperature: (request, currentState) => ({
+    colorTemperatureInKelvin:
+      request.directive.payload.colorTemperatureInKelvin,
+    lightMode: 'temp',
+    powerState: 'ON',
+  }),
+  IncreaseColorTemperature: (request, currentState) => {
+    const currentTemp = currentState.colorTemperatureInKelvin
+    const supportedTemps = [
+      2200, // warm, warm white
+      2700, // incandescent, soft white
+      4000, // white
+      5500, // daylight, daylight white
+      7000, // cool, cool white
+    ]
+    const newTemp = supportedTemps.find((t) => t > currentTemp) || 10000
+    return {
+      colorTemperatureInKelvin: newTemp,
+      lightMode: 'temp',
+    }
+  },
+  DecreaseColorTemperature: (request, currentState) => {
+    const currentTemp = currentState.colorTemperatureInKelvin
+    const supportedTemps = [
+      2200, // warm, warm white
+      2700, // incandescent, soft white
+      4000, // white
+      5500, // daylight, daylight white
+      7000, // cool, cool white
+    ]
+    const newTemp = supportedTemps.find((t) => t < currentTemp) || 1000
+    return {
+      colorTemperatureInKelvin: newTemp,
+      lightMode: 'temp',
+    }
+  },
+  Lock: (request, currentState) => ({
+    lockState: 'LOCKED',
+  }),
+  Unlock: (request, currentState) => ({
+    lockState: 'UNLOCKED',
+  }),
+  SetMode: (request, currentState) => {
+    const newState = {
+      mode: request.directive.payload.mode,
+      instance: request.directive.header.instance,
+    }
+    if (currentState.template === 'BLINDS') {
+      newState['percentage'] =
+        request.directive.payload.mode === 'Position.Up' ? 100 : 0
+    }
+    return newState
+  },
+  Activate: (request, currentState) => ({
+    isActivated: true,
+  }),
+  Deactivate: (request, currentState) => ({
+    isActivated: false,
+  }),
+  AdjustTargetTemperature: (request, currentState) => ({
+    targetTemperature:
+      currentState.targetTemperature +
+      request.directive.payload.targetSetpointDelta.value,
+  }),
+  SetTargetTemperature: (request, currentState) => ({
+    targetTemperature: request.directive.payload.targetSetpoint.value,
+    targetScale: request.directive.payload.targetSetpoint.scale,
+  }),
+  AdjustRangeValue: (request, currentState) => {
+    if (currentState.template === 'FAN') {
+      const currentSpeed = currentState.speed
+      let newSpeed = currentSpeed + request.directive.payload.rangeValueDelta
+      if (newSpeed < 0) {
+        newSpeed = 0
+      } else if (newSpeed > 10) {
+        newSpeed = 10
+      }
+      return {
+        speed: newSpeed,
+        powerState: newSpeed > 0 ? 'ON' : 'OFF',
+      }
+    } else if (currentState.template === 'BLINDS') {
+      let newPercentage =
+        currentState.percentage + request.directive.payload.rangeValueDelta
+      if (newPercentage < 0) {
+        newPercentage = 0
+      } else if (newPercentage > 100) {
+        newPercentage = 100
+      }
+      return {
+        percentage: newPercentage,
+      }
+    }
+  },
+  SetRangeValue: (request, currentState) => {
+    if (currentState.template === 'FAN') {
+      return {
+        speed: request.directive.payload.rangeValue,
+        powerState: request.directive.payload.rangeValue > 0 ? 'ON' : 'OFF',
+      }
+    } else if (currentState.template === 'BLINDS') {
+      return {
+        percentage: request.directive.payload.rangeValue,
+        mode:
+          request.directive.payload.rangeValue == 100
+            ? 'Position.Up'
+            : 'Position.Down',
+      }
+    } else {
+      return {}
+    }
+  },
 }
 
 function makeProperty(namespace, name, value, instance = null) {

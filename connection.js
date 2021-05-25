@@ -243,18 +243,6 @@ module.exports = function (RED) {
       this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
     }
 
-    // this.handleUpdateFromAlexa = function (deviceId, message) {
-    //   //console.log('handleUpdateFromAlexa:message:::', message)
-
-    //   const newLocalState = this.execCallbackForOne(
-    //     deviceId,
-    //     'setLocalState',
-    //     message.state
-    //   )
-    //   this.execCallbackForOne(deviceId, 'emitLocalState')
-    //   this.updateShadow({ state: newLocalState, deviceId, type: 'reported' })
-    // }
-
     this.handleDirectiveFromAlexa = function (deviceId, directiveRequest) {
       // EXAMPLE directiveRequest:
       // {
@@ -473,7 +461,6 @@ module.exports = function (RED) {
 
       const topicsToSubscribe = [
         `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-        //`vsh/${this.credentials.thingId}/+/update`,
         `vsh/${this.credentials.thingId}/+/directive`,
         `vsh/service`,
         `vsh/version/${VSH_VERSION}/+`,
