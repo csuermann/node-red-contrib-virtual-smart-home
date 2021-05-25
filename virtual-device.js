@@ -28,11 +28,6 @@ module.exports = function (RED) {
     const setLocalState = (targetState) => {
       const oldLocalState = getLocalState()
       localState = merge(oldLocalState, targetState)
-      const decoratedOldState = decorator({
-        localState: oldLocalState,
-        template: config.template,
-        friendlyName: config.name,
-      })
 
       node.context().set('state', localState)
 

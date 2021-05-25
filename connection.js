@@ -3,6 +3,11 @@ const debounce = require('debounce')
 const MqttClient = require('./MqttClient')
 const RateLimiter = require('./RateLimiter2')
 const VSH_VERSION = require('./version')
+const {
+  buildNewStateForDirectiveRequest,
+  buildPropertiesFromState,
+  annotateChanges,
+} = require('./directives')
 
 module.exports = function (RED) {
   function ConnectionNode(config) {
@@ -135,6 +140,9 @@ module.exports = function (RED) {
 
     this.requestShadowDebounced = debounce(this.requestShadow, 2500)
 
+    /**
+     * @deprecated
+     * **/
     this.updateShadow = function ({ state, deviceId, type }) {
       const payload = {
         state: { reported: state },
@@ -146,7 +154,6 @@ module.exports = function (RED) {
 
       const publishCb = () => {
         if (!this.isDisconnecting) {
-          //this.mqttClient.publish(topic, payload)
           this.publish(
             `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
             payload
@@ -159,6 +166,24 @@ module.exports = function (RED) {
       } else {
         publishCb()
       }
+    }
+
+    this.triggerChangeReport = function ({
+      endpointId,
+      properties,
+      causeType,
+    }) {
+      const publishCb = () => {
+        if (!this.isDisconnecting) {
+          this.publish(`vsh/${this.credentials.thingId}/changeReport`, {
+            endpointId,
+            properties,
+            causeType,
+          })
+        }
+      }
+
+      publishCb()
     }
 
     this.bulkDiscover = function (devices, mode = 'discover') {
@@ -218,16 +243,79 @@ module.exports = function (RED) {
       this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
     }
 
-    this.handleUpdateFromAlexa = function (deviceId, message) {
-      //console.log('handleUpdateFromAlexa:message:::', message)
+    // this.handleUpdateFromAlexa = function (deviceId, message) {
+    //   //console.log('handleUpdateFromAlexa:message:::', message)
 
-      const newLocalState = this.execCallbackForOne(
-        deviceId,
-        'setLocalState',
-        message.state
-      )
-      this.execCallbackForOne(deviceId, 'emitLocalState')
-      this.updateShadow({ state: newLocalState, deviceId, type: 'reported' })
+    //   const newLocalState = this.execCallbackForOne(
+    //     deviceId,
+    //     'setLocalState',
+    //     message.state
+    //   )
+    //   this.execCallbackForOne(deviceId, 'emitLocalState')
+    //   this.updateShadow({ state: newLocalState, deviceId, type: 'reported' })
+    // }
+
+    this.handleDirectiveFromAlexa = function (deviceId, directiveRequest) {
+      // EXAMPLE directiveRequest:
+      // {
+      //   directive: {
+      //     header: {
+      //       namespace: 'Alexa.PowerController',
+      //       name: 'TurnOn',
+      //       payloadVersion: '3',
+      //       messageId: '00a277c2-0172-4993-9c08-b50467925726',
+      //       correlationToken: 'AAAAAAAAAQAwOfXmbhm...',
+      //     },
+      //     endpoint: {
+      //       endpointId: 'vshd-xxxxxxxxxxxxx',
+      //     },
+      //     payload: {},
+      //   },
+      // }
+
+      // get current device state
+      const oldState = this.execCallbackForOne(deviceId, 'getLocalState')
+
+      if (!oldState) {
+        this.logger(`no local state found for device ID ${deviceId}`)
+        return
+      }
+
+      // memorize old properties so that we can find out what changed
+      const oldProperties = buildPropertiesFromState(oldState)
+
+      // apply directive to local device state
+      try {
+        const newState = buildNewStateForDirectiveRequest(
+          directiveRequest,
+          oldState
+        )
+
+        // update local device state
+        const newConfirmedState = this.execCallbackForOne(
+          deviceId,
+          'setLocalState',
+          newState
+        )
+
+        // emit msg obj
+        this.execCallbackForOne(deviceId, 'emitLocalState')
+
+        let newProperties = buildPropertiesFromState(newConfirmedState)
+
+        // annotate whether properties changed or not
+        newProperties = annotateChanges(newProperties, oldProperties)
+
+        // tell Alexa about new device properties
+        this.triggerChangeReport({
+          endpointId: deviceId,
+          properties: newProperties,
+          causeType: 'VOICE_INTERACTION',
+        })
+      } catch (e) {
+        this.logger(e.message)
+        return
+      }
     }
 
     this.handlePing = function () {
@@ -358,11 +446,11 @@ module.exports = function (RED) {
               if (match) {
                 const deviceId = match[0]
 
-                //if (topic.includes('/update/accepted')) {
-                if (topic.includes('/update')) {
-                  this.handleUpdateFromAlexa(deviceId, message)
-                } else if (topic.includes('/update/delta')) {
-                  this.handleDelta(deviceId, message)
+                // if (topic.includes('/update')) {
+                //   this.handleUpdateFromAlexa(deviceId, message)
+                // } else
+                if (topic.includes('/directive')) {
+                  this.handleDirectiveFromAlexa(deviceId, message)
                 } else {
                   console.log(
                     'received device-related message that I cannot handle yet!',
@@ -385,7 +473,8 @@ module.exports = function (RED) {
 
       const topicsToSubscribe = [
         `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-        `vsh/${this.credentials.thingId}/+/update`,
+        //`vsh/${this.credentials.thingId}/+/update`,
+        `vsh/${this.credentials.thingId}/+/directive`,
         `vsh/service`,
         `vsh/version/${VSH_VERSION}/+`,
         `vsh/${this.credentials.thingId}/service`,
