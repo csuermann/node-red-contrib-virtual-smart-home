@@ -1,7 +1,7 @@
 const { Base64 } = require('js-base64')
 const debounce = require('debounce')
 const MqttClient = require('./MqttClient')
-const RateLimiter = require('./RateLimiter2')
+const RateLimiter = require('./RateLimiter')
 const VSH_VERSION = require('./version')
 const {
   buildNewStateForDirectiveRequest,
@@ -26,8 +26,8 @@ module.exports = function (RED) {
 
     this.rater = new RateLimiter(
       [
-        { period: 1 * 60 * 1000, limit: 12, penalty: 1, repeat: 3 }, //for 3 min: Limit to 12 req / min
-        { period: 10 * 60 * 1000, limit: 1, penalty: 1 }, //afterward: Limit to 1 req / 10 min
+        { period: 1 * 60 * 1000, limit: 12, penalty: 1, repeat: 5 }, //for 5 min: Limit to 12 req / min
+        { period: 10 * 60 * 1000, limit: 2, penalty: 1 }, //afterward: Limit to 2 req / 10 min
       ],
       null, //= callback
       this.logger
@@ -140,39 +140,19 @@ module.exports = function (RED) {
 
     this.requestShadowDebounced = debounce(this.requestShadow, 2500)
 
-    /**
-     * @deprecated
-     * **/
-    this.updateShadow = function ({ state, deviceId, type }) {
-      const payload = {
-        state: { reported: state },
-      }
-
-      if (type === 'desired') {
-        payload.state['desired'] = state
-      }
-
-      const publishCb = () => {
-        if (!this.isDisconnecting) {
-          this.publish(
-            `$aws/things/${this.credentials.thingId}/shadow/name/${deviceId}/update`,
-            payload
-          )
-        }
-      }
-
-      if (type === 'desired') {
-        this.rater.execute(`${deviceId}`, publishCb.bind(this))
-      } else {
-        publishCb()
-      }
-    }
-
     this.triggerChangeReport = function ({
       endpointId,
       properties,
       causeType,
+      useRateLimiter,
     }) {
+      const changes = properties.filter((prop) => prop.changed).length
+
+      if (changes == 0) {
+        this.logger(`skipping ChangeReport - no properties changed`)
+        return
+      }
+
       const publishCb = () => {
         if (!this.isDisconnecting) {
           this.publish(`vsh/${this.credentials.thingId}/changeReport`, {
@@ -183,7 +163,11 @@ module.exports = function (RED) {
         }
       }
 
-      publishCb()
+      if (useRateLimiter) {
+        this.rater.execute(`${endpointId}`, publishCb.bind(this))
+      } else {
+        publishCb()
+      }
     }
 
     this.bulkDiscover = function (devices, mode = 'discover') {
@@ -243,6 +227,26 @@ module.exports = function (RED) {
       this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
     }
 
+    this.handleLocalDeviceStateChange = function ({
+      deviceId,
+      oldState,
+      newState,
+    }) {
+      const oldProperties = buildPropertiesFromState(oldState)
+      let newProperties = buildPropertiesFromState(newState)
+
+      // annotate whether properties changed or not
+      newProperties = annotateChanges(newProperties, oldProperties)
+
+      // tell Alexa about new device properties
+      this.triggerChangeReport({
+        endpointId: deviceId,
+        properties: newProperties,
+        causeType: 'PHYSICAL_INTERACTION',
+        useRateLimiter: true,
+      })
+    }
+
     this.handleDirectiveFromAlexa = function (deviceId, directiveRequest) {
       // EXAMPLE directiveRequest:
       // {
@@ -299,6 +303,7 @@ module.exports = function (RED) {
           endpointId: deviceId,
           properties: newProperties,
           causeType: 'VOICE_INTERACTION',
+          useRateLimiter: false,
         })
       } catch (e) {
         this.logger(e.message)

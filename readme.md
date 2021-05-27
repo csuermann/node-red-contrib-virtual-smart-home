@@ -25,7 +25,7 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
   - Dimmable Light Bulb
   - Dimmer Switch
   - Fan
-  - Garage Door Opener
+  - Garage Door Opener (en-US locale only)
   - Plug
   - Switch
   - Scene

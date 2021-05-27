@@ -1,5 +1,5 @@
 const MQTT = require('async-mqtt')
-const RateLimiter = require('./RateLimiter2')
+const RateLimiter = require('./RateLimiter')
 
 function MqttClient(options, callbacksObj) {
   this.options = options

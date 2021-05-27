@@ -21,8 +21,6 @@ module.exports = function (RED) {
     const validators = getValidators(config.template)
     const decorator = getDecorator(config.template, config.diff)
 
-    let isIncomingMsgProcessingAllowed = true
-
     const getLocalState = () => ({ ...localState })
 
     const setLocalState = (targetState) => {
@@ -105,14 +103,11 @@ module.exports = function (RED) {
       const newLocalState = { ...mergedState, source: 'device' }
       const confirmedNewLocalState = setLocalState(newLocalState)
 
-      if (
-        isIncomingMsgProcessingAllowed &&
-        !deepEql(oldLocalState, newLocalState)
-      ) {
-        connectionNode.updateShadow({
-          state: confirmedNewLocalState,
+      if (!deepEql(oldLocalState, newLocalState)) {
+        connectionNode.handleLocalDeviceStateChange({
           deviceId,
-          type: 'desired',
+          oldState: oldLocalState,
+          newState: confirmedNewLocalState,
         })
       }
 
