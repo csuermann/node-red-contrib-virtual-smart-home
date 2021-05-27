@@ -253,6 +253,17 @@ function buildPropertiesFromState(state) {
         'Blind.Lift'
       )
     )
+
+    if (state.template === 'BLINDS') {
+      properties.push(
+        makeProperty(
+          'Alexa.ModeController',
+          'mode',
+          state.percentage == 100 ? 'Position.Up' : 'Position.Down',
+          'Blinds.Position'
+        )
+      )
+    }
   }
 
   if (state.hasOwnProperty('powerState')) {
