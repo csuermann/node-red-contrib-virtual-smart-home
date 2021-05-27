@@ -372,7 +372,7 @@ module.exports = function (RED) {
 
       this.mqttClient = new MqttClient(options, {
         onConnect: () => {
-          this.logger('MQTT connecting')
+          this.logger(`MQTT connecting to ${options.host}:${options.port}`)
           this.stats.connectionCount++
           this.isConnected = true
           this.isError = false
