@@ -3,10 +3,20 @@
 const deepEql = require('deep-eql')
 
 const directives = {
-  TurnOn: (request, currentState) => ({
-    powerState: 'ON',
-    brightness: currentState.brightness === 0 ? 100 : currentState.brightness,
-  }),
+  TurnOn: (request, currentState) => {
+    const newState = { powerState: 'ON' }
+
+    if (
+      currentState.template === 'COLOR_CHANGING_LIGHT_BULB' ||
+      currentState.template === 'DIMMABLE_LIGHT_BULB' ||
+      currentState.template === 'DIMMER_SWITCH'
+    ) {
+      newState['brightness'] =
+        currentState.brightness === 0 ? 100 : currentState.brightness
+    }
+
+    return newState
+  },
   TurnOff: (request, currentState) => ({ powerState: 'OFF' }),
   SetBrightness: (request, currentState) => ({
     brightness: request.directive.payload.brightness,

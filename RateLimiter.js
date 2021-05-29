@@ -103,6 +103,8 @@ RateLimiter.prototype.execute = function (group, callback) {
 
   if (this.groups[group].remaining >= 0) {
     callback()
+  } else {
+    this.logger(`blocking execution of ${callback.name} for group '${group}'`)
   }
 
   if (this.groups[group].remaining == 0) {

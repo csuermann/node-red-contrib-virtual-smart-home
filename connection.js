@@ -17,7 +17,11 @@ module.exports = function (RED) {
 
     this.logger = config.debug
       ? (logMessage, variable = undefined) => {
-          console.log(`vsh-connection ${config.name || '<???>'}: ${logMessage}`)
+          console.log(
+            `${new Date().toISOString()}: vsh-connection ${
+              config.name || '<???>'
+            }: ${logMessage}`
+          )
           if (variable) {
             console.log(JSON.stringify(variable, null, 4))
           }
@@ -26,8 +30,8 @@ module.exports = function (RED) {
 
     this.rater = new RateLimiter(
       [
-        { period: 1 * 60 * 1000, limit: 12, penalty: 1, repeat: 5 }, //for 5 min: Limit to 12 req / min
-        { period: 10 * 60 * 1000, limit: 2, penalty: 1 }, //afterward: Limit to 2 req / 10 min
+        { period: 1 * 60 * 1000, limit: 12, penalty: 0, repeat: 10 }, //for 10 min: Limit to 12 req / min
+        { period: 10 * 60 * 1000, limit: 3, penalty: 1 }, //afterward: Limit to 3 req / 10 min
       ],
       null, //= callback
       this.logger
@@ -52,8 +56,9 @@ module.exports = function (RED) {
     this.jobQueue = []
 
     this.jobQueueExecutor = setInterval(() => {
+      //console.log(`job queue length: ${this.jobQueue.length}}`)
       this.jobQueue = this.jobQueue.filter((job) => job() == false)
-    }, 2000)
+    }, 1000)
 
     this.execOrQueueJob = function (job) {
       if (job() == false) {
@@ -138,7 +143,7 @@ module.exports = function (RED) {
       return await this.mqttClient.publish(topic, message)
     }
 
-    this.requestShadowDebounced = debounce(this.requestShadow, 2500)
+    this.requestShadowDebounced = debounce(this.requestShadow, 1000)
 
     this.triggerChangeReport = function ({
       endpointId,
