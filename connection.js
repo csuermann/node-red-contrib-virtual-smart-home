@@ -343,6 +343,12 @@ module.exports = function (RED) {
         case 'ping':
           this.handlePing()
           break
+        case 'overrideConfig':
+          if (message.rateLimiter) {
+            const iterations = message.rateLimiter
+            this.rater.overrideConfig(iterations)
+          }
+          break
         case 'kill':
           this.handleKill(message.reason)
           break

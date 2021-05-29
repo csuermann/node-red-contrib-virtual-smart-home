@@ -15,15 +15,15 @@ function RateLimiter(
   this.nextIteration = function () {
     let newConfig
 
-    if (iterations.length > 1) {
-      iterations[0].repeat--
-      if (iterations[0].repeat > 0) {
-        newConfig = iterations[0]
+    if (this.iterations.length > 1) {
+      this.iterations[0].repeat--
+      if (this.iterations[0].repeat > 0) {
+        newConfig = this.iterations[0]
       } else {
-        newConfig = iterations.shift()
+        newConfig = this.iterations.shift()
       }
     } else {
-      newConfig = iterations[0]
+      newConfig = this.iterations[0]
       newConfig.repeat = 999
     }
 
@@ -114,6 +114,16 @@ RateLimiter.prototype.execute = function (group, callback) {
       this.onExhaustionCb(group)
     }
   }
+}
+
+RateLimiter.prototype.overrideConfig = function (iterations) {
+  clearTimeout(this.timoutHandle)
+  this.iterations = iterations
+  this.isFirstIteration = true
+  this.limit = 0
+  this.groups = {}
+  this.logger('overrideConfig: ' + JSON.stringify(iterations, null, 2))
+  this.nextIteration()
 }
 
 RateLimiter.prototype.destroy = function () {
