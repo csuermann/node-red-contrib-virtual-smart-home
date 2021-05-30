@@ -149,7 +149,7 @@ __THANK YOU!__
 
 1. Q:  Can I run my own backend?
 
-    A:  Yes! Check out the [backend repository](https://github.com/csuermann/virtual-smart-home/tree/sandbox) and follow the instructions precisely.
+    A:  Yes! Check out the [backend repository](https://github.com/csuermann/virtual-smart-home/) and follow the instructions precisely.
 
 1. Q:  Can you add feature X, please?
 
