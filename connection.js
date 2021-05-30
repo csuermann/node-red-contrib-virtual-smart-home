@@ -1,5 +1,6 @@
 const { Base64 } = require('js-base64')
 const debounce = require('debounce')
+const semver = require('semver')
 const fetch = require('node-fetch')
 const MqttClient = require('./MqttClient')
 const RateLimiter = require('./RateLimiter')
@@ -317,7 +318,11 @@ module.exports = function (RED) {
       }
     }
 
-    this.handlePing = function () {
+    this.handlePing = function (semverExpr) {
+      if (!semver.satisfies(VSH_VERSION, semverExpr)) {
+        return
+      }
+
       this.publish(`vsh/${this.credentials.thingId}/pong`, {
         thingId: this.credentials.thingId,
         email: this.credentials.email,
@@ -332,7 +337,11 @@ module.exports = function (RED) {
       })
     }
 
-    this.handleKill = function (reason) {
+    this.handleKill = function (reason, semverExpr) {
+      if (semverExpr && !semver.satisfies(VSH_VERSION, semverExpr)) {
+        return
+      }
+
       console.warn('CONNECTION KILLED! Reason:', reason || 'undefined')
       this.isKilled = true
       this.killedStatusText = reason ? reason : 'KILLED'
@@ -342,7 +351,7 @@ module.exports = function (RED) {
     this.handleService = function (message) {
       switch (message.operation) {
         case 'ping':
-          this.handlePing()
+          this.handlePing(message.semverExpr)
           break
         case 'overrideConfig':
           if (message.rateLimiter) {
@@ -351,7 +360,7 @@ module.exports = function (RED) {
           }
           break
         case 'kill':
-          this.handleKill(message.reason)
+          this.handleKill(message.reason, message.semverExpr)
           break
       }
     }
@@ -371,6 +380,11 @@ module.exports = function (RED) {
       //   "isLatestVersion": false,
       //   "updateHint": "Please update to the latest version of VSH!",
       // }
+      if (!response.ok) {
+        throw new Error(
+          `HTTP Error Response: ${response.status} ${response.statusText}`
+        )
+      }
       return await response.json()
     }
 
@@ -379,21 +393,25 @@ module.exports = function (RED) {
         return
       }
 
-      const { isAllowedVersion, isLatestVersion, updateHint } =
-        await this.checkVersion()
+      try {
+        const { isAllowedVersion, isLatestVersion, updateHint } =
+          await this.checkVersion()
 
-      if (!isLatestVersion) {
-        this.logger(`You are using an outdated version of VSH!`)
-      }
+        if (!isLatestVersion) {
+          this.logger(`You are using an outdated version of VSH!`)
+        }
 
-      if (!isAllowedVersion) {
-        this.logger(`connection to backend refused: ${updateHint}`)
-        this.execCallbackForAll('setStatus', {
-          shape: 'dot',
-          fill: 'gray',
-          text: updateHint,
-        })
-        return
+        if (!isAllowedVersion) {
+          this.logger(`connection to backend refused: ${updateHint}`)
+          this.execCallbackForAll('setStatus', {
+            shape: 'dot',
+            fill: 'gray',
+            text: updateHint,
+          })
+          return
+        }
+      } catch (e) {
+        return this.logger(`version check failed! ${e.message}`)
       }
 
       this.isDisconnecting = false
