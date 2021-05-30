@@ -4,6 +4,10 @@ A Node-RED node that represents a virtual device which can be controlled via
 Amazon Alexa. Requires the '_virtual smart home_' skill to be enabled for your
 Amazon account.
 
+## Version 2.x.x - BREAKING CHANGE
+
+With the release of version 2.0.0 all earlier versions will be deprecated and no longer work. Please update to the latest version of VSH!
+
 ## Availability
 
 The _virtual smart home_ skill is available in the Amazon skill stores in the following locales:
