@@ -32,7 +32,7 @@ module.exports = function (RED) {
       return localState
     }
 
-    const emitLocalState = (topic = null) => {
+    const emitLocalState = ({ topic = null, rawDirective = null }) => {
       let payload
 
       payload = decorator({
@@ -46,6 +46,11 @@ module.exports = function (RED) {
           topic: topic ? topic : config.topic,
           payload,
         }
+
+        if (rawDirective) {
+          payload['rawDirective'] = rawDirective
+        }
+
         node.send(msg)
       }
     }
@@ -112,7 +117,7 @@ module.exports = function (RED) {
       }
 
       if (config.passthrough && Object.keys(approvedState).length > 0) {
-        emitLocalState(msg.topic)
+        emitLocalState({ topic: msg.topic })
       }
 
       if (done) {

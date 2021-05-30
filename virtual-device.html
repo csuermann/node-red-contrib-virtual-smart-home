@@ -235,7 +235,7 @@
     can be found in the 'import nodes' section underneath the 'import' menu.
   </p>
 
-  <h4>General Attributes (always present)</h4>
+  <h4>General Attributes (always present unless stated otherwise)</h4>
   <dl class="message-properties">
     <dt>
       payload.name
@@ -274,6 +274,21 @@
     </dt>
     <dd>
       Name of the directive that was invoked by Alexa, e.g. 'TurnOn'. Only
+      present for state changes triggered by Alexa (payload.source == 'alexa')
+    </dd>
+  </dl>
+
+  <dl class="message-properties">
+    <dt>
+      payload.rawDirective
+      <span class="property-type">object</span>
+    </dt>
+    <dd>
+      Raw directive object received from the
+      <a
+        href="https://developer.amazon.com/en-US/docs/alexa/device-apis/smart-home-general-apis.html"
+        >Alexa Smart Home Skill API</a
+      >. Sensitive attributes (e.g. OAuth tokens) are excluded on purpose. Only
       present for state changes triggered by Alexa (payload.source == 'alexa')
     </dd>
   </dl>

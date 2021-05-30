@@ -298,7 +298,9 @@ module.exports = function (RED) {
         )
 
         // emit msg obj
-        this.execCallbackForOne(deviceId, 'emitLocalState')
+        this.execCallbackForOne(deviceId, 'emitLocalState', {
+          rawDirective: directiveRequest,
+        })
 
         let newProperties = buildPropertiesFromState(newConfirmedState)
 
