@@ -37,7 +37,7 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
 - devices removed from the Node-RED canvas will also be removed from Alexa. Orphaned
   devices can also be manually removed from Alexa via the Node-RED editor.
 - changes made to virtual device types and names will immediately be picked up by Alexa.
-- local state changes of devices get synchronized with Alexa
+- local state changes of devices (e.g. thermostat values) get synchronized with Alexa
 - secure communication with the IoT cloud through individually provisioned
   certificates
 
