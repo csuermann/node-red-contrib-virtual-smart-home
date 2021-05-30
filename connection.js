@@ -1,5 +1,6 @@
 const { Base64 } = require('js-base64')
 const debounce = require('debounce')
+const fetch = require('node-fetch')
 const MqttClient = require('./MqttClient')
 const RateLimiter = require('./RateLimiter')
 const VSH_VERSION = require('./version')
@@ -355,8 +356,43 @@ module.exports = function (RED) {
       }
     }
 
+    this.checkVersion = async function () {
+      const response = await fetch(
+        `${
+          config.backendUrl
+        }/check_version?version=${VSH_VERSION}&nr_version=${RED.version()}&thingId=${
+          this.credentials.thingId
+        }`
+      )
+
+      // EXAMPLE
+      // {
+      //   "isAllowedVersion": false,
+      //   "isLatestVersion": false,
+      //   "updateHint": "Please update to the latest version of VSH!",
+      // }
+      return await response.json()
+    }
+
     this.connectAndSubscribe = async function () {
       if (!this.credentials.server) {
+        return
+      }
+
+      const { isAllowedVersion, isLatestVersion, updateHint } =
+        await this.checkVersion()
+
+      if (!isLatestVersion) {
+        this.logger(`You are using an outdated version of VSH!`)
+      }
+
+      if (!isAllowedVersion) {
+        this.logger(`connection to backend refused: ${updateHint}`)
+        this.execCallbackForAll('setStatus', {
+          shape: 'dot',
+          fill: 'gray',
+          text: updateHint,
+        })
         return
       }
 

@@ -44,7 +44,8 @@
     "debounce": "^1.2.0",
     "deep-eql": "^4.0.0",
     "deepmerge": "^4.2.2",
-    "js-base64": "^3.4.5"
+    "js-base64": "^3.4.5",
+    "node-fetch": "^2.6.1"
   },
   "engines": {
     "node": ">=10.23.0"
