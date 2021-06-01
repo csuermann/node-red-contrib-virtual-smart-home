@@ -151,6 +151,7 @@ module.exports = function (RED) {
       endpointId,
       properties,
       causeType,
+      correlationToken = '',
       useRateLimiter,
     }) {
       const changes = properties.filter((prop) => prop.changed).length
@@ -165,6 +166,7 @@ module.exports = function (RED) {
           this.publish(`vsh/${this.credentials.thingId}/changeReport`, {
             endpointId,
             properties,
+            correlationToken,
             causeType,
           })
         }
@@ -262,7 +264,6 @@ module.exports = function (RED) {
       //       namespace: 'Alexa.PowerController',
       //       name: 'TurnOn',
       //       payloadVersion: '3',
-      //       messageId: '00a277c2-0172-4993-9c08-b50467925726',
       //       correlationToken: 'AAAAAAAAAQAwOfXmbhm...',
       //     },
       //     endpoint: {
@@ -312,6 +313,7 @@ module.exports = function (RED) {
           endpointId: deviceId,
           properties: newProperties,
           causeType: 'VOICE_INTERACTION',
+          correlationToken: directiveRequest.directive.header.correlationToken,
           useRateLimiter: false,
         })
       } catch (e) {
