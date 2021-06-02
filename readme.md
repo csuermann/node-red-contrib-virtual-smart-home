@@ -8,6 +8,10 @@ Amazon account.
 
 With the release of version 2.0.0 all earlier versions will be deprecated and no longer work. Please update to the latest version of VSH!
 
+### What's new in version 2?
+
+Previously the state of virtual devices (e.g. the brightness of a lamp) was kept in a shadow database at the backend. When the backend skill received a directive (e.g. "Alexa, dim the kitchen light to 50 percent") the shadow database would immediately get updated and the client would receive a notification by being subscribed to shadow changes. With version 2, all state is exclusively stored on the client and incoming directives from Alexa are simply forwared to the client. You can inspect the raw directive content received by examining the new `rawDirective` property of outbound `msg` objects. This change will lead to a cost reduction in running the VSH backend as well as allow for more direct feedback when a virtual device is offline.
+
 ## Availability
 
 The _virtual smart home_ skill is available in the Amazon skill stores in the following locales:
