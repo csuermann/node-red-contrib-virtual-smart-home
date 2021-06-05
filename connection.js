@@ -18,15 +18,12 @@ module.exports = function (RED) {
     const node = this
 
     this.logger = config.debug
-      ? (logMessage, variable = undefined) => {
-          console.log(
-            `${new Date().toISOString()}: vsh-connection ${
-              config.name || '<???>'
-            }: ${logMessage}`
-          )
+      ? (logMessage, variable = undefined, logLevel = 'log') => {
+          //logLevel: log | warn | error | trace | debug
           if (variable) {
-            console.log(JSON.stringify(variable, null, 4))
+            logMessage = logMessage + ': ' + JSON.stringify(variable)
           }
+          this[logLevel](logMessage)
         }
       : (logMessage, variable) => {}
 
@@ -58,7 +55,6 @@ module.exports = function (RED) {
     this.jobQueue = []
 
     this.jobQueueExecutor = setInterval(() => {
-      //console.log(`job queue length: ${this.jobQueue.length}}`)
       this.jobQueue = this.jobQueue.filter((job) => job() == false)
     }, 1000)
 
@@ -277,7 +273,11 @@ module.exports = function (RED) {
       const oldState = this.execCallbackForOne(deviceId, 'getLocalState')
 
       if (!oldState) {
-        this.logger(`no local state found for device ID ${deviceId}`)
+        this.logger(
+          `no local state found for device ID ${deviceId}`,
+          null,
+          'warn'
+        )
         return
       }
 
@@ -317,7 +317,7 @@ module.exports = function (RED) {
           useRateLimiter: false,
         })
       } catch (e) {
-        this.logger(e.message)
+        this.logger(e.message, null, 'error')
         return
       }
     }
@@ -402,11 +402,15 @@ module.exports = function (RED) {
           await this.checkVersion()
 
         if (!isLatestVersion) {
-          this.logger(`You are using an outdated version of VSH!`)
+          this.logger(`You are using an outdated version of VSH!`, null, 'warn')
         }
 
         if (!isAllowedVersion) {
-          this.logger(`connection to backend refused: ${updateHint}`)
+          this.logger(
+            `connection to backend refused: ${updateHint}`,
+            null,
+            'error'
+          )
           this.execCallbackForAll('setStatus', {
             shape: 'dot',
             fill: 'gray',
@@ -415,7 +419,7 @@ module.exports = function (RED) {
           return
         }
       } catch (e) {
-        return this.logger(`version check failed! ${e.message}`)
+        return this.logger(`version check failed! ${e.message}`, null, 'error')
       }
 
       this.isDisconnecting = false
@@ -514,17 +518,19 @@ module.exports = function (RED) {
                 if (topic.includes('/directive')) {
                   this.handleDirectiveFromAlexa(deviceId, message)
                 } else {
-                  console.log(
-                    'received device-related message that I cannot handle yet!',
-                    topic,
-                    message
+                  this.logger(
+                    'received device-related message that is not supported yet!',
+                    { topic, message },
+                    null,
+                    'warn'
                   )
                 }
               } else {
-                console.log(
-                  'received thing-related message that I cannot handle yet!',
-                  topic,
-                  message
+                this.logger(
+                  'received thing-related message that is not supported yet!',
+                  { topic, message },
+                  null,
+                  'warn'
                 )
               }
           }
