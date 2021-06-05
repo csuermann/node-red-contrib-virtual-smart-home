@@ -152,7 +152,7 @@ module.exports = function (RED) {
     }) {
       const changes = properties.filter((prop) => prop.changed).length
 
-      if (changes == 0) {
+      if (changes == 0 && causeType == 'PHYSICAL_INTERACTION') {
         this.logger(`skipping ChangeReport - no properties changed`)
         return
       }
