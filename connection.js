@@ -30,7 +30,7 @@ module.exports = function (RED) {
     this.rater = new RateLimiter(
       [
         { period: 1 * 60 * 1000, limit: 12, penalty: 0, repeat: 10 }, //for 10 min: Limit to 12 req / min
-        { period: 10 * 60 * 1000, limit: 3, penalty: 1 }, //afterward: Limit to 3 req / 10 min
+        { period: 10 * 60 * 1000, limit: 5, penalty: 1 }, //afterward: Limit to 5 req / 10 min
       ],
       null, //= callback
       this.logger
