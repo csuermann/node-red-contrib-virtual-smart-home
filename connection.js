@@ -537,6 +537,7 @@ module.exports = function (RED) {
         },
       })
 
+      this.logger(`Attempting MQTT connection: ${options.host}:${options.port}`)
       this.mqttClient.connect()
 
       const topicsToSubscribe = [
