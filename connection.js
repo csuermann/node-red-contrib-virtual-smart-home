@@ -44,6 +44,7 @@ module.exports = function (RED) {
     this.isError = false
     this.isKilled = false
     this.killedStatusText = 'KILLED'
+    this.allowedDeviceCount = 200
 
     this.stats = {
       lastStartup: new Date().getTime(),
@@ -65,12 +66,27 @@ module.exports = function (RED) {
     }
 
     this.registerChildNode = function (nodeId, callbacks) {
-      if (Object.keys(this.childNodes).length == 0) {
-        //first child node is registering!
-        this.connectAndSubscribe()
+      // console.log(
+      //   `registerChildNode() for ${nodeId} | allowed: ${this.allowedDeviceCount}`
+      // )
+
+      if (Object.keys(this.childNodes).length >= this.allowedDeviceCount) {
+        callbacks.setStatus({
+          shape: 'dot',
+          fill: 'gray',
+          text: 'device limit reached!',
+        })
+        return
       }
 
       this.childNodes[nodeId] = callbacks
+
+      if (Object.keys(this.childNodes).length == 1) {
+        //first child node is registering!
+        //console.log('first child node registering!!!')
+
+        this.connectAndSubscribe()
+      }
 
       //immediately push most relevant state to new subscriber
       this.execCallbackForOne(nodeId, 'setStatus', {
@@ -91,6 +107,7 @@ module.exports = function (RED) {
     }
 
     this.unregisterChildNode = async function (nodeId) {
+      //console.log(`unregisterChildNode() for ${nodeId}`)
       delete this.childNodes[nodeId]
 
       if (Object.keys(this.childNodes).length == 0) {
@@ -383,6 +400,7 @@ module.exports = function (RED) {
       //   "isAllowedVersion": false,
       //   "isLatestVersion": false,
       //   "updateHint": "Please update to the latest version of VSH!",
+      //   "allowedDeviceCount": 5,
       // }
       if (!response.ok) {
         throw new Error(
@@ -392,14 +410,34 @@ module.exports = function (RED) {
       return await response.json()
     }
 
+    this.unrigisterUnallowedDevices = function (allowedDeviceCount) {
+      let i = 0
+
+      for (const nodeId in this.childNodes) {
+        i++
+        if (i > allowedDeviceCount) {
+          this.execCallbackForOne(nodeId, 'setStatus', {
+            shape: 'dot',
+            fill: 'gray',
+            text: 'device limit reached!',
+          })
+          this.unregisterChildNode(nodeId)
+        }
+      }
+    }
+
     this.connectAndSubscribe = async function () {
       if (!this.credentials.server) {
         return
       }
 
       try {
-        const { isAllowedVersion, isLatestVersion, updateHint } =
-          await this.checkVersion()
+        const {
+          isAllowedVersion,
+          isLatestVersion,
+          updateHint,
+          allowedDeviceCount,
+        } = await this.checkVersion()
 
         if (!isLatestVersion) {
           this.logger(`You are using an outdated version of VSH!`, null, 'warn')
@@ -418,6 +456,10 @@ module.exports = function (RED) {
           })
           return
         }
+
+        this.allowedDeviceCount = allowedDeviceCount
+
+        this.unrigisterUnallowedDevices(allowedDeviceCount)
       } catch (e) {
         return this.logger(`version check failed! ${e.message}`, null, 'error')
       }
@@ -537,7 +579,9 @@ module.exports = function (RED) {
         },
       })
 
-      this.logger(`Attempting MQTT connection: ${options.host}:${options.port}`)
+      this.logger(
+        `Attempting MQTT connection: ${options.host}:${options.port} (clientId: ${options.clientId})`
+      )
       this.mqttClient.connect()
 
       const topicsToSubscribe = [
