@@ -269,6 +269,50 @@ module.exports = function (RED) {
       })
     }
 
+    this.handleReportState = function (deviceId, directiveRequest) {
+      // EXAMPLE directiveRequest:
+      // {
+      //   directive: {
+      //     header: {
+      //       namespace: 'Alexa',
+      //       name: 'ReportState',
+      //       payloadVersion: '3',
+      //       correlationToken: 'AAAAAAAAAQAwOfXmbhm...',
+      //     },
+      //     endpoint: {
+      //       endpointId: 'vshd-xxxxxxxxxxxxx',
+      //     },
+      //     payload: {},
+      //   },
+      // }
+
+      const currentState = this.execCallbackForOne(deviceId, 'getLocalState')
+
+      if (!currentState) {
+        this.logger(
+          `no local state found for device ID ${deviceId}`,
+          null,
+          'warn'
+        )
+        return
+      }
+
+      const currentProperties = buildPropertiesFromState(currentState).map(
+        (prop) => {
+          prop['changed'] = false
+          return prop
+        }
+      )
+
+      this.triggerChangeReport({
+        endpointId: deviceId,
+        properties: currentProperties,
+        causeType: 'STATE_REPORT',
+        correlationToken: directiveRequest.directive.header.correlationToken,
+        useRateLimiter: false,
+      })
+    }
+
     this.handleDirectiveFromAlexa = function (deviceId, directiveRequest) {
       // EXAMPLE directiveRequest:
       // {
@@ -558,7 +602,11 @@ module.exports = function (RED) {
                 //   this.handleUpdateFromAlexa(deviceId, message)
                 // } else
                 if (topic.includes('/directive')) {
-                  this.handleDirectiveFromAlexa(deviceId, message)
+                  if (message.directive.header.name == 'ReportState') {
+                    this.handleReportState(deviceId, message)
+                  } else {
+                    this.handleDirectiveFromAlexa(deviceId, message)
+                  }
                 } else {
                   this.logger(
                     'received device-related message that is not supported yet!',
