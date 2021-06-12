@@ -383,7 +383,7 @@ module.exports = function (RED) {
       }
     }
 
-    this.handlePing = function (semverExpr) {
+    this.handlePing = function ({ semverExpr }) {
       if (!semver.satisfies(VSH_VERSION, semverExpr)) {
         return
       }
@@ -402,7 +402,7 @@ module.exports = function (RED) {
       })
     }
 
-    this.handleKill = function (reason, semverExpr) {
+    this.handleKill = function ({ reason, semverExpr }) {
       if (semverExpr && !semver.satisfies(VSH_VERSION, semverExpr)) {
         return
       }
@@ -413,10 +413,20 @@ module.exports = function (RED) {
       this.disconnect()
     }
 
+    this.handleSetDeviceStatus = function ({ status, color, devices }) {
+      devices.forEach((deviceId) => {
+        this.execCallbackForOne(deviceId, 'setStatus', {
+          shape: 'dot',
+          fill: color,
+          text: status,
+        })
+      })
+    }
+
     this.handleService = function (message) {
       switch (message.operation) {
         case 'ping':
-          this.handlePing(message.semverExpr)
+          this.handlePing(message)
           break
         case 'overrideConfig':
           if (message.rateLimiter) {
@@ -425,8 +435,16 @@ module.exports = function (RED) {
           }
           break
         case 'kill':
-          this.handleKill(message.reason, message.semverExpr)
+          this.handleKill(message)
           break
+        case 'setDeviceStatus':
+          this.handleSetDeviceStatus(message)
+          break
+        default:
+          this.logger(
+            `received service request (${message.operation}) that is not supported by this VSH version. Updating to the latest version might fix this!`,
+            'warn'
+          )
       }
     }
 
