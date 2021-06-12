@@ -484,7 +484,11 @@ module.exports = function (RED) {
         } = await this.checkVersion()
 
         if (!isLatestVersion) {
-          this.logger(`You are using an outdated version of VSH!`, null, 'warn')
+          this.logger(
+            `A newer version of VSH is available! Your system might no longer work as expected`,
+            null,
+            'warn'
+          )
         }
 
         if (!isAllowedVersion) {
