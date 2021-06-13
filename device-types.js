@@ -521,6 +521,15 @@ const types = {
     },
     decorator: defaultDecorator,
   },
+  MOTION_SENSOR: {
+    defaultState: {
+      detectionState: 'NOT_DETECTED',
+    },
+    validators: {
+      detectionState,
+    },
+    decorator: defaultDecorator,
+  },
   PLUG: {
     defaultState: {
       powerState: 'OFF',

@@ -1,0 +1,59 @@
+[
+  {
+    "id": "a67f98de.750138",
+    "type": "vsh-virtual-device",
+    "z": "7ecdfb0b.fa7794",
+    "name": "front door",
+    "topic": "frontDoor/motion",
+    "connection": "",
+    "template": "MOTION_SENSOR",
+    "passthrough": false,
+    "diff": false,
+    "filter": false,
+    "x": 760,
+    "y": 1240,
+    "wires": [[]]
+  },
+  {
+    "id": "c9e0153d.a8fd58",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "motion",
+    "props": [
+      {
+        "p": "payload.detectionState",
+        "v": "DETECTED",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 430,
+    "y": 1240,
+    "wires": [["a67f98de.750138"]]
+  },
+  {
+    "id": "51f1a442.3442ac",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "no motion",
+    "props": [
+      {
+        "p": "payload.detectionState",
+        "v": "NOT_DETECTED",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 440,
+    "y": 1280,
+    "wires": [["a67f98de.750138"]]
+  }
+]

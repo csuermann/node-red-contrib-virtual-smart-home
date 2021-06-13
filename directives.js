@@ -222,7 +222,9 @@ function buildPropertiesFromState(state) {
   if (state.hasOwnProperty('detectionState')) {
     properties.push(
       makeProperty(
-        'Alexa.ContactSensor',
+        state.template === 'CONTACT_SENSOR'
+          ? 'Alexa.ContactSensor'
+          : 'Alexa.MotionSensor',
         'detectionState',
         state.detectionState
       )
