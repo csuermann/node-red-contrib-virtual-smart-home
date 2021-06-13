@@ -3,13 +3,15 @@
     "id": "f8d7ccba.de9cf",
     "type": "vsh-virtual-device",
     "z": "7ecdfb0b.fa7794",
-    "name": "bedroom thermostat",
+    "name": "bedroom",
     "topic": "bedroom/thermostat",
-    "connection": "",
+    "connection": "c653a955.290d98",
     "template": "THERMOSTAT",
     "passthrough": true,
+    "diff": false,
+    "filter": false,
     "x": 940,
-    "y": 940,
+    "y": 1400,
     "wires": [["185af96.c50b507"]]
   },
   {
@@ -26,8 +28,8 @@
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 660,
-    "y": 940,
+    "x": 700,
+    "y": 1400,
     "wires": [["f8d7ccba.de9cf"]]
   },
   {
@@ -42,8 +44,8 @@
     "complete": "false",
     "statusVal": "",
     "statusType": "auto",
-    "x": 1190,
-    "y": 940,
+    "x": 1230,
+    "y": 1400,
     "wires": []
   },
   {
@@ -60,8 +62,8 @@
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 660,
-    "y": 980,
+    "x": 700,
+    "y": 1440,
     "wires": [["f8d7ccba.de9cf"]]
   },
   {
@@ -78,8 +80,8 @@
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 650,
-    "y": 1060,
+    "x": 690,
+    "y": 1520,
     "wires": [["f8d7ccba.de9cf"]]
   },
   {
@@ -96,8 +98,8 @@
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 660,
-    "y": 1100,
+    "x": 700,
+    "y": 1560,
     "wires": [["f8d7ccba.de9cf"]]
   },
   {
@@ -106,8 +108,8 @@
     "z": "7ecdfb0b.fa7794",
     "name": "THERMOSTAT",
     "info": "",
-    "x": 640,
-    "y": 700,
+    "x": 680,
+    "y": 1160,
     "wires": []
   },
   {
@@ -116,8 +118,8 @@
     "z": "7ecdfb0b.fa7794",
     "name": "Alexa, make it warmer in here.",
     "info": "",
-    "x": 720,
-    "y": 780,
+    "x": 760,
+    "y": 1240,
     "wires": []
   },
   {
@@ -126,8 +128,8 @@
     "z": "7ecdfb0b.fa7794",
     "name": "Alexa, make it cooler in here.",
     "info": "",
-    "x": 720,
-    "y": 820,
+    "x": 760,
+    "y": 1280,
     "wires": []
   },
   {
@@ -136,8 +138,8 @@
     "z": "7ecdfb0b.fa7794",
     "name": "Alexa, set bedroom thermostat to twenty.",
     "info": "",
-    "x": 760,
-    "y": 740,
+    "x": 800,
+    "y": 1200,
     "wires": []
   },
   {
@@ -146,8 +148,63 @@
     "z": "7ecdfb0b.fa7794",
     "name": "Alexa, what's the temperature of bedroom thermostat?",
     "info": "",
-    "x": 800,
-    "y": 860,
+    "x": 840,
+    "y": 1320,
     "wires": []
+  },
+  {
+    "id": "7b1a6735.ced7a8",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "mode = AUTO",
+    "props": [{ "p": "payload.thermostatMode", "v": "AUTO", "vt": "str" }],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 670,
+    "y": 1640,
+    "wires": [["f8d7ccba.de9cf"]]
+  },
+  {
+    "id": "5e3718a.25277e8",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "mode = HEAT",
+    "props": [{ "p": "payload.thermostatMode", "v": "HEAT", "vt": "str" }],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 670,
+    "y": 1680,
+    "wires": [["f8d7ccba.de9cf"]]
+  },
+  {
+    "id": "1072ec7.feef314",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "mode = COOL",
+    "props": [{ "p": "payload.thermostatMode", "v": "COOL", "vt": "str" }],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 680,
+    "y": 1720,
+    "wires": [["f8d7ccba.de9cf"]]
+  },
+  {
+    "id": "c653a955.290d98",
+    "type": "vsh-connection",
+    "name": "SANDBOX: cornelius.suermann@gmail.com",
+    "port": "8883",
+    "accessTokenExpiry": "1623058880575",
+    "debug": true,
+    "backendUrl": "https://hbsky6oavf.execute-api.eu-west-1.amazonaws.com/dev",
+    "lwaClientId": "amzn1.application-oa2-client.cc2605d7d7d64fb28b90e75f64622bfa"
   }
 ]

@@ -44,7 +44,6 @@ const directives = {
           ? 'Position.Up'
           : 'Position.Down'
     }
-
     return newState
   },
   SetVolume: (request, currentState) => ({
@@ -153,6 +152,20 @@ const directives = {
     targetTemperature: request.directive.payload.targetSetpoint.value,
     targetScale: request.directive.payload.targetSetpoint.scale,
   }),
+  SetThermostatMode: (request, currentState) => {
+    const newState = {
+      thermostatMode: request.directive.payload.thermostatMode.value,
+    }
+    if (
+      request.directive.payload.thermostatMode.value === 'COOL' ||
+      request.directive.payload.thermostatMode.value === 'HEAT'
+    ) {
+      newState['powerState'] = 'ON'
+    } else if (request.directive.payload.thermostatMode.value === 'OFF') {
+      newState['powerState'] = 'OFF'
+    }
+    return newState
+  },
   AdjustRangeValue: (request, currentState) => {
     if (currentState.template === 'FAN') {
       const currentSpeed = currentState.speed
@@ -306,6 +319,16 @@ function buildPropertiesFromState(state) {
   if (state.hasOwnProperty('mode')) {
     properties.push(
       makeProperty('Alexa.ModeController', 'mode', state.mode, state.instance)
+    )
+  }
+
+  if (state.hasOwnProperty('thermostatMode')) {
+    properties.push(
+      makeProperty(
+        'Alexa.ThermostatController',
+        'thermostatMode',
+        state.thermostatMode
+      )
     )
   }
 

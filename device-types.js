@@ -351,6 +351,15 @@ const temperatureScale = (val) => {
   return { key: 'scale', value: val }
 }
 
+const thermostatMode = (val) => {
+  const isValid =
+    val === 'AUTO' || val === 'HEAT' || val === 'COOL' || val === 'OFF'
+  if (!isValid) {
+    return false
+  }
+  return { key: 'thermostatMode', value: val }
+}
+
 //---DECORATORS---
 
 const diffDecoratorFactory = (anotherDecorator) => {
@@ -658,10 +667,13 @@ const types = {
       scale: 'CELSIUS',
       targetTemperature: 0,
       targetScale: 'CELSIUS',
+      thermostatMode: 'OFF',
+      powerState: 'OFF',
     },
     validators: {
       temperature: temperatureValue,
       scale: temperatureScale,
+      thermostatMode,
       targetTemperature: wrapValidator(temperatureValue, 'targetTemperature'),
       targetScale: wrapValidator(temperatureScale, 'targetScale'),
     },
