@@ -439,6 +439,43 @@
     <dd>Brightness in % (0...100)</dd>
   </dl>
 
+  <h4>Entertainment Device</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.channel
+      <span class="property-type">int</span>
+    </dt>
+    <dd>Channel number (1...999)</dd>
+    <dt>
+      payload.input
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Input source (e.g. 'HDMI 1',
+      <a
+        href="https://developer.amazon.com/en-US/docs/alexa/device-apis/alexa-inputcontroller.html"
+        >etc.</a
+      >)
+    </dd>
+    <dt>
+      payload.muted
+      <span class="property-type">boolean</span>
+    </dt>
+    <dd>
+      <code>true</code> when the speaker is muted, otherwise <code>false</code>
+    </dd>
+    <dt>
+      payload.powerState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'ON' or 'OFF'</dd>
+    <dt>
+      payload.volume
+      <span class="property-type">int</span>
+    </dt>
+    <dd>Volume in % (0...100)</dd>
+  </dl>
+
   <h4>Fan</h4>
   <dl class="message-properties">
     <dt>

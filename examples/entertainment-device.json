@@ -1,0 +1,134 @@
+[
+  {
+    "id": "20ba7c9f.2c3f64",
+    "type": "vsh-virtual-device",
+    "z": "7ecdfb0b.fa7794",
+    "name": "bedroom TV",
+    "topic": "bedroom/tv",
+    "connection": "",
+    "template": "ENTERTAINMENT_DEVICE",
+    "passthrough": false,
+    "diff": false,
+    "filter": false,
+    "x": 970,
+    "y": 1620,
+    "wires": [["2fd107a5.7060b8"]]
+  },
+  {
+    "id": "8184a2ed.ed96a",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "ENTERTAINMENT DEVICE",
+    "info": "",
+    "x": 950,
+    "y": 1180,
+    "wires": []
+  },
+  {
+    "id": "82b4b087.1bb01",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, change the input to DVD on the Bedroom TV.",
+    "info": "",
+    "x": 1070,
+    "y": 1220,
+    "wires": []
+  },
+  {
+    "id": "2fd107a5.7060b8",
+    "type": "debug",
+    "z": "7ecdfb0b.fa7794",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1150,
+    "y": 1620,
+    "wires": []
+  },
+  {
+    "id": "1fd55520.5de0eb",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, set the volume of the Bedroom TV to 50.",
+    "info": "",
+    "x": 1060,
+    "y": 1260,
+    "wires": []
+  },
+  {
+    "id": "4bf13e64.5d61b",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, turn the volume down on the Bedroom TV by 20.",
+    "info": "",
+    "x": 1080,
+    "y": 1300,
+    "wires": []
+  },
+  {
+    "id": "3bd5debb.559c32",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, turn the volume down on Bedroom TV.",
+    "info": "",
+    "x": 1050,
+    "y": 1340,
+    "wires": []
+  },
+  {
+    "id": "8bf6d33b.12e1b",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, mute Bedroom TV.",
+    "info": "",
+    "x": 990,
+    "y": 1380,
+    "wires": []
+  },
+  {
+    "id": "834842b6.f87e1",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, unmute Bedroom TV.",
+    "info": "",
+    "x": 1000,
+    "y": 1420,
+    "wires": []
+  },
+  {
+    "id": "b6ba1fdf.c2c96",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, change the channel to 200 on the Bedroom TV.",
+    "info": "",
+    "x": 1080,
+    "y": 1460,
+    "wires": []
+  },
+  {
+    "id": "b97f1566.8a4e98",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "lexa, next channel on the Bedroom TV.",
+    "info": "",
+    "x": 1030,
+    "y": 1500,
+    "wires": []
+  },
+  {
+    "id": "d2a795ba.f289f8",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, channel down on the Bedroom TV.",
+    "info": "",
+    "x": 1040,
+    "y": 1540,
+    "wires": []
+  }
+]
