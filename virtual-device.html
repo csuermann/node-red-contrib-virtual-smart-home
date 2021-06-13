@@ -83,6 +83,7 @@
     <select id="node-input-template">
       <option value="BLINDS">Blinds</option>
       <option value="COLOR_CHANGING_LIGHT_BULB">Color Changing Light Bulb</option>
+      <option value="CONTACT_SENSOR">Contact Sensor</option>
       <option value="DIMMABLE_LIGHT_BULB">Dimmable Light Bulb</option>
       <option value="DIMMER_SWITCH">Dimmer Switch</option>
       <option value="FAN">Fan</option>
@@ -390,6 +391,22 @@
       <span class="property-type">array(3)</span>
     </dt>
     <dd>[EXPERIMENTAL] XYZ representation of <code>payload.color</code></dd>
+  </dl>
+
+  <h4>Contact Sensor</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.detectionState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      'DETECTED' = The sensor is open and the two pieces of the sensor are not
+      in contact with each other. For example, after a window has been opened.
+    </dd>
+    <dd>
+      'NOT_DETECTED' = The sensor is closed and the two pieces of the sensor are
+      in contact with each other.
+    </dd>
   </dl>
 
   <h4>Dimmable Light Bulb</h4>

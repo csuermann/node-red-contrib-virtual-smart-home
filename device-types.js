@@ -30,6 +30,14 @@ const brightness = (val) => {
   return { key: 'brightness', value: val }
 }
 
+const detectionState = (val) => {
+  const isValid = val == 'DETECTED' || val == 'NOT_DETECTED'
+  if (!isValid) {
+    return false
+  }
+  return { key: 'detectionState', value: val }
+}
+
 const percentage = (val) => {
   const isValid = Number.isInteger(val) && val >= 0 && val <= 100
   if (!isValid) {
@@ -460,6 +468,15 @@ const types = {
       lightMode,
     },
     decorator: colorChangingLightDecorator,
+  },
+  CONTACT_SENSOR: {
+    defaultState: {
+      detectionState: 'NOT_DETECTED',
+    },
+    validators: {
+      detectionState,
+    },
+    decorator: defaultDecorator,
   },
   DIMMABLE_LIGHT_BULB: {
     defaultState: {

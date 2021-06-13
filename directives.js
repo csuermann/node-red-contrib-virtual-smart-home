@@ -219,6 +219,16 @@ function buildPropertiesFromState(state) {
     )
   }
 
+  if (state.hasOwnProperty('detectionState')) {
+    properties.push(
+      makeProperty(
+        'Alexa.ContactSensor',
+        'detectionState',
+        state.detectionState
+      )
+    )
+  }
+
   if (state.hasOwnProperty('color') && state.lightMode == 'hsb') {
     properties.push(
       makeProperty('Alexa.ColorController', 'color', {

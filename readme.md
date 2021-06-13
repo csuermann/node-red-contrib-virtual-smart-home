@@ -30,6 +30,7 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
 - supports a growing set of device types
   - Blinds
   - Color Changing Light Bulb
+  - Contact Sensor
   - Dimmable Light Bulb
   - Dimmer Switch
   - Fan
