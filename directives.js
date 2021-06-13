@@ -22,7 +22,18 @@ const directives = {
     brightness: request.directive.payload.brightness,
     powerState: request.directive.payload.brightness > 0 ? 'ON' : 'OFF',
   }),
-
+  ChangeChannel: (request, currentState) => ({
+    channel: request.directive.payload.channel.number
+      ? parseInt(request.directive.payload.channel.number)
+      : 1,
+  }),
+  SkipChannels: (request, currentState) => {
+    let newChannel =
+      currentState.channel + request.directive.payload.channelCount
+    return {
+      channel: newChannel <= 1 ? 999 : newChannel % 999,
+    }
+  },
   SetPercentage: (request, currentState) => {
     const newState = { percentage: request.directive.payload.percentage }
 
@@ -36,6 +47,23 @@ const directives = {
 
     return newState
   },
+  SetVolume: (request, currentState) => ({
+    volume: request.directive.payload.volume,
+  }),
+  AdjustVolume: (request, currentState) => {
+    let newVolume = currentState.volume + request.directive.payload.volume
+    if (newVolume < 0) {
+      newVolume = 0
+    } else if (newVolume > 100) {
+      newVolume = 100
+    }
+    return {
+      volume: newVolume,
+    }
+  },
+  SetMute: (request, currentState) => ({
+    muted: request.directive.payload.mute,
+  }),
   AdjustBrightness: (request, currentState) => {
     let newBrightness =
       currentState.brightness + request.directive.payload.brightnessDelta
@@ -117,6 +145,9 @@ const directives = {
     targetTemperature:
       currentState.targetTemperature +
       request.directive.payload.targetSetpointDelta.value,
+  }),
+  SelectInput: (request, currentState) => ({
+    input: request.directive.payload.input,
   }),
   SetTargetTemperature: (request, currentState) => ({
     targetTemperature: request.directive.payload.targetSetpoint.value,
@@ -231,6 +262,14 @@ function buildPropertiesFromState(state) {
     )
   }
 
+  if (state.hasOwnProperty('channel')) {
+    properties.push(
+      makeProperty('Alexa.ChannelController', 'channel', {
+        number: `${state.channel}`, //must be string
+      })
+    )
+  }
+
   if (state.hasOwnProperty('color') && state.lightMode == 'hsb') {
     properties.push(
       makeProperty('Alexa.ColorController', 'color', {
@@ -254,6 +293,10 @@ function buildPropertiesFromState(state) {
     )
   }
 
+  if (state.hasOwnProperty('input')) {
+    properties.push(makeProperty('Alexa.InputController', 'input', state.input))
+  }
+
   if (state.hasOwnProperty('lockState')) {
     properties.push(
       makeProperty('Alexa.LockController', 'lockState', state.lockState)
@@ -263,6 +306,14 @@ function buildPropertiesFromState(state) {
   if (state.hasOwnProperty('mode')) {
     properties.push(
       makeProperty('Alexa.ModeController', 'mode', state.mode, state.instance)
+    )
+  }
+
+  if (state.hasOwnProperty('muted')) {
+    properties.push(
+      makeProperty('Alexa.Speaker', 'muted', {
+        muted: state.muted,
+      })
     )
   }
 
@@ -319,6 +370,14 @@ function buildPropertiesFromState(state) {
       makeProperty('Alexa.TemperatureSensor', 'temperature', {
         value: state.temperature,
         scale: state.scale,
+      })
+    )
+  }
+
+  if (state.hasOwnProperty('volume')) {
+    properties.push(
+      makeProperty('Alexa.Speaker', 'volume', {
+        volume: state.volume,
       })
     )
   }

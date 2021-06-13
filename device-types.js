@@ -14,6 +14,14 @@ const wrapValidator = (validatorFn, outputStateKey) => {
   }
 }
 
+const booleanValidator = (val) => {
+  const isValid = val === true || val === false
+  if (!isValid) {
+    return false
+  }
+  return { key: 'boolean', value: val }
+}
+
 const powerState = (val) => {
   const isValid = val == 'ON' || val == 'OFF'
   if (!isValid) {
@@ -52,6 +60,17 @@ const speed = (val) => {
     return false
   }
   return { key: 'speed', value: val }
+}
+
+const channel = (val) => {
+  const isValid = Number.isInteger(val) && val >= 1 && val <= 999
+  if (!isValid) {
+    return false
+  }
+  return {
+    key: 'channel',
+    value: val,
+  }
 }
 
 const colorTemperatureInKelvin = (val) => {
@@ -247,6 +266,56 @@ const color_lab = (val) => {
       brightness: hsb[2] / 100,
     },
   }
+}
+
+const input = (val) => {
+  const inputs = [
+    'AUX 1',
+    'AUX 2',
+    'AUX 3',
+    'BLURAY',
+    'CABLE',
+    'CD',
+    'COAX 1',
+    'COAX 2',
+    'COMPOSITE 1',
+    'DVD',
+    'GAME',
+    'HD RADIO',
+    'HDMI 1',
+    'HDMI 2',
+    'HDMI 3',
+    'HDMI ARC',
+    'INPUT 1',
+    'INPUT 2',
+    'INPUT 3',
+    'IPOD',
+    'LINE 1',
+    'LINE 2',
+    'LINE 3',
+    'MEDIA PLAYER',
+    'OPTICAL 1',
+    'OPTICAL 2',
+    'PHONO',
+    'PLAYSTATION',
+    'PLAYSTATION 3',
+    'PLAYSTATION 4',
+    'SATELLITE',
+    'SMARTCAST',
+    'TUNER',
+    'TV',
+    'USB DAC',
+    'VIDEO 1',
+    'VIDEO 2',
+    'VIDEO 3',
+    'XBOX',
+  ]
+
+  if (inputs.indexOf(val) == -1) {
+    return false
+  }
+
+  return { key: 'input', value: val }
 }
 
 const lightMode = (val) => {
@@ -497,6 +566,23 @@ const types = {
     validators: {
       powerState,
       brightness,
+    },
+    decorator: defaultDecorator,
+  },
+  ENTERTAINMENT_DEVICE: {
+    defaultState: {
+      powerState: 'OFF',
+      input: 'TV',
+      channel: 1,
+      volume: 50,
+      muted: false,
+    },
+    validators: {
+      powerState,
+      input,
+      channel,
+      volume: wrapValidator(percentage, 'volume'),
+      muted: wrapValidator(booleanValidator, 'muted'),
     },
     decorator: defaultDecorator,
   },
