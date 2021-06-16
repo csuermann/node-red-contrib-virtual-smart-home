@@ -340,7 +340,7 @@ const temperatureValue = (val) => {
   if (!isValid) {
     return false
   }
-  return { key: 'temperature', value: floatValue }
+  return { key: 'temperature', value: Math.round(floatValue * 10) / 10 } //23.456789 --> 23.4
 }
 
 const temperatureScale = (val) => {
@@ -676,6 +676,7 @@ const types = {
       thermostatMode,
       targetTemperature: wrapValidator(temperatureValue, 'targetTemperature'),
       targetScale: wrapValidator(temperatureScale, 'targetScale'),
+      powerState,
     },
     decorator: defaultDecorator,
   },
