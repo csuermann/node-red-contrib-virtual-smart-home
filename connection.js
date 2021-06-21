@@ -144,7 +144,6 @@ module.exports = function (RED) {
     }
 
     this.requestConfig = function () {
-      this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
       this.publish(`vsh/${this.credentials.thingId}/requestConfig`, {
         vshVersion: VSH_VERSION,
       })
@@ -435,12 +434,18 @@ module.exports = function (RED) {
           this.handlePing(message)
           break
         case 'overrideConfig':
+          this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
+
           if (message.rateLimiter) {
             const iterations = message.rateLimiter
             this.rater.overrideConfig(iterations)
           }
           if (message.userIdToken) {
             this.userIdToken = message.userIdToken
+          }
+          if (message.allowedDeviceCount) {
+            this.allowedDeviceCount = message.allowedDeviceCount
+            this.unrigisterUnallowedDevices(message.allowedDeviceCount)
           }
           break
         case 'kill':
@@ -503,12 +508,8 @@ module.exports = function (RED) {
       }
 
       try {
-        const {
-          isAllowedVersion,
-          isLatestVersion,
-          updateHint,
-          allowedDeviceCount,
-        } = await this.checkVersion()
+        const { isAllowedVersion, isLatestVersion, updateHint } =
+          await this.checkVersion()
 
         if (!isLatestVersion) {
           this.logger(
@@ -531,10 +532,6 @@ module.exports = function (RED) {
           })
           return
         }
-
-        this.allowedDeviceCount = allowedDeviceCount
-
-        this.unrigisterUnallowedDevices(allowedDeviceCount)
       } catch (e) {
         return this.logger(`version check failed! ${e.message}`, null, 'error')
       }
@@ -629,9 +626,6 @@ module.exports = function (RED) {
               if (match) {
                 const deviceId = match[0]
 
-                // if (topic.includes('/update')) {
-                //   this.handleUpdateFromAlexa(deviceId, message)
-                // } else
                 if (topic.includes('/directive')) {
                   if (message.directive.header.name == 'ReportState') {
                     this.handleReportState(deviceId, message)
