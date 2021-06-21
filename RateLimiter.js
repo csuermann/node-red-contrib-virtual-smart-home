@@ -122,7 +122,9 @@ RateLimiter.prototype.overrideConfig = function (iterations) {
   this.isFirstIteration = true
   this.limit = 0
   this.groups = {}
-  this.logger('overrideConfig: ' + JSON.stringify(iterations, null, 2))
+  this.logger(
+    'RateLimiter.overrideConfig: ' + JSON.stringify(iterations, null, 2)
+  )
   this.nextIteration()
 }
 

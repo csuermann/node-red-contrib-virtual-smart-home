@@ -45,6 +45,7 @@ module.exports = function (RED) {
     this.isKilled = false
     this.killedStatusText = 'KILLED'
     this.allowedDeviceCount = 200
+    this.userIdToken = ''
 
     this.stats = {
       lastStartup: new Date().getTime(),
@@ -95,15 +96,15 @@ module.exports = function (RED) {
         text: this.isConnected ? 'online' : 'offline',
       })
 
-      const requestShadowJob = () => {
+      const requestConfigJob = () => {
         if (!this.isSubscribed) {
           return false
         }
 
-        this.requestShadowDebounced()
+        this.requestConfigDebounced()
       }
 
-      this.execOrQueueJob(requestShadowJob)
+      this.execOrQueueJob(requestConfigJob)
     }
 
     this.unregisterChildNode = async function (nodeId) {
@@ -142,8 +143,11 @@ module.exports = function (RED) {
       }
     }
 
-    this.requestShadow = function () {
+    this.requestConfig = function () {
       this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
+      this.publish(`vsh/${this.credentials.thingId}/requestConfig`, {
+        vshVersion: VSH_VERSION,
+      })
     }
 
     this.publish = async function (topic, message) {
@@ -158,7 +162,7 @@ module.exports = function (RED) {
       return await this.mqttClient.publish(topic, message)
     }
 
-    this.requestShadowDebounced = debounce(this.requestShadow, 1000)
+    this.requestConfigDebounced = debounce(this.requestConfig, 1000)
 
     this.triggerChangeReport = function ({
       endpointId,
@@ -181,6 +185,8 @@ module.exports = function (RED) {
             properties,
             correlationToken,
             causeType,
+            vshVersion: VSH_VERSION,
+            userIdToken: this.userIdToken,
           })
         }
       }
@@ -432,6 +438,9 @@ module.exports = function (RED) {
           if (message.rateLimiter) {
             const iterations = message.rateLimiter
             this.rater.overrideConfig(iterations)
+          }
+          if (message.userIdToken) {
+            this.userIdToken = message.userIdToken
           }
           break
         case 'kill':
