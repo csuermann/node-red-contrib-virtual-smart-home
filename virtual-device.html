@@ -567,10 +567,18 @@
   <h4>Thermostat</h4>
   <dl class="message-properties">
     <dt>
-      payload.targetTemperature
-      <span class="property-type">float</span>
+      payload.powerState
+      <span class="property-type">string</span>
     </dt>
-    <dd>Target temperature</dd>
+    <dd>'ON' or 'OFF'</dd>
+    <dt>
+      payload.scale
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Scale / unit of temperature. Allowed values: 'CELSIUS', 'FAHRENHEIT',
+      'KELVIN'
+    </dd>
     <dt>
       payload.targetScale
       <span class="property-type">string</span>
@@ -580,17 +588,19 @@
       'FAHRENHEIT', 'KELVIN'
     </dd>
     <dt>
+      payload.targetTemperature
+      <span class="property-type">float</span>
+    </dt>
+    <dd>Target temperature</dd>
+    <dt>
       payload.temperature
       <span class="property-type">float</span>
     </dt>
     <dd>Measured temperature</dd>
     <dt>
-      payload.scale
+      payload.thermostatMode
       <span class="property-type">string</span>
     </dt>
-    <dd>
-      Scale / unit of temperature. Allowed values: 'CELSIUS', 'FAHRENHEIT',
-      'KELVIN'
-    </dd>
+    <dd>'AUTO', 'HEAT', 'COOL', 'ECO', 'OFF'</dd>
   </dl>
 </script>
