@@ -1,39 +1,47 @@
 [
   {
-    "id": "f8d7ccba.de9cf",
+    "id": "ec192310.979d5",
     "type": "vsh-virtual-device",
     "z": "7ecdfb0b.fa7794",
     "name": "bedroom",
     "topic": "bedroom/thermostat",
-    "connection": "c653a955.290d98",
+    "connection": "",
     "template": "THERMOSTAT",
     "passthrough": true,
     "diff": false,
     "filter": false,
-    "x": 940,
-    "y": 1400,
-    "wires": [["185af96.c50b507"]]
+    "x": 1340,
+    "y": 1440,
+    "wires": [["90b1f25d.d713"]]
   },
   {
-    "id": "6ae812d4.64f2ac",
+    "id": "521b6c26.571e64",
     "type": "inject",
     "z": "7ecdfb0b.fa7794",
     "name": "current temp = 19.7 °C",
     "props": [
-      { "p": "payload.temperature", "v": "19.7", "vt": "num" },
-      { "p": "payload.scale", "v": "CELSIUS", "vt": "str" }
+      {
+        "p": "payload.temperature",
+        "v": "19.7",
+        "vt": "num"
+      },
+      {
+        "p": "payload.scale",
+        "v": "CELSIUS",
+        "vt": "str"
+      }
     ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 700,
-    "y": 1400,
-    "wires": [["f8d7ccba.de9cf"]]
+    "x": 1100,
+    "y": 1440,
+    "wires": [["ec192310.979d5"]]
   },
   {
-    "id": "185af96.c50b507",
+    "id": "90b1f25d.d713",
     "type": "debug",
     "z": "7ecdfb0b.fa7794",
     "name": "",
@@ -44,167 +52,241 @@
     "complete": "false",
     "statusVal": "",
     "statusType": "auto",
-    "x": 1230,
-    "y": 1400,
+    "x": 1630,
+    "y": 1440,
     "wires": []
   },
   {
-    "id": "366a3ec7.f45d32",
+    "id": "1b9ebdb3.4ce6b2",
     "type": "inject",
     "z": "7ecdfb0b.fa7794",
     "name": "current temp = 22 °C",
     "props": [
-      { "p": "payload.temperature", "v": "22", "vt": "num" },
-      { "p": "payload.scale", "v": "CELSIUS", "vt": "str" }
+      {
+        "p": "payload.temperature",
+        "v": "22",
+        "vt": "num"
+      },
+      {
+        "p": "payload.scale",
+        "v": "CELSIUS",
+        "vt": "str"
+      }
     ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 700,
-    "y": 1440,
-    "wires": [["f8d7ccba.de9cf"]]
+    "x": 1100,
+    "y": 1480,
+    "wires": [["ec192310.979d5"]]
   },
   {
-    "id": "34e9d23d.def9ce",
+    "id": "c19e6295.a1337",
     "type": "inject",
     "z": "7ecdfb0b.fa7794",
     "name": "target temp = 20 °C",
     "props": [
-      { "p": "payload.targetTemperature", "v": "20", "vt": "num" },
-      { "p": "payload.targetScale", "v": "CELSIUS", "vt": "str" }
+      {
+        "p": "payload.targetTemperature",
+        "v": "20",
+        "vt": "num"
+      },
+      {
+        "p": "payload.targetScale",
+        "v": "CELSIUS",
+        "vt": "str"
+      }
     ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 690,
-    "y": 1520,
-    "wires": [["f8d7ccba.de9cf"]]
+    "x": 1090,
+    "y": 1560,
+    "wires": [["ec192310.979d5"]]
   },
   {
-    "id": "202115cf.212b8a",
+    "id": "362951d9.1d9e3e",
     "type": "inject",
     "z": "7ecdfb0b.fa7794",
     "name": "target temp = 22.5 °C",
     "props": [
-      { "p": "payload.targetTemperature", "v": "22.5", "vt": "num" },
-      { "p": "payload.targetScale", "v": "CELSIUS", "vt": "str" }
+      {
+        "p": "payload.targetTemperature",
+        "v": "22.5",
+        "vt": "num"
+      },
+      {
+        "p": "payload.targetScale",
+        "v": "CELSIUS",
+        "vt": "str"
+      }
     ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 700,
-    "y": 1560,
-    "wires": [["f8d7ccba.de9cf"]]
+    "x": 1100,
+    "y": 1600,
+    "wires": [["ec192310.979d5"]]
   },
   {
-    "id": "3871c53e.5e060a",
+    "id": "56680f44.6827a",
     "type": "comment",
     "z": "7ecdfb0b.fa7794",
     "name": "THERMOSTAT",
     "info": "",
-    "x": 680,
-    "y": 1160,
-    "wires": []
-  },
-  {
-    "id": "94404dca.ad50b",
-    "type": "comment",
-    "z": "7ecdfb0b.fa7794",
-    "name": "Alexa, make it warmer in here.",
-    "info": "",
-    "x": 760,
-    "y": 1240,
-    "wires": []
-  },
-  {
-    "id": "cb3a71d8.b0511",
-    "type": "comment",
-    "z": "7ecdfb0b.fa7794",
-    "name": "Alexa, make it cooler in here.",
-    "info": "",
-    "x": 760,
-    "y": 1280,
-    "wires": []
-  },
-  {
-    "id": "305cc496.f4bdbc",
-    "type": "comment",
-    "z": "7ecdfb0b.fa7794",
-    "name": "Alexa, set bedroom thermostat to twenty.",
-    "info": "",
-    "x": 800,
+    "x": 1080,
     "y": 1200,
     "wires": []
   },
   {
-    "id": "f742ce9a.db0b6",
+    "id": "10fa60e2.65222f",
     "type": "comment",
     "z": "7ecdfb0b.fa7794",
-    "name": "Alexa, what's the temperature of bedroom thermostat?",
+    "name": "Alexa, make it warmer in here.",
     "info": "",
-    "x": 840,
+    "x": 1160,
+    "y": 1280,
+    "wires": []
+  },
+  {
+    "id": "ee97291.e7937d8",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, make it cooler in here.",
+    "info": "",
+    "x": 1160,
     "y": 1320,
     "wires": []
   },
   {
-    "id": "7b1a6735.ced7a8",
+    "id": "e41e1df4.35e2f",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, set bedroom thermostat to twenty.",
+    "info": "",
+    "x": 1200,
+    "y": 1240,
+    "wires": []
+  },
+  {
+    "id": "921caef2.454cf",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "Alexa, what's the temperature of bedroom thermostat?",
+    "info": "",
+    "x": 1240,
+    "y": 1360,
+    "wires": []
+  },
+  {
+    "id": "a4dd21a6.1a75e",
     "type": "inject",
     "z": "7ecdfb0b.fa7794",
     "name": "mode = AUTO",
-    "props": [{ "p": "payload.thermostatMode", "v": "AUTO", "vt": "str" }],
+    "props": [
+      {
+        "p": "payload.thermostatMode",
+        "v": "AUTO",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 670,
-    "y": 1640,
-    "wires": [["f8d7ccba.de9cf"]]
+    "x": 1070,
+    "y": 1680,
+    "wires": [["ec192310.979d5"]]
   },
   {
-    "id": "5e3718a.25277e8",
+    "id": "39ff2a1f.437cd6",
     "type": "inject",
     "z": "7ecdfb0b.fa7794",
     "name": "mode = HEAT",
-    "props": [{ "p": "payload.thermostatMode", "v": "HEAT", "vt": "str" }],
+    "props": [
+      {
+        "p": "payload.thermostatMode",
+        "v": "HEAT",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 670,
-    "y": 1680,
-    "wires": [["f8d7ccba.de9cf"]]
+    "x": 1070,
+    "y": 1720,
+    "wires": [["ec192310.979d5"]]
   },
   {
-    "id": "1072ec7.feef314",
+    "id": "fe487ec6.d62f4",
     "type": "inject",
     "z": "7ecdfb0b.fa7794",
     "name": "mode = COOL",
-    "props": [{ "p": "payload.thermostatMode", "v": "COOL", "vt": "str" }],
+    "props": [
+      {
+        "p": "payload.thermostatMode",
+        "v": "COOL",
+        "vt": "str"
+      }
+    ],
     "repeat": "",
     "crontab": "",
     "once": false,
     "onceDelay": 0.1,
     "topic": "",
-    "x": 680,
-    "y": 1720,
-    "wires": [["f8d7ccba.de9cf"]]
+    "x": 1080,
+    "y": 1760,
+    "wires": [["ec192310.979d5"]]
   },
   {
-    "id": "c653a955.290d98",
-    "type": "vsh-connection",
-    "name": "SANDBOX: cornelius.suermann@gmail.com",
-    "port": "8883",
-    "accessTokenExpiry": "1623058880575",
-    "debug": true,
-    "backendUrl": "https://hbsky6oavf.execute-api.eu-west-1.amazonaws.com/dev",
-    "lwaClientId": "amzn1.application-oa2-client.cc2605d7d7d64fb28b90e75f64622bfa"
+    "id": "d14af22e.2a3f3",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "mode = ECO",
+    "props": [
+      {
+        "p": "payload.thermostatMode",
+        "v": "ECO",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 1070,
+    "y": 1800,
+    "wires": [["ec192310.979d5"]]
+  },
+  {
+    "id": "5cc18f22.5aad3",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "mode = OFF",
+    "props": [
+      {
+        "p": "payload.thermostatMode",
+        "v": "OFF",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 1070,
+    "y": 1840,
+    "wires": [["ec192310.979d5"]]
   }
 ]

@@ -160,7 +160,8 @@ const directives = {
     }
     if (
       request.directive.payload.thermostatMode.value === 'COOL' ||
-      request.directive.payload.thermostatMode.value === 'HEAT'
+      request.directive.payload.thermostatMode.value === 'HEAT' ||
+      request.directive.payload.thermostatMode.value === 'ECO'
     ) {
       newState['powerState'] = 'ON'
     } else if (request.directive.payload.thermostatMode.value === 'OFF') {

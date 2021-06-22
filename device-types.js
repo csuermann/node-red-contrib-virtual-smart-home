@@ -353,7 +353,11 @@ const temperatureScale = (val) => {
 
 const thermostatMode = (val) => {
   const isValid =
-    val === 'AUTO' || val === 'HEAT' || val === 'COOL' || val === 'OFF'
+    val === 'AUTO' ||
+    val === 'HEAT' ||
+    val === 'COOL' ||
+    val === 'ECO' ||
+    val === 'OFF'
   if (!isValid) {
     return false
   }
