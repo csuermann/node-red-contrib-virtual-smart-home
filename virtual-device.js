@@ -16,20 +16,26 @@ module.exports = function (RED) {
 
     const connectionNode = RED.nodes.getNode(config.connection)
 
-    let localState = getDefaultState(config.template)
-
     const validators = getValidators(config.template)
     const decorator = getDecorator(config.template, config.diff)
 
-    const getLocalState = () => ({ ...localState })
+    const getLocalState = () => {
+      let contextState = node.context().get('state')
+
+      if (!contextState) {
+        contextState = getDefaultState(config.template)
+      }
+
+      return { ...contextState }
+    }
 
     const setLocalState = (targetState) => {
       const oldLocalState = getLocalState()
-      localState = merge(oldLocalState, targetState)
+      let newLocalState = merge(oldLocalState, targetState)
 
-      node.context().set('state', localState)
+      node.context().set('state', newLocalState)
 
-      return localState
+      return newLocalState
     }
 
     const emitLocalState = ({ topic = null, rawDirective = null }) => {
