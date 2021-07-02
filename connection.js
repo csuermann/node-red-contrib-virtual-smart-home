@@ -67,10 +67,6 @@ module.exports = function (RED) {
     }
 
     this.registerChildNode = function (nodeId, callbacks) {
-      // console.log(
-      //   `registerChildNode() for ${nodeId} | allowed: ${this.allowedDeviceCount}`
-      // )
-
       if (Object.keys(this.childNodes).length >= this.allowedDeviceCount) {
         callbacks.setStatus({
           shape: 'dot',
@@ -84,8 +80,6 @@ module.exports = function (RED) {
 
       if (Object.keys(this.childNodes).length == 1) {
         //first child node is registering!
-        //console.log('first child node registering!!!')
-
         this.connectAndSubscribe()
       }
 
@@ -108,7 +102,6 @@ module.exports = function (RED) {
     }
 
     this.unregisterChildNode = async function (nodeId) {
-      //console.log(`unregisterChildNode() for ${nodeId}`)
       delete this.childNodes[nodeId]
 
       if (Object.keys(this.childNodes).length == 0) {
@@ -149,6 +142,22 @@ module.exports = function (RED) {
       })
     }
 
+    this.requestConfigDebounced = debounce(this.requestConfig, 1000)
+
+    this.markAsConnected = function () {
+      this.publish(`$aws/things/${this.credentials.thingId}/shadow/update`, {
+        state: {
+          reported: {
+            connected: true,
+            vsh_version: VSH_VERSION,
+            nr_version: RED.version(),
+          },
+        },
+      })
+    }
+
+    this.markAsConnectedDebounced = debounce(this.markAsConnected, 7000)
+
     this.publish = async function (topic, message) {
       if (!this.mqttClient) {
         return
@@ -160,8 +169,6 @@ module.exports = function (RED) {
 
       return await this.mqttClient.publish(topic, message)
     }
-
-    this.requestConfigDebounced = debounce(this.requestConfig, 1000)
 
     this.triggerChangeReport = function ({
       endpointId,
@@ -569,18 +576,7 @@ module.exports = function (RED) {
             text: 'online',
           })
 
-          this.publish(
-            `$aws/things/${this.credentials.thingId}/shadow/update`,
-            {
-              state: {
-                reported: {
-                  connected: true,
-                  vsh_version: VSH_VERSION,
-                  nr_version: RED.version(),
-                },
-              },
-            }
-          )
+          this.markAsConnectedDebounced()
         },
 
         onDisconnect: () => {
