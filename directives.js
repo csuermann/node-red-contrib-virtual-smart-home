@@ -152,7 +152,6 @@ const directives = {
     targetTemperature: request.directive.payload.targetSetpoint.value,
     targetScale: request.directive.payload.targetSetpoint.scale,
     powerState: 'ON',
-    thermostatMode: 'AUTO',
   }),
   SetThermostatMode: (request, currentState) => {
     const newState = {
