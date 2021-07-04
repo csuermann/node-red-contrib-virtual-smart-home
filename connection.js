@@ -41,7 +41,9 @@ module.exports = function (RED) {
     this.isConnected = false
     this.isDisconnecting = false
     this.isSubscribed = false
+    this.isRequestConfigCompleted = false
     this.isError = false
+    this.errorCode = ''
     this.isKilled = false
     this.killedStatusText = 'KILLED'
     this.allowedDeviceCount = 200
@@ -66,6 +68,34 @@ module.exports = function (RED) {
       }
     }
 
+    this.refreshChildrenNodeStatus = () => {
+      let fill, text
+
+      if (!this.isRequestConfigCompleted) {
+        fill = 'yellow'
+        text = 'initializing...'
+      } else if (this.isConnected) {
+        fill = 'green'
+        text = 'online'
+      } else {
+        fill = 'red'
+
+        if (this.isError) {
+          text = this.errorCode
+        } else if (this.isKilled) {
+          text = this.killedStatusText
+        } else {
+          text = 'offline'
+        }
+      }
+
+      this.execCallbackForAll('setStatus', {
+        shape: 'dot',
+        fill,
+        text,
+      })
+    }
+
     this.registerChildNode = function (nodeId, callbacks) {
       if (Object.keys(this.childNodes).length >= this.allowedDeviceCount) {
         callbacks.setStatus({
@@ -82,13 +112,6 @@ module.exports = function (RED) {
         //first child node is registering!
         this.connectAndSubscribe()
       }
-
-      //immediately push most relevant state to new subscriber
-      this.execCallbackForOne(nodeId, 'setStatus', {
-        shape: 'dot',
-        fill: this.isConnected ? 'green' : 'red',
-        text: this.isConnected ? 'online' : 'offline',
-      })
 
       const requestConfigJob = () => {
         if (!this.isSubscribed) {
@@ -137,6 +160,9 @@ module.exports = function (RED) {
     }
 
     this.requestConfig = function () {
+      this.isRequestConfigCompleted = false
+      this.refreshChildrenNodeStatus()
+
       this.publish(`vsh/${this.credentials.thingId}/requestConfig`, {
         vshVersion: VSH_VERSION,
       })
@@ -145,6 +171,10 @@ module.exports = function (RED) {
     this.requestConfigDebounced = debounce(this.requestConfig, 1000)
 
     this.markAsConnected = function () {
+      if (!this.isConnected) {
+        return false
+      }
+
       this.publish(`$aws/things/${this.credentials.thingId}/shadow/update`, {
         state: {
           reported: {
@@ -422,6 +452,7 @@ module.exports = function (RED) {
       console.warn('CONNECTION KILLED! Reason:', reason || 'undefined')
       this.isKilled = true
       this.killedStatusText = reason ? reason : 'KILLED'
+      this.isRequestConfigCompleted = true
       this.disconnect()
     }
 
@@ -454,6 +485,8 @@ module.exports = function (RED) {
             this.allowedDeviceCount = message.allowedDeviceCount
             this.unrigisterUnallowedDevices(message.allowedDeviceCount)
           }
+          this.isRequestConfigCompleted = true
+          this.refreshChildrenNodeStatus()
           break
         case 'kill':
           this.handleKill(message)
@@ -532,11 +565,8 @@ module.exports = function (RED) {
             null,
             'error'
           )
-          this.execCallbackForAll('setStatus', {
-            shape: 'dot',
-            fill: 'gray',
-            text: updateHint,
-          })
+          this.errorCode = updateHint
+          this.refreshChildrenNodeStatus()
           return
         }
       } catch (e) {
@@ -570,35 +600,21 @@ module.exports = function (RED) {
           this.stats.connectionCount++
           this.isConnected = true
           this.isError = false
-          this.execCallbackForAll('setStatus', {
-            shape: 'dot',
-            fill: 'green',
-            text: 'online',
-          })
-
+          this.refreshChildrenNodeStatus()
           this.markAsConnectedDebounced()
         },
 
         onDisconnect: () => {
           this.logger('MQTT disconnected')
           this.isConnected = false
-          if (!this.isError) {
-            this.execCallbackForAll('setStatus', {
-              shape: 'dot',
-              fill: 'red',
-              text: this.isKilled ? this.killedStatusText : 'offline',
-            })
-          }
+          this.refreshChildrenNodeStatus()
         },
 
         onError: (error) => {
           this.isConnected = false
           this.isError = true
-          this.execCallbackForAll('setStatus', {
-            shape: 'dot',
-            fill: 'red',
-            text: error.code,
-          })
+          this.errorCode = error.code
+          this.refreshChildrenNodeStatus()
         },
 
         onSubscribeSuccess: (subscribeResult) => {
