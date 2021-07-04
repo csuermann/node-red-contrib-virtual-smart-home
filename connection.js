@@ -198,7 +198,7 @@ module.exports = function (RED) {
       }
 
       if (useRateLimiter) {
-        this.rater.execute(`${endpointId}`, publishCb.bind(this))
+        this.rater.execute(`${endpointId}::${causeType}`, publishCb.bind(this))
       } else {
         publishCb()
       }
@@ -321,7 +321,7 @@ module.exports = function (RED) {
         properties: currentProperties,
         causeType: 'STATE_REPORT',
         correlationToken: directiveRequest.directive.header.correlationToken,
-        useRateLimiter: false,
+        useRateLimiter: true,
       })
     }
 

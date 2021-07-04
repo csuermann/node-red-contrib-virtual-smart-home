@@ -162,6 +162,18 @@ __THANK YOU!__
 
     A:  Yes! Check out the [backend repository](https://github.com/csuermann/virtual-smart-home/) and follow the instructions precisely. Keep in mind that it might be cheaper to keep using the official backend and donate some money so that I can keep the system up for you.
 
+1. Q:  Is there a way to persist the state of devices across restarts of Node-RED?
+
+    A:  Yes! The device state is stored as 'context' provided by Node-RED, which is kept in memory by default. You can easily change that by adding this snippet to your Node-RED's settings.js file:
+
+    ```javascript
+    contextStorage: {
+      default: {
+        module: "localfilesystem",
+      },
+    },
+    ```
+
 1. Q:  Can you add feature X, please?
 
     A:  I'm always eager to hear your ideas! Please [file a ticket](https://github.com/csuermann/node-red-contrib-virtual-smart-home/issues/new).
@@ -175,6 +187,10 @@ __THANK YOU!__
 This package comes without any warranty. Use it, enjoy it, but all at your own
 risk. If you are satisfied with this project, please contribute your share for the backend infrastructure via [donation](https://paypal.me/cornelius/5). Thank you!
 
-__NOTE__: Devices that have not been online for 30 days will be permanently deleted without prior warning. Their certificates will be invalidated and can no longer be used to connect virtual devices.
+### NOTE
+
+The permitted use of the VSH package is limited to human-triggered interactions with Alexa and _infrequent_ synronizations of device states (e.g. for sensor data, such as thermostat). Any setup that leads to excessive data traffic between the VSH client and its backend is strictly forbidden and will lead to permanent blocking of the user's account.
+
+Devices that have not been online for 30 days will be permanently deleted without prior warning. Their certificates will be invalidated and can no longer be used to connect virtual devices.
 
 Accounts without any activity for 60 days will also be deleted and can no longer be used to control virtual devices.
