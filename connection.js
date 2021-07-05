@@ -201,6 +201,7 @@ module.exports = function (RED) {
     }
 
     this.triggerChangeReport = function ({
+      template,
       endpointId,
       properties,
       causeType,
@@ -217,6 +218,7 @@ module.exports = function (RED) {
       const publishCb = () => {
         if (!this.isDisconnecting) {
           this.publish(`vsh/${this.credentials.thingId}/changeReport`, {
+            template,
             endpointId,
             properties,
             correlationToken,
@@ -304,6 +306,7 @@ module.exports = function (RED) {
 
       // tell Alexa about new device properties
       this.triggerChangeReport({
+        template: oldState.template,
         endpointId: deviceId,
         properties: newProperties,
         causeType: 'PHYSICAL_INTERACTION',

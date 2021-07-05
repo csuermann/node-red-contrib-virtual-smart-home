@@ -1,0 +1,120 @@
+[
+  {
+    "id": "3c6eab3b.4539d4",
+    "type": "vsh-virtual-device",
+    "z": "7ecdfb0b.fa7794",
+    "name": "doorbell",
+    "topic": "doorbell",
+    "connection": "",
+    "template": "DOORBELL_EVENT_SOURCE",
+    "passthrough": false,
+    "diff": false,
+    "filter": false,
+    "x": 1060,
+    "y": 720,
+    "wires": [[]]
+  },
+  {
+    "id": "c9e0153d.a8fd58",
+    "type": "inject",
+    "z": "7ecdfb0b.fa7794",
+    "name": "pressed",
+    "props": [
+      {
+        "p": "payload.detectionState",
+        "v": "DETECTED",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payloadType": "str",
+    "x": 570,
+    "y": 720,
+    "wires": [["248691bd.94314e"]]
+  },
+  {
+    "id": "d9afcbd4.52af88",
+    "type": "delay",
+    "z": "7ecdfb0b.fa7794",
+    "name": "",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "x": 720,
+    "y": 780,
+    "wires": [["97c9ad29.a8c97"]]
+  },
+  {
+    "id": "97c9ad29.a8c97",
+    "type": "change",
+    "z": "7ecdfb0b.fa7794",
+    "name": "not pressed",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload.detectionState",
+        "pt": "msg",
+        "to": "NOT_DETECTED",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 890,
+    "y": 780,
+    "wires": [["3c6eab3b.4539d4"]]
+  },
+  {
+    "id": "248691bd.94314e",
+    "type": "delay",
+    "z": "7ecdfb0b.fa7794",
+    "name": "",
+    "pauseType": "rate",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "30",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": true,
+    "x": 740,
+    "y": 720,
+    "wires": [["3c6eab3b.4539d4", "d9afcbd4.52af88"]]
+  },
+  {
+    "id": "b4ba7049.d7fe3",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "DOORBELL EVENT SOURCE",
+    "info": "",
+    "x": 640,
+    "y": 600,
+    "wires": []
+  },
+  {
+    "id": "29498e9f.887142",
+    "type": "comment",
+    "z": "7ecdfb0b.fa7794",
+    "name": "!! please read this note !!",
+    "info": "# Doorbell Event Source\n\nAmazon only allows 1 doorbell event every 30 seconds.\n\nAfter 5 seconds the detectionState is set back to NOT_DETECTED. This is necessary in order to force a state change. Otherwise the state will appear as unchanged with the next doorbell event and not get submitted to Alexa.",
+    "x": 670,
+    "y": 640,
+    "wires": []
+  }
+]

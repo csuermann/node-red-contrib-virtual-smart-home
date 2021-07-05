@@ -266,11 +266,15 @@ function buildPropertiesFromState(state) {
   }
 
   if (state.hasOwnProperty('detectionState')) {
+    const namespaceMap = {
+      CONTACT_SENSOR: 'Alexa.ContactSensor',
+      MOTION_SENSOR: 'Alexa.MotionSensor',
+      DOORBELL_EVENT_SOURCE: 'Alexa.DoorbellEventSource',
+    }
+
     properties.push(
       makeProperty(
-        state.template === 'CONTACT_SENSOR'
-          ? 'Alexa.ContactSensor'
-          : 'Alexa.MotionSensor',
+        namespaceMap[state.template],
         'detectionState',
         state.detectionState
       )

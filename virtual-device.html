@@ -86,6 +86,7 @@
       <option value="CONTACT_SENSOR">Contact Sensor</option>
       <option value="DIMMABLE_LIGHT_BULB">Dimmable Light Bulb</option>
       <option value="DIMMER_SWITCH">Dimmer Switch</option>
+      <option value="DOORBELL_EVENT_SOURCE">Doorbell Event Source</option>
       <option value="ENTERTAINMENT_DEVICE">Entertainment Device</option>
       <option value="FAN">Fan</option>
       <option value="GARAGE_DOOR_OPENER">Garage Door Opener</option>
@@ -437,6 +438,16 @@
       <span class="property-type">int</span>
     </dt>
     <dd>Brightness in % (0...100)</dd>
+  </dl>
+
+  <h4>Doorbell Event Source</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.detectionState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'DETECTED' = Doorbell is pressed.</dd>
+    <dd>'NOT_DETECTED' = Doorbell is not pressed.</dd>
   </dl>
 
   <h4>Entertainment Device</h4>

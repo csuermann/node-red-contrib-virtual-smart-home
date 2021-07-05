@@ -582,6 +582,15 @@ const types = {
     },
     decorator: defaultDecorator,
   },
+  DOORBELL_EVENT_SOURCE: {
+    defaultState: {
+      detectionState: 'NOT_DETECTED',
+    },
+    validators: {
+      detectionState,
+    },
+    decorator: defaultDecorator,
+  },
   ENTERTAINMENT_DEVICE: {
     defaultState: {
       powerState: 'OFF',
