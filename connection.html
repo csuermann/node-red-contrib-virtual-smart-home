@@ -306,8 +306,11 @@
           installedVshVersion = await getInstalledVshVersion()
           const versionCheckResult = await checkVersion(installedVshVersion)
 
-          if (!versionCheckResult.isAllowedVersion) {
-            return showError(versionCheckResult.updateHint)
+          if (!versionCheckResult.isLatestVersion) {
+            return showError(
+              versionCheckResult.updateHint ||
+                'Please update to the latest version of VSH!'
+            )
           }
         } catch (e) {
           return showError('Could not connect to backend!')
