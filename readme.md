@@ -16,14 +16,16 @@ Previously the state of virtual devices (e.g. the brightness of a lamp) was kept
 
 The _virtual smart home_ skill is available in the Amazon skill stores in the following locales:
 
-- [English (AU)](https://skills-store.amazon.com.au/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-- [English (CA)](https://skills-store.amazon.ca/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-- [English (GB)](https://skills-store.amazon.co.uk/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-- [English (US)](https://skills-store.amazon.com/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-- [French (FR)](https://skills-store.amazon.fr/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-- [German (DE)](https://skills-store.amazon.de/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-- [Italian (IT)](https://skills-store.amazon.it/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
-- [Spanish (ES)](https://skills-store.amazon.es/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy)
+- [English (AU)](https://www.amazon.com.au/dp/B08JV9RT7H)
+- [English (CA)](https://www.amazon.ca/dp/B08JV9RT7H)
+- [English (GB)](https://www.amazon.co.uk/dp/B08JV9RT7H)
+- [English (IN)](https://www.amazon.in/dp/B08JV9RT7H)
+- [English (US)](https://www.amazon.com/dp/B08JV9RT7H)
+- [French (FR)](https://www.amazon.fr/dp/B08JV9RT7H)
+- [German (DE)](https://www.amazon.de/dp/B08JV9RT7H)
+- [Italian (IT)](https://www.amazon.it/dp/B08JV9RT7H)
+- [Portuguese (BR)](https://www.amazon.com.br/dp/B08JV9RT7H)
+- [Spanish (ES)](https://www.amazon.es/dp/B08JV9RT7H)
 
 ## Highlights
 
