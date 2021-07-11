@@ -3,7 +3,7 @@ const debounce = require('debounce')
 const semver = require('semver')
 const fetch = require('node-fetch')
 const MqttClient = require('./MqttClient')
-const RateLimiter = require('./RateLimiter')
+const MsgRateLimiter = require('./MsgRateLimiter')
 const VSH_VERSION = require('./version')
 const {
   buildNewStateForDirectiveRequest,
@@ -27,14 +27,7 @@ module.exports = function (RED) {
         }
       : (logMessage, variable) => {}
 
-    this.rater = new RateLimiter(
-      [
-        { period: 1 * 60 * 1000, limit: 12, penalty: 0, repeat: 10 }, //for 10 min: Limit to 12 req / min
-        { period: 10 * 60 * 1000, limit: 5, penalty: 1 }, //afterward: Limit to 5 req / 10 min
-      ],
-      null, //= callback
-      this.logger
-    )
+    this.rater = new MsgRateLimiter(this.logger)
 
     this.mqttClient = undefined
     this.childNodes = {}
@@ -206,7 +199,6 @@ module.exports = function (RED) {
       properties,
       causeType,
       correlationToken = '',
-      useRateLimiter,
     }) {
       const changes = properties.filter((prop) => prop.changed).length
 
@@ -215,7 +207,7 @@ module.exports = function (RED) {
         return
       }
 
-      const publishCb = () => {
+      const publishCb = (doneCb) => {
         if (!this.isDisconnecting) {
           this.publish(`vsh/${this.credentials.thingId}/changeReport`, {
             template,
@@ -227,13 +219,11 @@ module.exports = function (RED) {
             userIdToken: this.userIdToken,
           })
         }
+        doneCb()
       }
 
-      if (useRateLimiter) {
-        this.rater.execute(`${endpointId}::${causeType}`, publishCb.bind(this))
-      } else {
-        publishCb()
-      }
+      const classification = { causeType, template, endpointId }
+      this.rater.execute(classification, publishCb.bind(this))
     }
 
     this.bulkDiscover = function (devices, mode = 'discover') {
@@ -306,11 +296,10 @@ module.exports = function (RED) {
 
       // tell Alexa about new device properties
       this.triggerChangeReport({
-        template: oldState.template,
+        template: newState.template,
         endpointId: deviceId,
         properties: newProperties,
         causeType: 'PHYSICAL_INTERACTION',
-        useRateLimiter: true,
       })
     }
 
@@ -355,7 +344,6 @@ module.exports = function (RED) {
         properties: currentProperties,
         causeType: 'STATE_REPORT',
         correlationToken: directiveRequest.directive.header.correlationToken,
-        useRateLimiter: true,
       })
     }
 
@@ -422,7 +410,6 @@ module.exports = function (RED) {
           properties: newProperties,
           causeType: 'VOICE_INTERACTION',
           correlationToken: directiveRequest.directive.header.correlationToken,
-          useRateLimiter: false,
         })
       } catch (e) {
         this.logger(e.message, null, 'error')
@@ -479,9 +466,9 @@ module.exports = function (RED) {
         case 'overrideConfig':
           this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
 
-          if (message.rateLimiter) {
-            const iterations = message.rateLimiter
-            this.rater.overrideConfig(iterations)
+          if (message.msgRateLimiter) {
+            const config = message.msgRateLimiter
+            this.rater.overrideConfig(config)
           }
           if (message.userIdToken) {
             this.userIdToken = message.userIdToken
@@ -711,7 +698,7 @@ module.exports = function (RED) {
     }
 
     this.on('close', async function (removed, done) {
-      this.rater.destroy()
+      await this.rater.destroy()
 
       if (!this.credentials.thingId) {
         return done()
