@@ -64,7 +64,13 @@ module.exports = function (RED) {
     this.refreshChildrenNodeStatus = () => {
       let fill, text
 
-      if (!this.isRequestConfigCompleted) {
+      if (this.isError) {
+        fill = 'red'
+        text = this.errorCode
+      } else if (this.isKilled) {
+        fill = 'red'
+        text = this.killedStatusText
+      } else if (!this.isRequestConfigCompleted) {
         fill = 'yellow'
         text = 'initializing...'
       } else if (this.isConnected) {
@@ -72,14 +78,7 @@ module.exports = function (RED) {
         text = 'online'
       } else {
         fill = 'red'
-
-        if (this.isError) {
-          text = this.errorCode
-        } else if (this.isKilled) {
-          text = this.killedStatusText
-        } else {
-          text = 'offline'
-        }
+        text = 'offline'
       }
 
       this.execCallbackForAll('setStatus', {
@@ -558,6 +557,7 @@ module.exports = function (RED) {
             'error'
           )
           this.errorCode = updateHint
+          this.isError = true
           this.refreshChildrenNodeStatus()
           return
         }
