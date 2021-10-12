@@ -90,6 +90,7 @@
       <option value="ENTERTAINMENT_DEVICE">Entertainment Device</option>
       <option value="FAN">Fan</option>
       <option value="GARAGE_DOOR_OPENER">Garage Door Opener</option>
+      <option value="LOCK">Lock</option>
       <option value="MOTION_SENSOR">Motion Sensor</option>
       <option value="PLUG">Plug</option>
       <option value="SCENE">Scene</option>
@@ -512,6 +513,20 @@
       <span class="property-type">string</span>
     </dt>
     <dd>'Position.Up' or 'Position.Down'</dd>
+  </dl>
+
+  <h4>Lock</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.lockState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'LOCKED' = The device is currently locked.</dd>
+    <dd>'UNLOCKED' = The device is currently unlocked.</dd>
+    <dd>
+      'JAMMED' = The lock can't transition to locked or unlocked because the
+      locking mechanism is jammed.
+    </dd>
   </dl>
 
   <h4>Motion Sensor</h4>

@@ -30,6 +30,14 @@ const powerState = (val) => {
   return { key: 'powerState', value: val }
 }
 
+const lockState = (val) => {
+  const isValid = val == 'LOCKED' || val == 'UNLOCKED' || val == 'JAMMED'
+  if (!isValid) {
+    return false
+  }
+  return { key: 'lockState', value: val }
+}
+
 const brightness = (val) => {
   const isValid = Number.isInteger(val) && val >= 0 && val <= 100
   if (!isValid) {
@@ -626,6 +634,15 @@ const types = {
     },
     validators: {
       mode: wrapValidator(position, 'mode'),
+    },
+    decorator: defaultDecorator,
+  },
+  LOCK: {
+    defaultState: {
+      lockState: 'UNLOCKED',
+    },
+    validators: {
+      lockState,
     },
     decorator: defaultDecorator,
   },
