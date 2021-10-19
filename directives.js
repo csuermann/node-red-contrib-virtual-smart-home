@@ -27,6 +27,30 @@ const directives = {
       ? parseInt(request.directive.payload.channel.number)
       : 1,
   }),
+  Play: (request, currentState) => {
+    return currentState
+  },
+  Pause: (request, currentState) => {
+    return currentState
+  },
+  Stop: (request, currentState) => {
+    return currentState
+  },
+  StartOver: (request, currentState) => {
+    return currentState
+  },
+  Previous: (request, currentState) => {
+    return currentState
+  },
+  Next: (request, currentState) => {
+    return currentState
+  },
+  Rewind: (request, currentState) => {
+    return currentState
+  },
+  FastForward: (request, currentState) => {
+    return currentState
+  },
   SkipChannels: (request, currentState) => {
     let newChannel =
       currentState.channel + request.directive.payload.channelCount
