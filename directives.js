@@ -20,7 +20,7 @@ const directives = {
   TurnOff: (request, currentState) => ({ powerState: 'OFF' }),
   SetBrightness: (request, currentState) => ({
     brightness: request.directive.payload.brightness,
-    powerState: request.directive.payload.brightness > 0 ? 'ON' : 'OFF',
+    //Do not automatically change power state: powerState: request.directive.payload.brightness > 0 ? 'ON' : 'OFF',
   }),
   ChangeChannel: (request, currentState) => ({
     channel: request.directive.payload.channel.number
