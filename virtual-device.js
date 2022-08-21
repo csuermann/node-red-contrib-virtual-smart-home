@@ -95,7 +95,9 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg, send, done) {
-      if (config.filter && msg.payload.name !== config.name) {
+
+      const ignoreBecauseOfNameFilter = config.filter && msg.payload.name !== config.name;
+      if (ignoreBecauseOfNameFilter) {
         if (done) {
           done()
         }
@@ -104,6 +106,15 @@ module.exports = function (RED) {
             msg.payload.name ? `'${msg.payload.name}'` : '<undefined>'
           }) does not match '${config.name}'`
         )
+        return
+      }
+
+      const ignoreBecauseOfTopicFilter = config.filterTopic && msg.topic !== config.topic;
+      if (ignoreBecauseOfTopicFilter) {
+        if (done) {
+          done()
+        }
+        console.log(`ignoring inbound msg because msg.topic (${msg.topic ? `'${msg.topic}'` : '<undefined>'}) does not match '${config.topic}'`);
         return
       }
 
