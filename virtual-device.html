@@ -13,6 +13,7 @@
       passthrough: { value: false },
       diff: { value: false },
       filter: { value: false },
+      filterTopic: { value: false },
     },
     inputs: 1,
     outputs: 1,
@@ -113,15 +114,22 @@
   </div>
 
   <div class="form-row">
-    <label for="node-input-filter"
-      ><i class="fa fa-filter"></i> Filter</label
-    >
+    <label for="node-input-filter"><i class="fa fa-filter"></i> Filter</label>
     <input
       type="checkbox"
       id="node-input-filter"
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
-    /> Ignore inbound messages unless name matches
+    /> Ignore inbound messages unless &quot;name&quot; matches
+  </div>
+  <div class="form-row">
+    <label for="node-input-filterTopic"><i class="fa fa-filter"></i> Filter topic</label>
+    <input
+      type="checkbox"
+      id="node-input-filterTopic"
+      style="display:inline-block;width:22px;vertical-align:top;"
+      autocomplete="off"
+    /> Ignore inbound messages unless &quot;topic&quot; matches
   </div>
 
   <div class="form-row">
@@ -197,7 +205,9 @@
       key/value pairs of device attributes to update. Invalid attributes will be
       silently ignored. (Available attributes are documented below). If the
       'Filter' option is enabled, inbound messages will also be ignored unless
-      <code>msg.payload.name</code> matches the device name.
+      <code>msg.payload.name</code> matches the device name. If the
+      'Filter topic' option is enabled, inbound messages will also be ignored unless
+      <code>msg.topic</code> matches the topic of the node.
     </dd>
   </dl>
 
