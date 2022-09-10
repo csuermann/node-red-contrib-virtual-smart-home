@@ -6,7 +6,7 @@
     "name": "kitchen window",
     "topic": "kitchen/window",
     "connection": "",
-    "template": "TEMPERATURE_SENSOR",
+    "template": "CONTACT_SENSOR",
     "passthrough": false,
     "diff": false,
     "filter": false,
