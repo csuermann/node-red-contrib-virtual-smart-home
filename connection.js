@@ -93,7 +93,7 @@ module.exports = function (RED) {
         callbacks.setStatus({
           shape: 'dot',
           fill: 'gray',
-          text: 'device limit reached!',
+          text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
         })
         return
       }
@@ -123,6 +123,10 @@ module.exports = function (RED) {
         //last child node is unregistering!
         await this.disconnect()
       }
+    }
+
+    this.isChildNodeRegistered = function (nodeId) {
+      return this.childNodes[nodeId] !== undefined
     }
 
     this.getLocalDevices = function () {
@@ -435,6 +439,27 @@ module.exports = function (RED) {
       })
     }
 
+    this.handleRestart = function ({ semverExpr }) {
+      if (semverExpr && !semver.satisfies(VSH_VERSION, semverExpr)) {
+        return
+      }
+
+      console.warn('RECEIVED REQUEST TO RESTART VSH...')
+
+      this.disconnect()
+
+      setTimeout(() => {
+        this.connectAndSubscribe()
+        const requestConfigJob = () => {
+          if (!this.isSubscribed) {
+            return false
+          }
+          this.requestConfigDebounced()
+        }
+        this.execOrQueueJob(requestConfigJob)
+      }, 5000)
+    }
+
     this.handleKill = function ({ reason, semverExpr }) {
       if (semverExpr && !semver.satisfies(VSH_VERSION, semverExpr)) {
         return
@@ -478,6 +503,9 @@ module.exports = function (RED) {
           }
           this.isRequestConfigCompleted = true
           this.refreshChildrenNodeStatus()
+          break
+        case 'restart':
+          this.handleRestart(message)
           break
         case 'kill':
           this.handleKill(message)
@@ -526,7 +554,7 @@ module.exports = function (RED) {
           this.execCallbackForOne(nodeId, 'setStatus', {
             shape: 'dot',
             fill: 'gray',
-            text: 'device limit reached!',
+            text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
           })
           this.unregisterChildNode(nodeId)
         }
@@ -718,6 +746,7 @@ module.exports = function (RED) {
 
   RED.nodes.registerType('vsh-connection', ConnectionNode, {
     credentials: {
+      vshJwt: { type: 'text' },
       refreshToken: { type: 'text' },
       accessToken: { type: 'text' },
       email: { type: 'text' },
@@ -731,6 +760,16 @@ module.exports = function (RED) {
       vshConnectionShowSettings: {
         //= RED.settings.vshConnectionShowSettings
         value: false,
+        exportable: true,
+      },
+      vshConnectionDefaultBackendUrl: {
+        //= RED.settings.vshConnectionDefaultBackendUrl
+        value: 'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev',
+        exportable: true,
+      },
+      vshConnectionDefaultLwaClientId: {
+        //= RED.settings.vshConnectionDefaultLwaClientId
+        value: 'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18',
         exportable: true,
       },
     },

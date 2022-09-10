@@ -68,14 +68,14 @@
     function getBackendUrl() {
       return (
         $('#node-config-input-backendUrl').val() ||
-        'https://kfd5m4a21f.execute-api.eu-west-1.amazonaws.com/dev'
+        RED.settings.vshConnectionDefaultBackendUrl
       )
     }
 
     function getLwaClientId() {
       return (
         $('#node-config-input-lwaClientId').val() ||
-        'amzn1.application-oa2-client.3f1bb07133854b078261ad43f2484c18'
+        RED.settings.vshConnectionDefaultLwaClientId
       )
     }
 
@@ -90,6 +90,12 @@
     }
 
     async function ensureValidAccessToken() {
+      //if there is a vshJwt (devices provisioned with v >3.0.0), use it as Bearer token instead of legacy access token
+      if ($('#node-config-input-vshJwt').val()) {
+        return 'Bearer ' + $('#node-config-input-vshJwt').val()
+      }
+
+      //legacy:
       const now = new Date().getTime()
       const expiry = $('#node-config-input-accessTokenExpiry').val() || 0
       const refreshToken = $('#node-config-input-refreshToken').val()
@@ -118,9 +124,9 @@
 
       if (!resp.access_token) {
         throw new Error('could not fetch access token')
-      } else {
-        return resp
       }
+
+      return resp
     }
 
     async function fetchDeviceToken(device_code, user_code) {
@@ -137,9 +143,9 @@
         const err = new Error('authorization_pending')
         err.status = 400
         throw err
-      } else {
-        return resp
       }
+
+      return resp
     }
 
     function populateTokenData({ access_token, refresh_token, expires_in }) {
@@ -373,6 +379,7 @@
 
               populateTokenData(deviceTokenResponse)
 
+              $('#node-config-input-vshJwt').val(provisionData.vshJwt)
               $('#node-config-input-name').val(provisionData.email)
               $('#node-config-input-email').val(provisionData.email)
               $('#node-config-input-server').val(provisionData.server)
@@ -430,6 +437,7 @@
         },
       },
       credentials: {
+        vshJwt: { type: 'text' },
         refreshToken: { type: 'text' },
         accessToken: { type: 'text' },
         email: { type: 'text' },
@@ -619,6 +627,17 @@
       />
     </div>
 
+    <div class="form-row hidden">
+      <label for="node-config-input-vshJwt"
+        ><i class="fa fa-ticket"></i> VSH JWT</label
+      >
+      <input
+        type="text"
+        id="node-config-input-vshJwt"
+        readonly
+        placeholder="VSH JWT"
+      />
+    </div>
     <div class="form-row hidden">
       <label for="node-config-input-accessToken"
         ><i class="fa fa-ticket"></i> Access Token</label
