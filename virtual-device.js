@@ -19,6 +19,8 @@ module.exports = function (RED) {
     const validators = getValidators(config.template)
     const decorator = getDecorator(config.template, config.diff)
 
+    let isActive = false
+
     const getLocalState = () => {
       let contextState = node.context().get('state')
 
@@ -81,7 +83,15 @@ module.exports = function (RED) {
       //connection is configured
       //register callbacks. This way connectionNode can communicate with us:
       connectionNode.registerChildNode(deviceId, {
-        setStatus: (status) => node.status(status),
+        setStatus: (status, force = false) => {
+          if (isActive || force) {
+            node.status(status)
+          }
+        },
+        setActive: (isActiveToggle) => {
+          isActive = isActiveToggle
+        },
+        isActive: () => isActive,
         getLocalState,
         setLocalState,
         emitLocalState,
@@ -89,15 +99,16 @@ module.exports = function (RED) {
           return {
             friendlyName: config.name || config.template.toLowerCase(),
             template: config.template,
+            retrievable: config.retrievable,
           }
         },
       })
     }
 
     node.on('input', function (msg, send, done) {
-      if (!connectionNode || !connectionNode.isChildNodeRegistered(deviceId)) {
+      if (!connectionNode || !isActive) {
         console.log(
-          `ignoring inbound msg for ${deviceId} because device is not registered'`
+          `ignoring inbound msg for non-active device ID ${deviceId}'`
         )
         if (done) {
           done()
@@ -112,7 +123,7 @@ module.exports = function (RED) {
           done()
         }
         console.log(
-          `ignoring inbound msg for ${deviceId} because msg.payload.name (${
+          `ignoring inbound msg for device ID ${deviceId} because msg.payload.name (${
             msg.payload.name ? `'${msg.payload.name}'` : '<undefined>'
           }) does not match '${config.name}'`
         )
@@ -126,7 +137,7 @@ module.exports = function (RED) {
           done()
         }
         console.log(
-          `ignoring inbound msg for ${deviceId} because msg.topic (${
+          `ignoring inbound msg for device ID ${deviceId} because msg.topic (${
             msg.topic ? `'${msg.topic}'` : '<undefined>'
           }) does not match '${config.topic}'`
         )

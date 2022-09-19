@@ -1,6 +1,25 @@
 <script type="text/javascript">
   function vshOnEditPrepare() {
-    setTimeout(() => $('#donation').fadeIn('slow'), 2000)
+    const vshConnectionNodeId = $('#node-input-connection')[0].value
+
+    if (vshConnectionNodeId === '_ADD_') {
+      return
+    }
+
+    $.getJSON('vsh-connection/' + vshConnectionNodeId, function ({ plan }) {
+      $('#vsh-current-plan')
+        .text(plan.toUpperCase())
+        .addClass('vsh-plan-' + plan)
+
+      if (plan === 'free') {
+        setTimeout(() => $('#subscription-hint').fadeIn('slow'), 1500)
+      }
+
+      if (plan === 'pro') {
+        $('#node-input-retrievable').prop('disabled', false)
+        $('#retrievable-label').removeClass('retrievable-option-disabled')
+      }
+    })
   }
 
   RED.nodes.registerType('vsh-virtual-device', {
@@ -10,10 +29,12 @@
       topic: { value: '', required: false },
       connection: { type: 'vsh-connection', required: true },
       template: { value: 'SWITCH', required: true },
+      retrievable: { value: false },
       passthrough: { value: false },
       diff: { value: false },
       filter: { value: false },
       filterTopic: { value: false },
+      plan: { value: 'free' },
     },
     inputs: 1,
     outputs: 1,
@@ -28,36 +49,58 @@
 </script>
 
 <style>
-  #donation {
+  #subscription-hint {
     display: none;
-    padding: 15px;
+    padding: 12px;
     text-align: center;
-    border: 3px #253b80 solid;
+    border: 3px #00691c solid;
     margin-top: 30px;
-    background-color: #cad7de;
-    color: #253b80;
+    background-color: #e3fddd;
+    color: #00691c;
     width: 90%;
   }
 
-  #donation > h1 {
+  #subscription-hint > h1 {
     line-height: normal;
   }
 
-  #donation > h2 {
+  #subscription-hint > h2 {
     margin-top: 50px;
   }
 
-  #donation > ul > li {
+  #subscription-hint > ul > li {
     list-style-position: inside;
   }
 
-  #donation > ul > li a {
+  #subscription-hint > ul > li a {
     text-decoration: underline;
-    color: #253b80;
+    color: #00691c;
   }
 
-  #donation img {
+  #subscription-hint img {
     height: 5em;
+  }
+
+  .retrievable-option-disabled {
+    color: var(--red-ui-secondary-text-color-disabled);
+  }
+
+  .vsh-plan-unknown {
+    padding: 3px;
+    border: #615f5f solid 1px;
+    background-color: rgb(190, 190, 190);
+  }
+
+  .vsh-plan-free {
+    padding: 3px;
+    border: #f8dc09 solid 1px;
+    background-color: #ffff7a;
+  }
+
+  .vsh-plan-pro {
+    padding: 3px;
+    border: #00691c solid 1px;
+    background-color: #e3fddd;
   }
 </style>
 
@@ -80,10 +123,19 @@
   </div>
 
   <div class="form-row">
+    <label><i class="fa fa-credit-card"></i> Plan</label>
+    <span id="vsh-current-plan">
+      <i>available when at least 1 device is connected</i>
+    </span>
+  </div>
+
+  <div class="form-row">
     <label for="node-input-template"><i class="fa fa-cubes"></i> Type</label>
     <select id="node-input-template">
       <option value="BLINDS">Blinds</option>
-      <option value="COLOR_CHANGING_LIGHT_BULB">Color Changing Light Bulb</option>
+      <option value="COLOR_CHANGING_LIGHT_BULB">
+        Color Changing Light Bulb
+      </option>
       <option value="CONTACT_SENSOR">Contact Sensor</option>
       <option value="DIMMABLE_LIGHT_BULB">Dimmable Light Bulb</option>
       <option value="DIMMER_SWITCH">Dimmer Switch</option>
@@ -102,6 +154,22 @@
   </div>
 
   <div class="form-row">
+    <label for="node-input-retrievable"
+      ><i class="fa fa-arrow-up"></i> Retrievable</label
+    >
+    <input
+      type="checkbox"
+      id="node-input-retrievable"
+      disabled
+      style="display:inline-block;width:22px;vertical-align:top;"
+      autocomplete="off"
+    />
+    <span id="retrievable-label" class="retrievable-option-disabled"
+      >Alexa can retrieve device state (&quot;Pro&quot; feature)</span
+    >
+  </div>
+
+  <div class="form-row">
     <label for="node-input-passthrough"
       ><i class="fa fa-forward"></i> Passthrough</label
     >
@@ -110,63 +178,54 @@
       id="node-input-passthrough"
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
-    /> Emit state on inbound message
+    />
+    Emit state on inbound message
   </div>
 
   <div class="form-row">
-    <label for="node-input-filter"><i class="fa fa-filter"></i> Filter by name</label>
+    <label for="node-input-filter"
+      ><i class="fa fa-filter"></i> Filter by name</label
+    >
     <input
       type="checkbox"
       id="node-input-filter"
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
-    /> Ignore inbound messages unless &quot;name&quot; matches
+    />
+    Ignore inbound messages unless &quot;name&quot; matches
   </div>
   <div class="form-row">
-    <label for="node-input-filterTopic"><i class="fa fa-filter"></i> Filter by topic</label>
+    <label for="node-input-filterTopic"
+      ><i class="fa fa-filter"></i> Filter by topic</label
+    >
     <input
       type="checkbox"
       id="node-input-filterTopic"
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
-    /> Ignore inbound messages unless &quot;topic&quot; matches
+    />
+    Ignore inbound messages unless &quot;topic&quot; matches
   </div>
 
   <div class="form-row">
-    <label for="node-input-diff"
-      ><i class="fa fa-clone"></i> Diff</label
-    >
+    <label for="node-input-diff"><i class="fa fa-clone"></i> Diff</label>
     <input
       type="checkbox"
       id="node-input-diff"
       style="display:inline-block;width:22px;vertical-align:top;"
       autocomplete="off"
-    /> Emit only attributes set by Alexa
+    />
+    Emit only attributes set by Alexa
   </div>
 
-  <div id="donation">
-    <h1>Please Support</h1>
-    <p>
-      Your <i>virtual smart home</i> can only function as long as I am
-      paying the bills for the backend infrastructure.
-    </p>
-    <p>If you are satisfied with this project, please help me to keep the system up.</p>
-    <a
-      target="_blank"
-      href="https://paypal.me/cornelius/5"
-      ><img src="icons/node-red-contrib-virtual-smart-home/donate.png"
-    /></a>
-    <h2>... and Spread the Love</h2>
-    <p>
-      I dedicated many hours to this project and really hope it adds value for you!
-      Nothing is more rewarding to me than your feedback. So if you are a happy user, please
-      <ul>
-        <li>rate the <i>virtual smart home</i> skill on the <a href="https://skills-store.amazon.com/deeplink/dp/B08JV9RT7H?deviceType=app&share&refSuffix=ss_copy">Alexa skill store</a></li>
-        <li>rate the <i>virtual smart home</i> <a href="https://flows.nodered.org/node/node-red-contrib-virtual-smart-home">Node-RED package</a></li>
-        <li>mention this package in your next blog post / podcast / YouTube</li>
-      </ul>
-    </p>
-    <h1>THANK YOU</h1>
+  <div id="subscription-hint">
+    <h1>VSH Pro is now available</h1>
+    <ul>
+      <li>control up to 200 virtual devices</li>
+      <li>device status retrievable by Alexa</li>
+      <li>cancellable at any time</li>
+    </ul>
+    <p>Switch to &quot;Pro&quot; on the <i>Connection</i> page</p>
   </div>
 </script>
 

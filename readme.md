@@ -107,7 +107,7 @@ I dedicated endless hours to this project and really hope it adds value for you!
 - rate the 'virtual smart home' skill on the Alexa skill store
 - rate the 'virtual smart home' [Node-RED package](https://flows.nodered.org/node/node-red-contrib-virtual-smart-home)
 - mention this package in your next blog post / podcast / YouTube
-- [donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ37WU5S4NZ2E&source=url) a few bucks to help cover the infrastructure costs.
+- say thank you by [buying me a coffee](https://paypal.me/cornelius/5).
 
 __THANK YOU!__
 
@@ -192,7 +192,7 @@ Previously the state of virtual devices (e.g. the brightness of a lamp) was kept
 ## Terms of Use
 
 This package comes without any warranty. Use it, enjoy it, but all at your own
-risk. If you are satisfied with this project, please contribute your share for the backend infrastructure via [donation](https://paypal.me/cornelius/5). Thank you!
+risk. If you are satisfied with this project, consider [bying me a coffee](https://paypal.me/cornelius/5). Thank you!
 
 ### NOTE
 

@@ -17,6 +17,16 @@ module.exports = function (RED) {
 
     const node = this
 
+    node.plan = 'unknown'
+
+    RED.httpAdmin.get(
+      `/vsh-connection/${node.id}`,
+      RED.auth.needsPermission('vsh-virtual-device.read'),
+      function (req, res) {
+        res.json({ plan: node.plan })
+      }
+    )
+
     this.logger = config.debug
       ? (logMessage, variable = undefined, logLevel = 'log') => {
           //logLevel: log | warn | error | trace | debug
@@ -90,12 +100,17 @@ module.exports = function (RED) {
 
     this.registerChildNode = function (nodeId, callbacks) {
       if (Object.keys(this.childNodes).length >= this.allowedDeviceCount) {
-        callbacks.setStatus({
-          shape: 'dot',
-          fill: 'gray',
-          text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
-        })
-        return
+        callbacks.setActive(false)
+        callbacks.setStatus(
+          {
+            shape: 'dot',
+            fill: 'gray',
+            text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
+          },
+          true //force!
+        )
+      } else {
+        callbacks.setActive(true)
       }
 
       this.childNodes[nodeId] = callbacks
@@ -125,10 +140,6 @@ module.exports = function (RED) {
       }
     }
 
-    this.isChildNodeRegistered = function (nodeId) {
-      return this.childNodes[nodeId] !== undefined
-    }
-
     this.getLocalDevices = function () {
       const localDevices = {}
 
@@ -149,16 +160,20 @@ module.exports = function (RED) {
       return result
     }
 
-    this.execCallbackForOne = function (nodeId, eventName, eventDetails) {
+    this.execCallbackForOne = function (
+      nodeId,
+      eventName,
+      params,
+      ...moreParams
+    ) {
       if (this.childNodes[nodeId][eventName]) {
-        return this.childNodes[nodeId][eventName](eventDetails)
+        return this.childNodes[nodeId][eventName](params, ...moreParams)
       }
     }
 
     this.requestConfig = function () {
       this.isRequestConfigCompleted = false
       this.refreshChildrenNodeStatus()
-
       this.publish(`vsh/${this.credentials.thingId}/requestConfig`, {
         vshVersion: VSH_VERSION,
       })
@@ -238,6 +253,7 @@ module.exports = function (RED) {
             deviceId,
             friendlyName: devices[deviceId]['friendlyName'],
             template: devices[deviceId]['template'],
+            retrievable: devices[deviceId]['retrievable'],
           })
         }
       }
@@ -260,7 +276,9 @@ module.exports = function (RED) {
           shadowDevices[deviceId]['template'] !==
             localDevices[deviceId]['template'] ||
           shadowDevices[deviceId]['friendlyName'] !==
-            localDevices[deviceId]['friendlyName']
+            localDevices[deviceId]['friendlyName'] ||
+          shadowDevices[deviceId]['retrievable'] !==
+            localDevices[deviceId]['retrievable']
         ) {
           toBeDiscoveredDevices[deviceId] = localDevices[deviceId]
         }
@@ -323,6 +341,17 @@ module.exports = function (RED) {
       //   },
       // }
 
+      const isActive = this.execCallbackForOne(deviceId, 'isActive')
+
+      if (!isActive) {
+        this.logger(
+          `ignoring handleReportState for non-active device ID ${deviceId}`,
+          null,
+          'warn'
+        )
+        return
+      }
+
       const currentState = this.execCallbackForOne(deviceId, 'getLocalState')
 
       if (!currentState) {
@@ -366,6 +395,16 @@ module.exports = function (RED) {
       //     payload: {},
       //   },
       // }
+      const isActive = this.execCallbackForOne(deviceId, 'isActive')
+
+      if (!isActive) {
+        // this.logger(
+        //   `ignoring handleDirectiveFromAlexa for non-active device ID ${deviceId}`,
+        //   null,
+        //   'warn'
+        // )
+        return
+      }
 
       // get current device state
       const oldState = this.execCallbackForOne(deviceId, 'getLocalState')
@@ -439,6 +478,27 @@ module.exports = function (RED) {
       })
     }
 
+    this.handleOverrideConfig = function (message) {
+      this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
+
+      if (message.msgRateLimiter) {
+        const config = message.msgRateLimiter
+        this.rater.overrideConfig(config)
+      }
+      if (message.userIdToken) {
+        this.userIdToken = message.userIdToken
+      }
+      if (message.allowedDeviceCount) {
+        this.allowedDeviceCount = message.allowedDeviceCount
+        this.disableUnallowedDevices(message.allowedDeviceCount)
+      }
+
+      node.plan = message.plan
+
+      this.isRequestConfigCompleted = true
+      this.refreshChildrenNodeStatus()
+    }
+
     this.handleRestart = function ({ semverExpr }) {
       if (semverExpr && !semver.satisfies(VSH_VERSION, semverExpr)) {
         return
@@ -447,6 +507,8 @@ module.exports = function (RED) {
       console.warn('RECEIVED REQUEST TO RESTART VSH...')
 
       this.disconnect()
+
+      this.execCallbackForAll('setActive', true)
 
       setTimeout(() => {
         this.connectAndSubscribe()
@@ -488,21 +550,7 @@ module.exports = function (RED) {
           this.handlePing(message)
           break
         case 'overrideConfig':
-          this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
-
-          if (message.msgRateLimiter) {
-            const config = message.msgRateLimiter
-            this.rater.overrideConfig(config)
-          }
-          if (message.userIdToken) {
-            this.userIdToken = message.userIdToken
-          }
-          if (message.allowedDeviceCount) {
-            this.allowedDeviceCount = message.allowedDeviceCount
-            this.unrigisterUnallowedDevices(message.allowedDeviceCount)
-          }
-          this.isRequestConfigCompleted = true
-          this.refreshChildrenNodeStatus()
+          this.handleOverrideConfig(message)
           break
         case 'restart':
           this.handleRestart(message)
@@ -545,18 +593,23 @@ module.exports = function (RED) {
       return await response.json()
     }
 
-    this.unrigisterUnallowedDevices = function (allowedDeviceCount) {
+    this.disableUnallowedDevices = function (allowedDeviceCount) {
       let i = 0
 
       for (const nodeId in this.childNodes) {
         i++
         if (i > allowedDeviceCount) {
-          this.execCallbackForOne(nodeId, 'setStatus', {
-            shape: 'dot',
-            fill: 'gray',
-            text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
-          })
-          this.unregisterChildNode(nodeId)
+          this.execCallbackForOne(nodeId, 'setActive', false)
+          this.execCallbackForOne(
+            nodeId,
+            'setStatus',
+            {
+              shape: 'dot',
+              fill: 'gray',
+              text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
+            },
+            true //force
+          )
         }
       }
     }
@@ -723,6 +776,8 @@ module.exports = function (RED) {
       }
 
       this.isSubscribed = false
+      this.isRequestConfigCompleted = false
+      this.isError = false
     }
 
     this.on('close', async function (removed, done) {

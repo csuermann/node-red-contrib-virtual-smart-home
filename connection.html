@@ -171,6 +171,12 @@
       })
     }
 
+    function getPlanInfo(accessToken) {
+      return execGetRequest(getBackendUrl() + '/plan', {
+        Authorization: accessToken,
+      })
+    }
+
     function checkVersion(version) {
       return execGetRequest(
         `${$(
@@ -210,6 +216,48 @@
       if (deleteResult.error) {
         showError('delete failed')
         $(`#${deviceId}`).fadeIn()
+      }
+    }
+
+    async function displayPlanInfo() {
+      try {
+        const accessToken = await ensureValidAccessToken()
+        const { plan, allowedDeviceCount, availablePlans, subcriptionToken } =
+          await getPlanInfo(accessToken)
+
+        $('.current-plan-name').text(plan.toUpperCase())
+        $('#allowed-device-count').text(allowedDeviceCount)
+
+        if (plan === 'free') {
+          $('#plan-name').text(availablePlans[0].name)
+
+          //availablePlans is an array, but at this point we're handling only the first element!
+          const availPlan = availablePlans[0]
+
+          $.each(availPlan.features, function (i, feature) {
+            let $li = $('<li>').text(feature).appendTo('#plan-features')
+          })
+
+          $.each(availPlan.priceTags, async function (i, priceTag) {
+            $('#' + priceTag.name)
+              .text(priceTag.tag)
+              .attr(
+                'href',
+                getBackendUrl() + '/checkout?token=' + priceTag.checkoutToken
+              )
+              .on('click', () => $('#buy-subscription').hide())
+          })
+
+          $('#buy-subscription').show()
+        } else {
+          $('#btn-manage-subscription').attr(
+            'href',
+            getBackendUrl() + '/subscription?token=' + subcriptionToken
+          )
+          $('#manage-subscription').show()
+        }
+      } catch (e) {
+        console.log(e)
       }
     }
 
@@ -411,7 +459,8 @@
         if (RED.settings.vshConnectionShowSettings) {
           $('.hidden').show()
         }
-        displayRegisteredDevices()
+        await displayPlanInfo()
+        await displayRegisteredDevices()
       }
     }
 
@@ -460,6 +509,8 @@
 
 <style>
   #provisioned,
+  #manage-subscription,
+  #buy-subscription,
   #registered-devices,
   #device-list-table,
   #loading-failed,
@@ -485,10 +536,30 @@
     border: 3px red dashed;
   }
 
+  .subscription a {
+    color: white;
+    background-color: #00691c;
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 8px;
+  }
+
+  .subscription a:hover,
+  .subscription a:focus {
+    background-color: #015217;
+    color: white;
+  }
+
   #provisioned h1,
-  #registered-devices h1 {
+  #registered-devices h1,
+  .subscription > h1 {
     font-size: 1.5em;
     margin-top: 30px;
+  }
+
+  .subscription > h2 {
+    font-size: 1.2em;
+    margin-top: 20px;
   }
 
   #registered-devices table {
@@ -758,8 +829,31 @@
     </div>
   </div>
 
+  <div id="manage-subscription" class="subscription">
+    <h1>Subscription</h1>
+    <p>Your current plan: <b class="current-plan-name">{CURRENT-PLAN-NAME}</b></p>
+    <p>
+      <a id="btn-manage-subscription" href="" target="_blank">manage subscription</a>
+    </p>
+  </div>
+
+  <div id="buy-subscription" class="subscription">
+    <h1>Subscription</h1>
+    <p>Your current plan: <b class="current-plan-name">{CURRENT-PLAN-NAME}</b></p>
+    <h2>Upgrade to <span id="plan-name">VSH Premium</span>!</h2>
+    <p>
+      <ul id="plan-features">
+        <!-- <li> elements are dynamically put here -->
+      </ul>
+    </p>
+    <p>
+      Subscribe for <a id="vsh-pro-yearly" href="" target="_blank">XX EUR per year</a> or <a id="vsh-pro-monthly" href="" target="_blank">X.XX EUR per month</a>
+    </p>
+  </div>
+
   <div id="registered-devices">
     <h1>Registered Devices</h1>
+    <p>The <span class="current-plan-name">{CURRENT-PLAN-NAME}</span> plan allows up to <span id="allowed-device-count">?</span> devices</p>
     <div id="loading">...loading...</div>
     <div id="loading-failed">Loading device list failed!</div>
     <div id="empty">
