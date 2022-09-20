@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/csuermann/node-red-contrib-virtual-smart-home#readme",
   "node-red": {
+    "version": ">=2.0.0",
     "nodes": {
       "vsh-connection": "connection.js",
       "vsh-virtual-device": "virtual-device.js"
@@ -38,7 +39,7 @@
     "singleQuote": true
   },
   "dependencies": {
-    "async-mqtt": "^2.6.2",
+    "async-mqtt": "^2.6.3",
     "bottleneck": "^2.19.5",
     "color-convert": "^2.0.1",
     "dayjs": "^1.11.5",
@@ -46,7 +47,7 @@
     "deep-eql": "^4.1.0",
     "deepmerge": "^4.2.2",
     "js-base64": "^3.7.2",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^3.2.10",
     "semver": "^7.3.7"
   },
   "engines": {

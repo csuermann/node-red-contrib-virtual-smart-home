@@ -1,7 +1,6 @@
 const { Base64 } = require('js-base64')
 const debounce = require('debounce')
 const semver = require('semver')
-const fetch = require('node-fetch')
 const MqttClient = require('./MqttClient')
 const MsgRateLimiter = require('./MsgRateLimiter')
 const VSH_VERSION = require('./version')
@@ -10,6 +9,9 @@ const {
   buildPropertiesFromState,
   annotateChanges,
 } = require('./directives')
+
+const fetch = (...args) =>
+  import('node-fetch').then(({ default: fetch }) => fetch(...args))
 
 module.exports = function (RED) {
   function ConnectionNode(config) {
