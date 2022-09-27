@@ -117,7 +117,7 @@ New versions of VSH are frequently released and it is generally recommended to a
 
 ### Version 3.x.x - BREAKING CHANGE
 
-With the release of version 3.0.0 all earlier versions will be deprecated and might no longer work as expected. Please update to the latest version of VSH!
+With the release of version 3.0.0 all earlier versions will be deprecated and might no longer work as expected. Please update to the latest version of VSH! The new version of VSH also requires Node-RED >= 2.0.0! But please do yourself a favour and upgrade to Node-RED v3 while you're at it!
 
 ### What's new in version 3?
 
