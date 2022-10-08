@@ -171,7 +171,7 @@ The "Free" plan will be limited to 7 virtual devices.
 
 1. Q:  Can I run my own backend?
 
-    A:  Yes! Check out the [backend repository](https://github.com/csuermann/virtual-smart-home/) and follow the instructions precisely. Keep in mind that it might be cheaper to keep using the official backend and donate some money so that I can keep the system up for you.
+    A:  Yes! Check out the [backend repository](https://github.com/csuermann/virtual-smart-home/) and follow the instructions precisely. Keep in mind that it might be cheaper and much easier to keep using the official backend.
 
 1. Q:  Is there a way to persist the state of devices across restarts of Node-RED?
 

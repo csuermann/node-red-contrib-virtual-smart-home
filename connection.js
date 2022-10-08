@@ -19,13 +19,21 @@ module.exports = function (RED) {
 
     const node = this
 
-    node.plan = 'unknown'
+    let plan = 'unknown'
+
+    this.setPlan = function (newPlan) {
+      plan = newPlan
+    }
+
+    this.getPlan = function () {
+      return plan
+    }
 
     RED.httpAdmin.get(
       `/vsh-connection/${node.id}`,
       RED.auth.needsPermission('vsh-virtual-device.read'),
       function (req, res) {
-        res.json({ plan: node.plan })
+        res.json({ plan: node.getPlan() })
       }
     )
 
@@ -495,7 +503,7 @@ module.exports = function (RED) {
         this.disableUnallowedDevices(message.allowedDeviceCount)
       }
 
-      node.plan = message.plan
+      node.setPlan(message.plan)
 
       this.isRequestConfigCompleted = true
       this.refreshChildrenNodeStatus()
