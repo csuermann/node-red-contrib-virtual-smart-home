@@ -1,3 +1,4 @@
+const axios = require('axios')
 const { Base64 } = require('js-base64')
 const debounce = require('debounce')
 const semver = require('semver')
@@ -9,9 +10,6 @@ const {
   buildPropertiesFromState,
   annotateChanges,
 } = require('./directives')
-
-const fetch = (...args) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(...args))
 
 module.exports = function (RED) {
   function ConnectionNode(config) {
@@ -580,27 +578,30 @@ module.exports = function (RED) {
     }
 
     this.checkVersion = async function () {
-      const response = await fetch(
-        `${
-          config.backendUrl
-        }/check_version?version=${VSH_VERSION}&nr_version=${RED.version()}&thingId=${
-          this.credentials.thingId
-        }`
-      )
+      let response
 
-      // EXAMPLE
-      // {
-      //   "isAllowedVersion": false,
-      //   "isLatestVersion": false,
-      //   "updateHint": "Please update to the latest version of VSH!",
-      //   "allowedDeviceCount": 5,
-      // }
-      if (!response.ok) {
+      try {
+        response = await axios.get(
+          `${
+            config.backendUrl
+          }/check_version?version=${VSH_VERSION}&nr_version=${RED.version()}&thingId=${
+            this.credentials.thingId
+          }`
+        )
+
+        // EXAMPLE response.data
+        // {
+        //   "isAllowedVersion": false,
+        //   "isLatestVersion": false,
+        //   "updateHint": "Please update to the latest version of VSH!",
+        //   "allowedDeviceCount": 5,
+        // }
+        return response.data
+      } catch (error) {
         throw new Error(
           `HTTP Error Response: ${response.status} ${response.statusText}`
         )
       }
-      return await response.json()
     }
 
     this.disableUnallowedDevices = function (allowedDeviceCount) {
