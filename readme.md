@@ -192,11 +192,11 @@ The "Free" plan will be limited to 7 virtual devices.
 
 1. Q: Why did a paid PRO plan get introduced?
 
-   A: With growing popularity of VSH the infrastructure costs also grew significantly. I had to make a decision to either shut VSH down or to introduce a paid plan. For 12 EUR per year, you can deploy up to 200 virtual devices and support further development of VSH.
+   A: With growing popularity of VSH the infrastructure costs also grew significantly. I had to make a decision to either shut VSH down or to introduce a paid plan. For 12 EUR per year, you can deploy up to 200 virtual devices and support further development of VSH. You can upgrade to the "Pro" plan from the Connection dialog within Node-RED.
 
 1. Q: Where can I manage my VSH subscription?
 
-   A: Click the 'manage subscription' button on the vsh-connection page in Node-RED or manually log into the [Stripe dashboard](https://billing.stripe.com/p/login/6oE00vdQ62Tp3LidQQ).
+   A: Click the 'manage subscription' button on the vsh-connection page in Node-RED or manually log into the [Stripe dashboard](https://billing.stripe.com/p/login/6oE00vdQ62Tp3LidQQ). This will only work when you already have purchased a subscription.
 
 1. Q: Can you add feature X, please?
 
