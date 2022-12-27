@@ -599,7 +599,9 @@ module.exports = function (RED) {
         return response.data
       } catch (error) {
         throw new Error(
-          `HTTP Error Response: ${response.status} ${response.statusText}`
+          `HTTP Error Response: ${response?.status ?? 'n/a'} ${
+            response?.statusText ?? 'n/a'
+          }`
         )
       }
     }
@@ -654,6 +656,11 @@ module.exports = function (RED) {
           return
         }
       } catch (e) {
+        this.logger('connection failed. Retrying in 5 seconds...')
+        this.errorCode = 'connection failed. Retrying every 30 sec...'
+        this.isError = true
+        this.refreshChildrenNodeStatus()
+        setTimeout(() => this.connectAndSubscribe(), 30000)
         return this.logger(`version check failed! ${e.message}`, null, 'error')
       }
 
