@@ -599,8 +599,8 @@ module.exports = function (RED) {
         return response.data
       } catch (error) {
         throw new Error(
-          `HTTP Error Response: ${response.status ?? 'n/a'} ${
-            response.statusText ?? 'n/a'
+          `HTTP Error Response: ${response.status || 'n/a'} ${
+            response.statusText || 'n/a'
           }`
         )
       }
