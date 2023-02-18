@@ -589,7 +589,7 @@ module.exports = function (RED) {
           }`
         )
 
-        // EXAMPLE response.data
+        // EXAMPLE response.data:
         // {
         //   "isAllowedVersion": false,
         //   "isLatestVersion": false,
