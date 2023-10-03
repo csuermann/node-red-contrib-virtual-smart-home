@@ -6,20 +6,23 @@
       return
     }
 
-    $.getJSON('vsh-connection/' + vshConnectionNodeId, function ({ plan }) {
-      $('#vsh-current-plan')
-        .text(plan.toUpperCase())
-        .addClass('vsh-plan-' + plan)
+    $.getJSON(
+      'vsh-connection/' + vshConnectionNodeId + '?_=' + new Date().getTime(),
+      function ({ plan }) {
+        $('#vsh-current-plan')
+          .text(plan.toUpperCase())
+          .addClass('vsh-plan-' + plan)
 
-      if (plan === 'free') {
-        setTimeout(() => $('#subscription-hint').fadeIn('slow'), 1500)
-      }
+        if (plan === 'free') {
+          setTimeout(() => $('#subscription-hint').fadeIn('slow'), 1500)
+        }
 
-      if (plan === 'pro') {
-        $('#node-input-retrievable').prop('disabled', false)
-        $('#retrievable-label').removeClass('retrievable-option-disabled')
+        if (plan === 'pro') {
+          $('#node-input-retrievable').prop('disabled', false)
+          $('#retrievable-label').removeClass('retrievable-option-disabled')
+        }
       }
-    })
+    )
   }
 
   RED.nodes.registerType('vsh-virtual-device', {

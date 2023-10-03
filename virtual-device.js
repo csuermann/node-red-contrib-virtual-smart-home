@@ -14,7 +14,9 @@ module.exports = function (RED) {
 
     const deviceId = 'vshd-' + node.id.replace('.', '')
 
-    const connectionNode = RED.nodes.getNode(config.connection)
+    const getConnectionNode = () => {
+      return RED.nodes.getNode(config.connection)
+    }
 
     const validators = getValidators(config.template)
     const decorator = getDecorator(config.template, config.diff)
@@ -79,10 +81,10 @@ module.exports = function (RED) {
       return approvedState
     }
 
-    if (connectionNode) {
+    if (getConnectionNode()) {
       //connection is configured
       //register callbacks. This way connectionNode can communicate with us:
-      connectionNode.registerChildNode(deviceId, {
+      getConnectionNode().registerChildNode(deviceId, {
         setStatus: (status, force = false) => {
           if (isActive || force) {
             node.status(status)
@@ -106,7 +108,7 @@ module.exports = function (RED) {
     }
 
     node.on('input', function (msg, send, done) {
-      if (!connectionNode || !isActive) {
+      if (!getConnectionNode() || !isActive) {
         console.log(
           `ignoring inbound msg for non-active device ID ${deviceId}'`
         )
@@ -152,7 +154,7 @@ module.exports = function (RED) {
       const confirmedNewLocalState = setLocalState(newLocalState)
 
       if (!deepEql(oldLocalState, newLocalState)) {
-        connectionNode.handleLocalDeviceStateChange({
+        getConnectionNode().handleLocalDeviceStateChange({
           deviceId,
           oldState: oldLocalState,
           newState: confirmedNewLocalState,
@@ -169,8 +171,8 @@ module.exports = function (RED) {
     })
 
     node.on('close', async function (removed, done) {
-      if (connectionNode) {
-        await connectionNode.unregisterChildNode(deviceId)
+      if (getConnectionNode()) {
+        await getConnectionNode().unregisterChildNode(deviceId)
       }
       node.status({})
       return done()

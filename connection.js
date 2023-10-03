@@ -31,7 +31,8 @@ module.exports = function (RED) {
       `/vsh-connection/${node.id}`,
       RED.auth.needsPermission('vsh-virtual-device.read'),
       function (req, res) {
-        res.json({ plan: node.getPlan() })
+        const connectionNode = RED.nodes.getNode(node.id)
+        res.json({ plan: connectionNode.getPlan() })
       }
     )
 
@@ -512,7 +513,7 @@ module.exports = function (RED) {
         return
       }
 
-      console.warn('RECEIVED REQUEST TO RESTART VSH...')
+      this.logger('RECEIVED REQUEST TO RESTART VSH...')
 
       this.disconnect()
 
@@ -656,7 +657,7 @@ module.exports = function (RED) {
           return
         }
       } catch (e) {
-        this.logger('connection failed. Retrying in 5 seconds...')
+        this.logger('connection failed. Retrying in 30 seconds...')
         this.errorCode = 'connection failed. Retrying every 30 sec...'
         this.isError = true
         this.refreshChildrenNodeStatus()
