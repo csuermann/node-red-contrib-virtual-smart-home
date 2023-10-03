@@ -12,6 +12,15 @@ const {
 } = require('./directives')
 
 module.exports = function (RED) {
+  RED.httpAdmin.get(
+    `/vsh-connection/:nodeId`,
+    RED.auth.needsPermission('vsh-virtual-device.read'),
+    function (req, res) {
+      const connectionNode = RED.nodes.getNode(req.params.nodeId)
+      res.json({ plan: connectionNode.getPlan() })
+    }
+  )
+
   function ConnectionNode(config) {
     RED.nodes.createNode(this, config)
 
@@ -27,15 +36,6 @@ module.exports = function (RED) {
       return plan
     }
 
-    RED.httpAdmin.get(
-      `/vsh-connection/${node.id}`,
-      RED.auth.needsPermission('vsh-virtual-device.read'),
-      function (req, res) {
-        const connectionNode = RED.nodes.getNode(node.id)
-        res.json({ plan: connectionNode.getPlan() })
-      }
-    )
-
     this.logger = config.debug
       ? (logMessage, variable = undefined, logLevel = 'log') => {
           //logLevel: log | warn | error | trace | debug
@@ -44,7 +44,7 @@ module.exports = function (RED) {
           }
           this[logLevel](logMessage)
         }
-      : (logMessage, variable) => {}
+      : (_logMessage, _variable) => {}
 
     this.rater = new MsgRateLimiter(this.logger)
 
