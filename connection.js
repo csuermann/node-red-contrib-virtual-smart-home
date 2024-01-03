@@ -215,7 +215,7 @@ module.exports = function (RED) {
 
       this.stats.outboundMsgCount++
 
-      this.logger(`MQTT publish to topic ${topic}`, message)
+      this.logger(`MQTT: publish to topic ${topic}`, message)
 
       return await this.mqttClient.publish(topic, message)
     }
@@ -688,7 +688,7 @@ module.exports = function (RED) {
 
       this.mqttClient = new MqttClient(options, {
         onConnect: () => {
-          this.logger(`MQTT connecting to ${options.host}:${options.port}`)
+          this.logger(`MQTT: connected to ${options.host}:${options.port}`)
           this.stats.connectionCount++
           this.isConnected = true
           this.isError = false
@@ -697,9 +697,17 @@ module.exports = function (RED) {
         },
 
         onDisconnect: () => {
-          this.logger('MQTT disconnected')
+          this.logger('MQTT: disconnected')
           this.isConnected = false
           this.refreshChildrenNodeStatus()
+        },
+
+        onClose: () => {
+          if (this.isConnected) {
+            this.logger('MQTT: connection closed')
+            this.isConnected = false
+            this.refreshChildrenNodeStatus()
+          }
         },
 
         onError: (error) => {
@@ -714,7 +722,7 @@ module.exports = function (RED) {
         },
 
         onMessage: (topic, message) => {
-          this.logger(`MQTT message received on topic ${topic}`, message)
+          this.logger(`MQTT: message received on topic ${topic}`, message)
           this.stats.inboundMsgCount++
           switch (topic) {
             case `$aws/things/${this.credentials.thingId}/shadow/get/accepted`:
@@ -757,7 +765,7 @@ module.exports = function (RED) {
       })
 
       this.logger(
-        `Attempting MQTT connection: ${options.host}:${options.port} (clientId: ${options.clientId})`
+        `MQTT: attempting connection: ${options.host}:${options.port} (clientId: ${options.clientId})`
       )
       this.mqttClient.connect()
 
@@ -769,7 +777,7 @@ module.exports = function (RED) {
         `vsh/${this.credentials.thingId}/service`,
       ]
 
-      this.logger('MQTT subscribe to topics', topicsToSubscribe)
+      this.logger('MQTT: subscribe to topics', topicsToSubscribe)
 
       await this.mqttClient.subscribe(topicsToSubscribe)
     }
@@ -779,7 +787,7 @@ module.exports = function (RED) {
         return
       }
 
-      this.logger('MQTT disconnecting')
+      this.logger('MQTT: disconnecting')
 
       this.isDisconnecting = true
 
