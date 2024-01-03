@@ -23,7 +23,8 @@ function MqttClient(options, callbacksObj) {
     this.client = MQTT.connect('mqtts://' + this.options.host, this.options)
 
     this.client.on('connect', this.handleOnConnect.bind(this))
-    this.client.on('close', this.handleOnDisconnect)
+    this.client.on('close', this.handleOnClose)
+    this.client.on('disconnect', this.handleOnDisconnect)
     this.client.on('offline', this.handleOnDisconnect)
     this.client.on('error', this.handleOnError)
     this.client.on('message', this.handleOnMessage)
@@ -35,6 +36,10 @@ function MqttClient(options, callbacksObj) {
 
   this.handleOnDisconnect = function () {
     callbacksObj['onDisconnect']()
+  }
+
+  this.handleOnClose = function () {
+    callbacksObj['onClose']()
   }
 
   this.handleOnError = function (error) {

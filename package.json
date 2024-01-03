@@ -48,6 +48,7 @@
     "deep-eql": "^4.1.0",
     "deepmerge": "^4.2.2",
     "js-base64": "^3.7.2",
+    "mqtt": "^5.3.4",
     "semver": "^7.3.7"
   },
   "engines": {
