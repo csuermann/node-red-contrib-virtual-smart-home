@@ -15,72 +15,95 @@ module.exports = function (RED) {
   RED.httpAdmin.get(
     `/vsh-connection/:nodeId`,
     RED.auth.needsPermission('vsh-virtual-device.read'),
-    function (req, res) {
+    (req, res) => {
       const connectionNode = RED.nodes.getNode(req.params.nodeId)
       res.json({ plan: connectionNode.getPlan() })
     }
   )
 
-  function ConnectionNode(config) {
-    RED.nodes.createNode(this, config)
-
-    const node = this
-
-    let plan = 'unknown'
-
-    this.setPlan = function (newPlan) {
-      plan = newPlan
-    }
-
-    this.getPlan = function () {
-      return plan
-    }
-
-    this.logger = config.debug
-      ? (logMessage, variable = undefined, logLevel = 'log') => {
-          //logLevel: log | warn | error | trace | debug
-          if (variable) {
-            logMessage = logMessage + ': ' + JSON.stringify(variable)
-          }
-          this[logLevel](logMessage)
-        }
-      : (_logMessage, _variable) => {}
-
-    this.rater = new MsgRateLimiter(this.logger)
-
-    this.mqttClient = undefined
-    this.childNodes = {}
-    this.isConnected = false
-    this.isDisconnecting = false
-    this.isSubscribed = false
-    this.isRequestConfigCompleted = false
-    this.isError = false
-    this.errorCode = ''
-    this.isKilled = false
-    this.killedStatusText = 'KILLED'
-    this.allowedDeviceCount = 200
-    this.userIdToken = ''
-
-    this.stats = {
+  class ConnectionNode {
+    config = undefined
+    plan = 'unknown'
+    logger = undefined
+    rater = undefined
+    mqttClient = undefined
+    childNodes = {}
+    isConnected = false
+    isDisconnecting = false
+    isSubscribed = false
+    isRequestConfigCompleted = true
+    isError = false
+    errorCode = ''
+    isKilled = false
+    killedStatusText = 'KILLED'
+    allowedDeviceCount = 200
+    userIdToken = ''
+    stats = {
       lastStartup: new Date().getTime(),
       connectionCount: 0,
       inboundMsgCount: 0,
       outboundMsgCount: 0,
     }
+    jobQueue = []
+    jobQueueExecutor = undefined
 
-    this.jobQueue = []
+    constructor(config) {
+      this.config = config
+      RED.nodes.createNode(this, config)
 
-    this.jobQueueExecutor = setInterval(() => {
-      this.jobQueue = this.jobQueue.filter((job) => job() == false)
-    }, 1000)
+      const that = this
 
-    this.execOrQueueJob = function (job) {
+      this.logger = this.config.debug
+        ? (logMessage, variable = undefined, logLevel = 'log') => {
+            //logLevel: log | warn | error | trace | debug
+            if (variable) {
+              logMessage = logMessage + ': ' + JSON.stringify(variable)
+            }
+            this[logLevel](logMessage)
+          }
+        : (_logMessage, _variable) => {}
+
+      this.rater = new MsgRateLimiter(this.logger)
+
+      this.jobQueueExecutor = setInterval(() => {
+        this.jobQueue = this.jobQueue.filter((job) => job() == false)
+      }, 1000)
+
+      this.on('close', async function (_removed, done) {
+        await this.rater.destroy()
+
+        if (!this.credentials.thingId) {
+          return done()
+        }
+
+        clearInterval(this.jobQueueExecutor)
+
+        try {
+          await this.disconnect()
+        } catch (e) {
+          console.log('connection.js:this:on:close::', e)
+        }
+
+        this.execCallbackForAll('onDisconnect')
+        done()
+      })
+    }
+
+    setPlan(newPlan) {
+      this.plan = newPlan
+    }
+
+    getPlan() {
+      return this.plan
+    }
+
+    execOrQueueJob(job) {
       if (job() == false) {
         this.jobQueue.push(job)
       }
     }
 
-    this.refreshChildrenNodeStatus = () => {
+    refreshChildrenNodeStatus() {
       let fill, text
 
       if (this.isError) {
@@ -107,7 +130,7 @@ module.exports = function (RED) {
       })
     }
 
-    this.registerChildNode = function (nodeId, callbacks) {
+    registerChildNode(nodeId, callbacks) {
       if (Object.keys(this.childNodes).length >= this.allowedDeviceCount) {
         callbacks.setActive(false)
         callbacks.setStatus(
@@ -140,7 +163,7 @@ module.exports = function (RED) {
       this.execOrQueueJob(requestConfigJob)
     }
 
-    this.unregisterChildNode = async function (nodeId) {
+    async unregisterChildNode(nodeId) {
       delete this.childNodes[nodeId]
 
       if (Object.keys(this.childNodes).length == 0) {
@@ -149,7 +172,7 @@ module.exports = function (RED) {
       }
     }
 
-    this.getLocalDevices = function () {
+    getLocalDevices() {
       const localDevices = {}
 
       for (const nodeId in this.childNodes) {
@@ -159,7 +182,7 @@ module.exports = function (RED) {
       return localDevices
     }
 
-    this.execCallbackForAll = function (eventName, eventDetails) {
+    execCallbackForAll(eventName, eventDetails) {
       const result = {}
       for (const nodeId in this.childNodes) {
         if (this.childNodes[nodeId][eventName]) {
@@ -169,18 +192,13 @@ module.exports = function (RED) {
       return result
     }
 
-    this.execCallbackForOne = function (
-      nodeId,
-      eventName,
-      params,
-      ...moreParams
-    ) {
+    execCallbackForOne(nodeId, eventName, params, ...moreParams) {
       if (this.childNodes[nodeId][eventName]) {
         return this.childNodes[nodeId][eventName](params, ...moreParams)
       }
     }
 
-    this.requestConfig = function () {
+    requestConfig() {
       this.isRequestConfigCompleted = false
       this.refreshChildrenNodeStatus()
       this.publish(`vsh/${this.credentials.thingId}/requestConfig`, {
@@ -188,9 +206,9 @@ module.exports = function (RED) {
       })
     }
 
-    this.requestConfigDebounced = debounce(this.requestConfig, 1000)
+    requestConfigDebounced = debounce(this.requestConfig, 1000)
 
-    this.markAsConnected = function () {
+    markAsConnected() {
       if (!this.isConnected) {
         return false
       }
@@ -206,9 +224,9 @@ module.exports = function (RED) {
       })
     }
 
-    this.markAsConnectedDebounced = debounce(this.markAsConnected, 7000)
+    markAsConnectedDebounced = debounce(this.markAsConnected, 7000)
 
-    this.publish = async function (topic, message) {
+    async publish(topic, message) {
       if (!this.mqttClient) {
         return
       }
@@ -220,7 +238,7 @@ module.exports = function (RED) {
       return await this.mqttClient.publish(topic, message)
     }
 
-    this.triggerChangeReport = function ({
+    triggerChangeReport({
       template,
       endpointId,
       properties,
@@ -253,7 +271,7 @@ module.exports = function (RED) {
       this.rater.execute(classification, publishCb.bind(this))
     }
 
-    this.bulkDiscover = function (devices, mode = 'discover') {
+    bulkDiscover(devices, mode = 'discover') {
       const payload = { devices: [] }
 
       for (const deviceId in devices) {
@@ -272,7 +290,7 @@ module.exports = function (RED) {
       }
     }
 
-    this.handleGetAccepted = function (message) {
+    handleGetAccepted(message) {
       const localDevices = this.getLocalDevices()
       const shadowDevices =
         (message.state.reported && message.state.reported.devices) || {}
@@ -313,11 +331,7 @@ module.exports = function (RED) {
       this.bulkDiscover(toBeUndiscoveredDevices, 'undiscover')
     }
 
-    this.handleLocalDeviceStateChange = function ({
-      deviceId,
-      oldState,
-      newState,
-    }) {
+    handleLocalDeviceStateChange({ deviceId, oldState, newState }) {
       const oldProperties = buildPropertiesFromState(oldState)
       let newProperties = buildPropertiesFromState(newState)
 
@@ -333,7 +347,7 @@ module.exports = function (RED) {
       })
     }
 
-    this.handleReportState = function (deviceId, directiveRequest) {
+    handleReportState(deviceId, directiveRequest) {
       // EXAMPLE directiveRequest:
       // {
       //   directive: {
@@ -349,7 +363,6 @@ module.exports = function (RED) {
       //     payload: {},
       //   },
       // }
-
       const isActive = this.execCallbackForOne(deviceId, 'isActive')
 
       if (!isActive) {
@@ -388,7 +401,7 @@ module.exports = function (RED) {
       })
     }
 
-    this.handleDirectiveFromAlexa = function (deviceId, directiveRequest) {
+    handleDirectiveFromAlexa(deviceId, directiveRequest) {
       // EXAMPLE directiveRequest:
       // {
       //   directive: {
@@ -468,7 +481,7 @@ module.exports = function (RED) {
       }
     }
 
-    this.handlePing = function ({ semverExpr }) {
+    handlePing({ semverExpr }) {
       if (!semver.satisfies(VSH_VERSION, semverExpr)) {
         return
       }
@@ -487,7 +500,7 @@ module.exports = function (RED) {
       })
     }
 
-    this.handleOverrideConfig = function (message) {
+    handleOverrideConfig(message) {
       this.publish(`$aws/things/${this.credentials.thingId}/shadow/get`, {})
 
       if (message.msgRateLimiter) {
@@ -502,13 +515,13 @@ module.exports = function (RED) {
         this.disableUnallowedDevices(message.allowedDeviceCount)
       }
 
-      node.setPlan(message.plan)
+      this.setPlan(message.plan)
 
       this.isRequestConfigCompleted = true
       this.refreshChildrenNodeStatus()
     }
 
-    this.handleRestart = function ({ semverExpr }) {
+    handleRestart({ semverExpr }) {
       if (semverExpr && !semver.satisfies(VSH_VERSION, semverExpr)) {
         return
       }
@@ -531,7 +544,7 @@ module.exports = function (RED) {
       }, 5000)
     }
 
-    this.handleKill = function ({ reason, semverExpr }) {
+    handleKill({ reason, semverExpr }) {
       if (semverExpr && !semver.satisfies(VSH_VERSION, semverExpr)) {
         return
       }
@@ -543,7 +556,7 @@ module.exports = function (RED) {
       this.disconnect()
     }
 
-    this.handleSetDeviceStatus = function ({ status, color, devices }) {
+    handleSetDeviceStatus({ status, color, devices }) {
       devices.forEach((deviceId) => {
         this.execCallbackForOne(deviceId, 'setStatus', {
           shape: 'dot',
@@ -553,7 +566,7 @@ module.exports = function (RED) {
       })
     }
 
-    this.handleService = function (message) {
+    handleService(message) {
       switch (message.operation) {
         case 'ping':
           this.handlePing(message)
@@ -578,13 +591,13 @@ module.exports = function (RED) {
       }
     }
 
-    this.checkVersion = async function () {
+    async checkVersion() {
       let response
 
       try {
         response = await axios.get(
           `${
-            config.backendUrl
+            this.config.backendUrl
           }/check_version?version=${VSH_VERSION}&nr_version=${RED.version()}&thingId=${
             this.credentials.thingId
           }`
@@ -599,6 +612,7 @@ module.exports = function (RED) {
         // }
         return response.data
       } catch (error) {
+        console.log(error)
         throw new Error(
           `HTTP Error Response: ${response.status || 'n/a'} ${
             response.statusText || 'n/a'
@@ -607,7 +621,7 @@ module.exports = function (RED) {
       }
     }
 
-    this.disableUnallowedDevices = function (allowedDeviceCount) {
+    disableUnallowedDevices(allowedDeviceCount) {
       let i = 0
 
       for (const nodeId in this.childNodes) {
@@ -628,7 +642,7 @@ module.exports = function (RED) {
       }
     }
 
-    this.connectAndSubscribe = async function () {
+    async connectAndSubscribe() {
       if (!this.credentials.server) {
         return
       }
@@ -669,7 +683,7 @@ module.exports = function (RED) {
 
       const options = {
         host: this.credentials.server,
-        port: config.port,
+        port: this.config.port,
         key: Base64.decode(this.credentials.privateKey),
         cert: Base64.decode(this.credentials.cert),
         ca: Base64.decode(this.credentials.caCert),
@@ -782,7 +796,7 @@ module.exports = function (RED) {
       await this.mqttClient.subscribe(topicsToSubscribe)
     }
 
-    this.disconnect = async function () {
+    async disconnect() {
       if (!this.isConnected || this.isDisconnecting) {
         return
       }
@@ -806,24 +820,6 @@ module.exports = function (RED) {
       this.isRequestConfigCompleted = false
       this.isError = false
     }
-
-    this.on('close', async function (removed, done) {
-      await this.rater.destroy()
-
-      if (!this.credentials.thingId) {
-        return done()
-      }
-
-      clearInterval(this.jobQueueExecutor)
-      try {
-        await this.disconnect()
-      } catch (e) {
-        console.log('connection.js:this:on:close::', e)
-      }
-
-      this.execCallbackForAll('onDisconnect')
-      done()
-    })
   }
 
   RED.nodes.registerType('vsh-connection', ConnectionNode, {
