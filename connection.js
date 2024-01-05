@@ -1,6 +1,7 @@
 const axios = require('axios')
 const { Base64 } = require('js-base64')
 const debounce = require('debounce')
+const throttle = require('./throttle')
 const semver = require('semver')
 const MqttClient = require('./MqttClient')
 const MsgRateLimiter = require('./MsgRateLimiter')
@@ -22,16 +23,16 @@ module.exports = function (RED) {
   )
 
   class ConnectionNode {
+    credentials = undefined
     config = undefined
     plan = 'unknown'
     logger = undefined
     rater = undefined
     mqttClient = undefined
     childNodes = {}
-    isConnected = false
     isDisconnecting = false
     isSubscribed = false
-    isRequestConfigCompleted = true
+    isInitializing = false
     isError = false
     errorCode = ''
     isKilled = false
@@ -49,9 +50,8 @@ module.exports = function (RED) {
 
     constructor(config) {
       this.config = config
-      RED.nodes.createNode(this, config)
 
-      const that = this
+      RED.nodes.createNode(this, config)
 
       this.logger = this.config.debug
         ? (logMessage, variable = undefined, logLevel = 'log') => {
@@ -69,7 +69,7 @@ module.exports = function (RED) {
         this.jobQueue = this.jobQueue.filter((job) => job() == false)
       }, 1000)
 
-      this.on('close', async function (_removed, done) {
+      this.on('close', async (_removed, done) => {
         await this.rater.destroy()
 
         if (!this.credentials.thingId) {
@@ -89,6 +89,14 @@ module.exports = function (RED) {
       })
     }
 
+    isConnected() {
+      return this.mqttClient && this.mqttClient.isConnected()
+    }
+
+    isReconnecting() {
+      return this.mqttClient && this.mqttClient.isReconnecting()
+    }
+
     setPlan(newPlan) {
       this.plan = newPlan
     }
@@ -103,7 +111,7 @@ module.exports = function (RED) {
       }
     }
 
-    refreshChildrenNodeStatus() {
+    refreshChildrenNodeStatus(statusText = null) {
       let fill, text
 
       if (this.isError) {
@@ -112,18 +120,24 @@ module.exports = function (RED) {
       } else if (this.isKilled) {
         fill = 'red'
         text = this.killedStatusText
-      } else if (!this.isRequestConfigCompleted) {
+      } else if (this.isInitializing) {
         fill = 'yellow'
-        text = 'initializing...'
-      } else if (this.isConnected) {
+        text = 'Initializing...'
+      } else if (statusText === 'Reconnecting...') {
+        fill = 'yellow'
+        text = statusText
+      } else if (this.isConnected()) {
         fill = 'green'
-        text = 'online'
+        text = 'Online'
+      } else if (this.isReconnecting()) {
+        fill = 'red'
+        text = 'Offline. Reconnecting soon...'
       } else {
         fill = 'red'
-        text = 'offline'
+        text = 'Offline'
       }
 
-      this.execCallbackForAll('setStatus', {
+      this.execCallbackForAllThrottled('setStatus', {
         shape: 'dot',
         fill,
         text,
@@ -192,6 +206,8 @@ module.exports = function (RED) {
       return result
     }
 
+    execCallbackForAllThrottled = throttle(this.execCallbackForAll, 1000)
+
     execCallbackForOne(nodeId, eventName, params, ...moreParams) {
       if (this.childNodes[nodeId][eventName]) {
         return this.childNodes[nodeId][eventName](params, ...moreParams)
@@ -199,7 +215,7 @@ module.exports = function (RED) {
     }
 
     requestConfig() {
-      this.isRequestConfigCompleted = false
+      this.isInitializing = true
       this.refreshChildrenNodeStatus()
       this.publish(`vsh/${this.credentials.thingId}/requestConfig`, {
         vshVersion: VSH_VERSION,
@@ -209,7 +225,7 @@ module.exports = function (RED) {
     requestConfigDebounced = debounce(this.requestConfig, 1000)
 
     markAsConnected() {
-      if (!this.isConnected) {
+      if (!this.isConnected()) {
         return false
       }
 
@@ -224,7 +240,9 @@ module.exports = function (RED) {
       })
     }
 
-    markAsConnectedDebounced = debounce(this.markAsConnected, 7000)
+    markAsConnectedDebounced = debounce(this.markAsConnected, 7000, {
+      immediate: true,
+    })
 
     async publish(topic, message) {
       if (!this.mqttClient) {
@@ -517,7 +535,7 @@ module.exports = function (RED) {
 
       this.setPlan(message.plan)
 
-      this.isRequestConfigCompleted = true
+      this.isInitializing = false
       this.refreshChildrenNodeStatus()
     }
 
@@ -552,7 +570,7 @@ module.exports = function (RED) {
       console.warn('CONNECTION KILLED! Reason:', reason || 'undefined')
       this.isKilled = true
       this.killedStatusText = reason ? reason : 'KILLED'
-      this.isRequestConfigCompleted = true
+      this.isInitializing = false
       this.disconnect()
     }
 
@@ -653,7 +671,7 @@ module.exports = function (RED) {
 
         if (!isLatestVersion) {
           this.logger(
-            `A newer version of VSH is available! Your system might no longer work as expected`,
+            `A newer version of VSH is available! Please update to ensure compatibility`,
             null,
             'warn'
           )
@@ -671,11 +689,9 @@ module.exports = function (RED) {
           return
         }
       } catch (e) {
-        this.logger('connection failed. Retrying in 30 seconds...')
-        this.errorCode = 'connection failed. Retrying every 30 sec...'
+        this.errorCode = 'version check failed'
         this.isError = true
         this.refreshChildrenNodeStatus()
-        setTimeout(() => this.connectAndSubscribe(), 30000)
         return this.logger(`version check failed! ${e.message}`, null, 'error')
       }
 
@@ -688,9 +704,6 @@ module.exports = function (RED) {
         cert: Base64.decode(this.credentials.cert),
         ca: Base64.decode(this.credentials.caCert),
         clientId: this.credentials.thingId,
-        reconnectPeriod: 5000,
-        keepalive: 90,
-        rejectUnauthorized: false,
         will: {
           topic: `vsh/${this.credentials.thingId}/update`,
           payload: JSON.stringify({
@@ -700,104 +713,108 @@ module.exports = function (RED) {
         },
       }
 
-      this.mqttClient = new MqttClient(options, {
-        onConnect: () => {
-          this.logger(`MQTT: connected to ${options.host}:${options.port}`)
-          this.stats.connectionCount++
-          this.isConnected = true
-          this.isError = false
-          this.refreshChildrenNodeStatus()
-          this.markAsConnectedDebounced()
-        },
+      this.mqttClient = new MqttClient(options)
 
-        onDisconnect: () => {
-          this.logger('MQTT: disconnected')
-          this.isConnected = false
-          this.refreshChildrenNodeStatus()
-        },
+      // register event listeners:
 
-        onClose: () => {
-          if (this.isConnected) {
-            this.logger('MQTT: connection closed')
-            this.isConnected = false
-            this.refreshChildrenNodeStatus()
-          }
-        },
+      this.mqttClient.on('connect', (connack) => {
+        this.logger(`MQTT: connected to ${options.host}:${options.port}`)
+        this.stats.connectionCount++
+        this.isError = false
+        this.refreshChildrenNodeStatus()
+        this.markAsConnectedDebounced()
 
-        onError: (error) => {
-          this.isConnected = false
-          this.isError = true
-          this.errorCode = error.code
-          this.refreshChildrenNodeStatus()
-        },
+        if (!this.isSubscribed) {
+          const topicsToSubscribe = [
+            `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
+            `vsh/${this.credentials.thingId}/+/directive`,
+            `vsh/service`,
+            `vsh/version/${VSH_VERSION}/+`,
+            `vsh/${this.credentials.thingId}/service`,
+          ]
 
-        onSubscribeSuccess: (subscribeResult) => {
-          this.isSubscribed = true
-        },
+          this.logger('MQTT: subscribe to topics', topicsToSubscribe)
 
-        onMessage: (topic, message) => {
-          this.logger(`MQTT: message received on topic ${topic}`, message)
-          this.stats.inboundMsgCount++
-          switch (topic) {
-            case `$aws/things/${this.credentials.thingId}/shadow/get/accepted`:
-              this.handleGetAccepted(message)
-              break
-            case `vsh/service`:
-            case `vsh/version/${VSH_VERSION}/service`:
-            case `vsh/${this.credentials.thingId}/service`:
-              this.handleService(message)
-              break
-            default:
-              const match = topic.match(/vshd-[^\/]+/)
-              if (match) {
-                const deviceId = match[0]
+          this.mqttClient.subscribe(topicsToSubscribe).catch((error) => {
+            console.error('MQTT: subscription failed', error)
+          })
+        }
+      })
 
-                if (topic.includes('/directive')) {
-                  if (message.directive.header.name == 'ReportState') {
-                    this.handleReportState(deviceId, message)
-                  } else {
-                    this.handleDirectiveFromAlexa(deviceId, message)
-                  }
+      this.mqttClient.on('offline', () => {
+        this.logger('MQTT: connection offline')
+        this.refreshChildrenNodeStatus()
+      })
+
+      this.mqttClient.on('close', () => {
+        this.refreshChildrenNodeStatus()
+      })
+
+      this.mqttClient.on('reconnect', () => {
+        this.logger('MQTT: reconnecting...')
+        this.refreshChildrenNodeStatus('Reconnecting...')
+      })
+
+      this.mqttClient.on('error', (error) => {
+        this.isError = true
+        this.errorCode = error.code
+        this.refreshChildrenNodeStatus()
+      })
+
+      this.mqttClient.on('message', (topic, message) => {
+        this.logger(`MQTT: message received on topic ${topic}`, message)
+        this.stats.inboundMsgCount++
+        switch (topic) {
+          case `$aws/things/${this.credentials.thingId}/shadow/get/accepted`:
+            this.handleGetAccepted(message)
+            break
+          case `vsh/service`:
+          case `vsh/version/${VSH_VERSION}/service`:
+          case `vsh/${this.credentials.thingId}/service`:
+            this.handleService(message)
+            break
+          default:
+            const match = topic.match(/vshd-[^\/]+/)
+            if (match) {
+              const deviceId = match[0]
+
+              if (topic.includes('/directive')) {
+                if (message.directive.header.name == 'ReportState') {
+                  this.handleReportState(deviceId, message)
                 } else {
-                  this.logger(
-                    'received device-related message that is not supported yet!',
-                    { topic, message },
-                    null,
-                    'warn'
-                  )
+                  this.handleDirectiveFromAlexa(deviceId, message)
                 }
               } else {
                 this.logger(
-                  'received thing-related message that is not supported yet!',
+                  'received device-related message that is not supported yet!',
                   { topic, message },
                   null,
                   'warn'
                 )
               }
-          }
-        },
+            } else {
+              this.logger(
+                'received thing-related message that is not supported yet!',
+                { topic, message },
+                null,
+                'warn'
+              )
+            }
+        }
+      })
+
+      this.mqttClient.on('subscribed', (topic, messageObj) => {
+        this.isSubscribed = true
       })
 
       this.logger(
         `MQTT: attempting connection: ${options.host}:${options.port} (clientId: ${options.clientId})`
       )
       this.mqttClient.connect()
-
-      const topicsToSubscribe = [
-        `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-        `vsh/${this.credentials.thingId}/+/directive`,
-        `vsh/service`,
-        `vsh/version/${VSH_VERSION}/+`,
-        `vsh/${this.credentials.thingId}/service`,
-      ]
-
-      this.logger('MQTT: subscribe to topics', topicsToSubscribe)
-
-      await this.mqttClient.subscribe(topicsToSubscribe)
     }
 
     async disconnect() {
-      if (!this.isConnected || this.isDisconnecting) {
+      if (this.isDisconnecting) {
         return
       }
 
@@ -805,19 +822,23 @@ module.exports = function (RED) {
 
       this.isDisconnecting = true
 
-      await this.publish(
-        `$aws/things/${this.credentials.thingId}/shadow/update`,
-        {
-          state: { reported: { connected: false } },
-        }
-      )
+      // this isConnected() check is important because in disconnected state publish() will block forever
+      if (this.isConnected()) {
+        await this.publish(
+          `$aws/things/${this.credentials.thingId}/shadow/update`,
+          {
+            state: { reported: { connected: false } },
+          }
+        )
+      }
 
       if (this.mqttClient) {
-        await this.mqttClient.disconnect()
+        await this.mqttClient.end()
+        this.mqttClient = null
       }
 
       this.isSubscribed = false
-      this.isRequestConfigCompleted = false
+      this.isInitializing = false
       this.isError = false
     }
   }
