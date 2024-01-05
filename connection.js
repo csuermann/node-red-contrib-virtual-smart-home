@@ -131,7 +131,7 @@ module.exports = function (RED) {
         text = 'Online'
       } else if (this.isReconnecting()) {
         fill = 'red'
-        text = 'Offline. Reconnecting soon...'
+        text = 'Disconnected. Periodically retrying...'
       } else {
         fill = 'red'
         text = 'Offline'
