@@ -1,6 +1,7 @@
 {
   "name": "node-red-contrib-virtual-smart-home",
   "version": "3.0.0",
+  "type": "commonjs",
   "description": "A Node-RED node that represents a 'virtual device' which can be controlled via Alexa. Requires the virtual smart home skill to be enabled for your Amazon account.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -39,7 +40,6 @@
     "singleQuote": true
   },
   "dependencies": {
-    "async-mqtt": "^2.6.3",
     "axios": "^1.1.2",
     "bottleneck": "^2.19.5",
     "color-convert": "^2.0.1",
@@ -48,9 +48,10 @@
     "deep-eql": "^4.1.0",
     "deepmerge": "^4.2.2",
     "js-base64": "^3.7.2",
+    "mqtt": "^5.3.4",
     "semver": "^7.3.7"
   },
   "engines": {
-    "node": ">=12.20.0"
+    "node": ">=16.0.0"
   }
 }

@@ -1,79 +1,106 @@
-const MQTT = require('async-mqtt')
-const RateLimiter = require('./RateLimiter')
+const EventEmitter = require('node:events')
+const mqtt = require('mqtt')
 
-function MqttClient(options, callbacksObj) {
-  this.options = options
-  this.client = null
+class MqttClient extends EventEmitter {
+  constructor(options) {
+    super()
 
-  this.rater = new RateLimiter(
-    [{ period: 60000, limit: 4, penalty: 0 }],
-    (group) => {
-      this.disconnect()
-      console.log(
-        'Too many connection attempts to the virtual smart home backend. Please try restarting your flows, Node-RED or even your entire system.'
-      )
-      setTimeout(
-        () => this.handleOnError({ code: 'connection quota exhausted' }),
-        2000
-      )
+    this.options = {
+      ...options,
+      reconnectPeriod: 30000,
+      keepalive: 90,
+      rejectUnauthorized: true,
     }
-  )
 
-  this.connect = function () {
-    this.client = MQTT.connect('mqtts://' + this.options.host, this.options)
-
-    this.client.on('connect', this.handleOnConnect.bind(this))
-    this.client.on('close', this.handleOnDisconnect)
-    this.client.on('offline', this.handleOnDisconnect)
-    this.client.on('error', this.handleOnError)
-    this.client.on('message', this.handleOnMessage)
+    this.client = null
   }
 
-  this.handleOnConnect = function () {
-    this.rater.execute('onConnect_group', () => callbacksObj['onConnect']())
+  connect() {
+    this.client = mqtt.connect(`mqtts://${this.options.host}`, this.options)
+
+    this.client.on('connect', (connack) => {
+      //console.log('EVENT connect', connack)
+      this.emit('connect', connack)
+    })
+
+    // this.client.on('disconnect', (args) => {
+    //   console.log('EVENT disconnect (initiated by broker)', args)
+    // })
+
+    this.client.on('offline', () => {
+      //console.log('EVENT offline')
+      this.emit('offline')
+    })
+
+    this.client.on('close', () => {
+      //console.log('EVENT close')
+      this.emit('close')
+    })
+
+    this.client.on('reconnect', () => {
+      //console.log('EVENT reconnect')
+      this.emit('reconnect')
+    })
+
+    this.client.on('error', (error) => {
+      //console.log('EVENT error', error)
+      this.emit('error', error)
+    })
+
+    this.client.on('message', (topic, message, _packet) => {
+      const parsedMsg = JSON.parse(message.toString())
+      //console.log('EVENT message', topic, parsedMsg)
+      this.emit('message', topic, parsedMsg)
+    })
   }
 
-  this.handleOnDisconnect = function () {
-    callbacksObj['onDisconnect']()
+  async end() {
+    return this.client.endAsync()
   }
 
-  this.handleOnError = function (error) {
-    callbacksObj['onError'](error)
+  async publish(topic, json) {
+    return new Promise((resolve, reject) => {
+      const message = JSON.stringify(json)
+      const options = {
+        qos: 1,
+      }
+
+      this.client.publish(topic, message, options, (err, result) => {
+        if (err) {
+          console.log(err)
+          reject(err)
+        } else {
+          resolve(result)
+        }
+      })
+    })
   }
 
-  this.handleOnMessage = function (topic, message, packet) {
-    try {
-      callbacksObj['onMessage'](topic, JSON.parse(message.toString()))
-    } catch (e) {
-      console.log(e)
+  async subscribe(topics) {
+    const options = {
+      qos: 1,
     }
+
+    return new Promise((resolve, reject) => {
+      this.client.subscribe(topics, options, (err, result) => {
+        if (err) {
+          console.log('Error during subscribe()', err)
+          reject(err)
+        } else {
+          //console.log('EVENT subscribed')
+          this.emit('subscribed', result)
+          resolve(result)
+        }
+      })
+    })
   }
 
-  this.disconnect = async function () {
-    try {
-      await this.client.end()
-      this.rater.destroy()
-    } catch (e) {
-      console.log(e)
-    }
-    return true
+  isConnected() {
+    return this.client && this.client.connected
   }
 
-  this.publish = async function (topic, json) {
-    try {
-      return await this.client.publish(topic, JSON.stringify(json), { qos: 1 })
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  this.subscribe = async function (topics) {
-    try {
-      const subscribeResult = await this.client.subscribe(topics, { qos: 1 })
-      callbacksObj['onSubscribeSuccess'](subscribeResult)
-    } catch (e) {
-      console.log(e)
-    }
+  isReconnecting() {
+    return this.client && this.client.reconnecting
   }
 }
 

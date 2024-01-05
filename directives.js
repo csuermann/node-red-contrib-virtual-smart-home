@@ -3,7 +3,7 @@
 const deepEql = require('deep-eql')
 
 const directives = {
-  TurnOn: (request, currentState) => {
+  TurnOn: (_request, currentState) => {
     const newState = { powerState: 'ON' }
 
     if (
@@ -17,38 +17,38 @@ const directives = {
 
     return newState
   },
-  TurnOff: (request, currentState) => ({ powerState: 'OFF' }),
-  SetBrightness: (request, currentState) => ({
+  TurnOff: (_request, _currentState) => ({ powerState: 'OFF' }),
+  SetBrightness: (request, _currentState) => ({
     brightness: request.directive.payload.brightness,
     powerState: request.directive.payload.brightness > 0 ? 'ON' : 'OFF',
   }),
-  ChangeChannel: (request, currentState) => ({
+  ChangeChannel: (request, _currentState) => ({
     channel: request.directive.payload.channel.number
       ? parseInt(request.directive.payload.channel.number)
       : 1,
   }),
-  Play: (request, currentState) => {
+  Play: (_request, currentState) => {
     return currentState
   },
-  Pause: (request, currentState) => {
+  Pause: (_request, currentState) => {
     return currentState
   },
-  Stop: (request, currentState) => {
+  Stop: (_request, currentState) => {
     return currentState
   },
-  StartOver: (request, currentState) => {
+  StartOver: (_request, currentState) => {
     return currentState
   },
-  Previous: (request, currentState) => {
+  Previous: (_request, currentState) => {
     return currentState
   },
-  Next: (request, currentState) => {
+  Next: (_request, currentState) => {
     return currentState
   },
-  Rewind: (request, currentState) => {
+  Rewind: (_request, currentState) => {
     return currentState
   },
-  FastForward: (request, currentState) => {
+  FastForward: (_request, currentState) => {
     return currentState
   },
   SkipChannels: (request, currentState) => {
@@ -70,7 +70,7 @@ const directives = {
     }
     return newState
   },
-  SetVolume: (request, currentState) => ({
+  SetVolume: (request, _currentState) => ({
     volume: request.directive.payload.volume,
   }),
   AdjustVolume: (request, currentState) => {
@@ -84,7 +84,7 @@ const directives = {
       volume: newVolume,
     }
   },
-  SetMute: (request, currentState) => ({
+  SetMute: (request, _currentState) => ({
     muted: request.directive.payload.mute,
   }),
   AdjustBrightness: (request, currentState) => {
@@ -100,18 +100,18 @@ const directives = {
       powerState: newBrightness > 0 ? 'ON' : 'OFF',
     }
   },
-  SetColor: (request, currentState) => ({
+  SetColor: (request, _currentState) => ({
     color: request.directive.payload.color,
     lightMode: 'hsb',
     powerState: 'ON',
   }),
-  SetColorTemperature: (request, currentState) => ({
+  SetColorTemperature: (request, _currentState) => ({
     colorTemperatureInKelvin:
       request.directive.payload.colorTemperatureInKelvin,
     lightMode: 'temp',
     powerState: 'ON',
   }),
-  IncreaseColorTemperature: (request, currentState) => {
+  IncreaseColorTemperature: (_request, currentState) => {
     const currentTemp = currentState.colorTemperatureInKelvin
     const supportedTemps = [
       2200, // warm, warm white
@@ -126,7 +126,7 @@ const directives = {
       lightMode: 'temp',
     }
   },
-  DecreaseColorTemperature: (request, currentState) => {
+  DecreaseColorTemperature: (_request, currentState) => {
     const currentTemp = currentState.colorTemperatureInKelvin
     const supportedTemps = [
       2200, // warm, warm white
@@ -141,10 +141,10 @@ const directives = {
       lightMode: 'temp',
     }
   },
-  Lock: (request, currentState) => ({
+  Lock: (_request, _currentState) => ({
     lockState: 'LOCKED',
   }),
-  Unlock: (request, currentState) => ({
+  Unlock: (_request, _currentState) => ({
     lockState: 'UNLOCKED',
   }),
   SetMode: (request, currentState) => {
@@ -158,10 +158,10 @@ const directives = {
     }
     return newState
   },
-  Activate: (request, currentState) => ({
+  Activate: (_request, _currentState) => ({
     isActivated: true,
   }),
-  Deactivate: (request, currentState) => ({
+  Deactivate: (_request, _currentState) => ({
     isActivated: false,
   }),
   AdjustTargetTemperature: (request, currentState) => ({
@@ -169,15 +169,15 @@ const directives = {
       currentState.targetTemperature +
       request.directive.payload.targetSetpointDelta.value,
   }),
-  SelectInput: (request, currentState) => ({
+  SelectInput: (request, _currentState) => ({
     input: request.directive.payload.input,
   }),
-  SetTargetTemperature: (request, currentState) => ({
+  SetTargetTemperature: (request, _currentState) => ({
     targetTemperature: request.directive.payload.targetSetpoint.value,
     targetScale: request.directive.payload.targetSetpoint.scale,
     powerState: 'ON',
   }),
-  SetThermostatMode: (request, currentState) => {
+  SetThermostatMode: (request, _currentState) => {
     const newState = {
       thermostatMode: request.directive.payload.thermostatMode.value,
     }

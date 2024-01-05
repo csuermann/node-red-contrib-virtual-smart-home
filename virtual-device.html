@@ -1,5 +1,7 @@
 <script type="text/javascript">
   function vshOnEditPrepare() {
+    $('#node-input-deviceId').val('vshd-' + this.id.replace('.', ''))
+
     const vshConnectionNodeId = $('#node-input-connection')[0].value
 
     if (vshConnectionNodeId === '_ADD_') {
@@ -29,6 +31,7 @@
     category: 'virtual smart home',
     defaults: {
       name: { value: '', required: true },
+      //deviceId: { value: 'vshd-xxx', required: false },
       topic: { value: '', required: false },
       connection: { type: 'vsh-connection', required: true },
       template: { value: 'SWITCH', required: true },
@@ -116,6 +119,18 @@
   <div class="form-row">
     <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
     <input type="text" id="node-input-topic" placeholder="Topic" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-deviceId"
+      ><i class="fa fa-hashtag"></i> Device ID</label
+    >
+    <input
+      type="text"
+      readonly
+      id="node-input-deviceId"
+      placeholder="vshd-???"
+    />
   </div>
 
   <div class="form-row">
@@ -222,7 +237,7 @@
   </div>
 
   <div id="subscription-hint">
-    <h1>VSH Pro is now available</h1>
+    <h1>Upgrade to VSH Pro</h1>
     <ul>
       <li>control up to 200 virtual devices</li>
       <li>device status retrievable by Alexa</li>

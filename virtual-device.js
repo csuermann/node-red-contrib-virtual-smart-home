@@ -10,9 +10,9 @@ module.exports = function (RED) {
   function VirtualDeviceNode(config) {
     RED.nodes.createNode(this, config)
 
-    const node = this
+    const that = this
 
-    const deviceId = 'vshd-' + node.id.replace('.', '')
+    const deviceId = 'vshd-' + that.id.replace('.', '')
 
     const getConnectionNode = () => {
       return RED.nodes.getNode(config.connection)
@@ -24,7 +24,7 @@ module.exports = function (RED) {
     let isActive = false
 
     const getLocalState = () => {
-      let contextState = node.context().get('state')
+      let contextState = that.context().get('state')
 
       if (!contextState) {
         contextState = getDefaultState(config.template)
@@ -37,7 +37,7 @@ module.exports = function (RED) {
       const oldLocalState = getLocalState()
       let newLocalState = merge(oldLocalState, targetState)
 
-      node.context().set('state', newLocalState)
+      that.context().set('state', newLocalState)
 
       return newLocalState
     }
@@ -61,7 +61,7 @@ module.exports = function (RED) {
           payload['rawDirective'] = rawDirective
         }
 
-        node.send(msg)
+        that.send(msg)
       }
     }
 
@@ -87,7 +87,7 @@ module.exports = function (RED) {
       getConnectionNode().registerChildNode(deviceId, {
         setStatus: (status, force = false) => {
           if (isActive || force) {
-            node.status(status)
+            that.status(status)
           }
         },
         setActive: (isActiveToggle) => {
@@ -107,7 +107,7 @@ module.exports = function (RED) {
       })
     }
 
-    node.on('input', function (msg, send, done) {
+    that.on('input', function (msg, send, done) {
       if (!getConnectionNode() || !isActive) {
         console.log(
           `ignoring inbound msg for non-active device ID ${deviceId}'`
@@ -170,11 +170,11 @@ module.exports = function (RED) {
       }
     })
 
-    node.on('close', async function (removed, done) {
+    that.on('close', async function (_removed, done) {
       if (getConnectionNode()) {
         await getConnectionNode().unregisterChildNode(deviceId)
       }
-      node.status({})
+      that.status({})
       return done()
     })
   }
