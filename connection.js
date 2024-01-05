@@ -151,7 +151,7 @@ module.exports = function (RED) {
           {
             shape: 'dot',
             fill: 'gray',
-            text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
+            text: 'Device limit reached! Upgrade your VSH subscription to get more devices!',
           },
           true //force!
         )
@@ -525,13 +525,13 @@ module.exports = function (RED) {
         const config = message.msgRateLimiter
         this.rater.overrideConfig(config)
       }
+
       if (message.userIdToken) {
         this.userIdToken = message.userIdToken
       }
-      if (message.allowedDeviceCount) {
-        this.allowedDeviceCount = message.allowedDeviceCount
-        this.disableUnallowedDevices(message.allowedDeviceCount)
-      }
+
+      this.allowedDeviceCount = message.allowedDeviceCount
+      this.disableUnallowedDevices(message.allowedDeviceCount)
 
       this.setPlan(message.plan)
 
@@ -652,7 +652,7 @@ module.exports = function (RED) {
             {
               shape: 'dot',
               fill: 'gray',
-              text: 'device limit reached! Upgrade your VSH subscription to get more devices!',
+              text: 'Device limit reached! Upgrade your VSH subscription to get more devices!',
             },
             true //force
           )

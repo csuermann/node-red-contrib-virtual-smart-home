@@ -286,6 +286,7 @@
         return
       }
 
+      // sort by friendlyName
       registeredDevices = registeredDevices.sort((a, b) => {
         const nameA = a.friendlyName.toUpperCase()
         const nameB = b.friendlyName.toUpperCase()
@@ -299,6 +300,7 @@
         return comparison
       })
 
+      // beautify template names
       registeredDevices = registeredDevices.map((item) => {
         var splitStr = item.template.toLowerCase().split('_')
         for (var i = 0; i < splitStr.length; i++) {
@@ -309,6 +311,32 @@
         return item
       })
 
+      // mark duplicates
+      registeredDevices = registeredDevices.map((item) => {
+        const duplicates = registeredDevices.filter(
+          (d) => d.deviceId == item.deviceId
+        )
+
+        item.isDuplicate = duplicates.length > 1
+
+        return item
+      })
+
+      console.table(registeredDevices)
+
+      // show only relevant hints below table
+      if (
+        registeredDevices.some(
+          (d) => d.thingId != $('#node-config-input-thingId').val()
+        )
+      ) {
+        $('#foreign-connection-hint').show()
+      }
+
+      if (registeredDevices.some((d) => d.isDuplicate)) {
+        $('#duplicates-hint').show()
+      }
+
       $.each(registeredDevices, function (i, item) {
         let $tr = $('<tr>')
           .attr('id', item.deviceId)
@@ -318,7 +346,12 @@
               : 'other-thing'
           )
           .append(
-            $('<td>').text(item.friendlyName),
+            $('<td>').append(
+              document.createTextNode(item.friendlyName),
+              item.isDuplicate
+                ? $('<i class="is-duplicate fa fa-exclamation-triangle">')
+                : null //TODO set to null
+            ),
             $('<td>').text(item.template),
             $('<td>')
               .addClass('action-column')
@@ -584,7 +617,18 @@
   }
 
   #registered-devices .other-thing {
-    background-color: #f5f2f2;
+    background-color: rgb(161, 161, 161);
+  }
+
+  #registered-devices .is-duplicate {
+    padding-left: 10px;
+    color: red;
+  }
+
+  #table-hints {
+    font-size: 0.8em;
+    margin-top: 10px;
+    margin-bottom: 0;
   }
 
   #user-code {
@@ -867,6 +911,10 @@
           <th>&nbsp;</th>
         </tr>
       </table>
+      <ul id="table-hints">
+        <li id="foreign-connection-hint" hidden>Devices from other connections are shown with a gray background</li>
+        <li id="duplicates-hint" hidden><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Indicates non-unique Device IDs</li>
+      </ul>
     </div>
   </div>
 </script>
@@ -896,7 +944,8 @@
     The 'Registered Devices' section lists all virtual devices that are
     associated with the Alexa account the connection was linked with. Hence the
     list might contain more devices than the ones using this connection. Devices
-    linked to another connection are displayed with a gray background.
+    originating from other connections (possibly even different Node-RED
+    instances) are displayed with a gray background.
   </p>
   <p>
     Registered devices can be deleted by clicking the trash icon, which will
