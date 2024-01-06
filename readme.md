@@ -73,23 +73,25 @@ local device changes, which will then be reflected in the Alexa app. If the
 passthrough option is enabled, this will also trigger an outbound message, just
 like when the node gets invoked via Alexa. In this case `payload.source` is set to `device` instead of `alexa`. If the inbound message has a `topic` attribute, its value will be present in the outbound msg instead of the topic configured in the editor.
 
-Please ensure that your setup does not send too many messages to Alexa. Othewise you risk getting your account blocked.
+Please ensure that your setup does not send too many messages to Alexa. Otherwise you risk getting your account blocked.
 
-## Setup instructions
+## Setup Instructions
 
-- In the Alexa app:
-  1. Search the skill store for the `virtual smart home` skill
-  1. Enable the 'virtual smart home' skill
-  1. Complete the account linking process by logging in with your Amazon account credentials.
-- In Node-RED:
-  1. Install the `node-red-contrib-virtual-smart-home` module
-  1. Place a `virtual device` node onto the canvas and connect it to a debug node
-  1. Double click on the virtual device node to enter a name and select a device type. Once set up you can use this name to control the device via Alexa.
-  1. Configure a new `vsh-connection` by clicking the pen icon. (Only needed _once_ for each Amazon account)
-  1. Follow the instructions to complete the account linking process. Make sure you use the same Amazon account credentials as above!
-  1. Deploy your Node-RED flow. This will trigger your virtual device to be discovered by Alexa. You should even get a push notification via the Alexa app (if notifications are enabled).
-  1. You should now be able to control your virtual device with your voice, e.g. by saying "Alexa, turn xxx on". Inspect the output of the connected debug node and consult the docs in order to do something useful.
-  1. Once you remove virtual devices from the canvas (and redeploy your flows), those devices will also be removed from Alexa.
+### In the Alexa app
+
+1. Search the skill store for the `virtual smart home` skill and enable it.
+2. Complete the account linking process by logging in with your Amazon account credentials.
+
+### In Node-RED
+
+1. Install the `node-red-contrib-virtual-smart-home` module.
+2. Place a `virtual device` node onto the canvas and connect it to a debug node.
+3. Double-click on the virtual device node to enter a name and select a device type. Once set up, you can use this name to control the device via Alexa.
+4. Configure a new `vsh-connection` by clicking the pen icon. (Only needed _once_ for each Amazon account).
+5. Follow the instructions to complete the account linking process. Make sure you use the same Amazon account credentials as above.
+6. Deploy your Node-RED flow. This will trigger your virtual device to be discovered by Alexa. You should even get a push notification via the Alexa app (if notifications are enabled).
+7. You should now be able to control your virtual device with your voice, e.g., by saying "Alexa, turn xxx on". Inspect the output of the connected debug node and consult the docs to do something useful.
+8. Once you remove virtual devices from the canvas (and redeploy your flows), those devices will also be removed from Alexa.
 
 ## Docs
 
@@ -107,25 +109,12 @@ I dedicated endless hours to this project and really hope it adds value for you!
 - rate the 'virtual smart home' skill on the Alexa skill store
 - rate the 'virtual smart home' [Node-RED package](https://flows.nodered.org/node/node-red-contrib-virtual-smart-home)
 - mention this package in your next blog post / podcast / YouTube
-- say thank you by [buying me a coffee](https://paypal.me/cornelius/5).
 
 **THANK YOU!**
 
 ## Changelog
 
 New versions of VSH are frequently released and it is generally recommended to always run the latest version. The Changelog is published in the [Releases](https://github.com/csuermann/node-red-contrib-virtual-smart-home/releases) section on GitHub.
-
-### Version 3.x.x - BREAKING CHANGE
-
-With the release of version 3.0.0 all earlier versions will be deprecated and might no longer work as expected. Please update to the latest version of VSH! The new version of VSH also requires Node-RED >= 2.0.0! But please do yourself a favour and upgrade to Node-RED v3 while you're at it!
-
-### What's new in version 3?
-
-Version 3 introduces a "Pro" plan which includes up to 200 virtual devices and the option of configuring devices as "retrievable" so that their device state can be retrieved by Alexa / the Alexa app.
-
-You can upgrade to the "Pro" plan from the _Connection_ dialog.
-
-The "Free" plan will be limited to 7 virtual devices.
 
 ## FAQ
 
@@ -137,7 +126,7 @@ The "Free" plan will be limited to 7 virtual devices.
 
    - Alexa, switch on / off DEVICE-NAME
    - Alexa, set DEVICE-NAME to X percent
-   - Alexa, set DEVICE-NAME to Warm white / Soft white / Daylight white / Cool white / Red / Crimson / Salmon / Orange / Gold / Yellow / Green / Turquoise / Cyan / Sky blue / Blue / Purple / Magenta / Pink / Lavendar
+   - Alexa, set DEVICE-NAME to Warm white / Soft white / Daylight white / Cool white / Red / Crimson / Salmon / Orange / Gold / Yellow / Green / Turquoise / Cyan / Sky blue / Blue / Purple / Magenta / Pink / Lavender
    - Alexa, open / close DEVICE-NAME
 
 1. Q: How can I control devices in a specific room?
@@ -208,12 +197,12 @@ The "Free" plan will be limited to 7 virtual devices.
 
 ## Terms of Use
 
-This package comes without any warranty. Use it, enjoy it, but all at your own
-risk. If you are satisfied with this project, consider upgrading to the PRO plan or [bying me a coffee](https://paypal.me/cornelius/5). Thank you!
+This package comes without any warranty. Use it, enjoy it, but all at your own risk.
+If you are satisfied with this project, consider upgrading to the PRO plan or [buying me a coffee](https://paypal.me/cornelius/5). Thank you!
 
 ### NOTE
 
-The permitted use of the VSH package is limited to human-triggered interactions with Alexa and _infrequent_ synronizations of device states (e.g. for sensor data, such as thermostat). Any setup that leads to excessive data traffic between the VSH client and its backend is strictly forbidden and will lead to permanent blocking of the user's account.
+The permitted use of the VSH package is limited to human-triggered interactions with Alexa and _infrequent_ synchronizations of device states (e.g. for sensor data, such as thermostat). Any setup that leads to excessive data traffic between the VSH client and its backend is strictly forbidden and will lead to permanent blocking of the user's account.
 
 Devices that have not been online for 30 days will be permanently deleted without prior warning. Their certificates will be invalidated and can no longer be used to connect virtual devices.
 
