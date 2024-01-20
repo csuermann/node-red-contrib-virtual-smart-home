@@ -1,5 +1,5 @@
 const axios = require('axios')
-const { Base64 } = require('js-base64')
+const Buffer = require('buffer').Buffer
 const debounce = require('debounce')
 const throttle = require('./throttle')
 const semver = require('semver')
@@ -11,6 +11,10 @@ const {
   buildPropertiesFromState,
   annotateChanges,
 } = require('./directives')
+
+function decodeBase64(str) {
+  return Buffer.from(str, 'base64').toString('utf-8')
+}
 
 module.exports = function (RED) {
   RED.httpAdmin.get(
@@ -700,9 +704,9 @@ module.exports = function (RED) {
       const options = {
         host: this.credentials.server,
         port: this.config.port,
-        key: Base64.decode(this.credentials.privateKey),
-        cert: Base64.decode(this.credentials.cert),
-        ca: Base64.decode(this.credentials.caCert),
+        key: decodeBase64(this.credentials.privateKey),
+        cert: decodeBase64(this.credentials.cert),
+        ca: decodeBase64(this.credentials.caCert),
         clientId: this.credentials.thingId,
         will: {
           topic: `vsh/${this.credentials.thingId}/update`,
