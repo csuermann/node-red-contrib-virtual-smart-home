@@ -54,6 +54,7 @@ module.exports = function (RED) {
       if (Object.keys(payload).length > 0) {
         const msg = {
           topic: topic ? topic : config.topic,
+          metadata: config.metadata,
           payload,
         }
 

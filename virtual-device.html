@@ -2,6 +2,11 @@
   function vshOnEditPrepare() {
     $('#node-input-deviceId').val('vshd-' + this.id.replace('.', ''))
 
+    $('#node-input-metadata').typedInput({
+      type: 'json',
+      types: ['json'],
+    })
+
     const vshConnectionNodeId = $('#node-input-connection')[0].value
 
     if (vshConnectionNodeId === '_ADD_') {
@@ -33,6 +38,7 @@
       name: { value: '', required: true },
       //deviceId: { value: 'vshd-xxx', required: false },
       topic: { value: '', required: false },
+      metadata: { value: {}, required: false },
       connection: { type: 'vsh-connection', required: true },
       template: { value: 'SWITCH', required: true },
       retrievable: { value: false },
@@ -119,6 +125,15 @@
   <div class="form-row">
     <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
     <input type="text" id="node-input-topic" placeholder="Topic" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-metadata"><i class="fa fa-code"></i> Metadata</label>
+    <input
+      type="text"
+      id="node-input-metadata"
+      placeholder="arbitrary optional metadata"
+    />
   </div>
 
   <div class="form-row">
@@ -295,6 +310,13 @@
       <span class="property-type">string</span>
     </dt>
     <dd>topic string as configured in the virtual device node</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>
+      metadata
+      <span class="property-type">object</span>
+    </dt>
+    <dd>metadata as configured in the virtual device node</dd>
   </dl>
   <dl class="message-properties">
     <dt>
