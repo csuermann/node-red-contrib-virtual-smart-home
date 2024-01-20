@@ -1,0 +1,103 @@
+[
+  {
+    "id": "affffc88a48e1001",
+    "type": "subflow",
+    "name": "Alexa -> Homeassistant",
+    "info": "",
+    "category": "",
+    "in": [{ "x": 60, "y": 80, "wires": [{ "id": "2565add7dc2c886d" }] }],
+    "out": [],
+    "env": [],
+    "meta": {},
+    "color": "#039be5",
+    "icon": "font-awesome/fa-home",
+    "status": {
+      "x": 320,
+      "y": 160,
+      "wires": [{ "id": "2e59c216b911bfdf", "port": 0 }]
+    }
+  },
+  {
+    "id": "2565add7dc2c886d",
+    "type": "function",
+    "z": "affffc88a48e1001",
+    "name": "convert",
+    "func": "const directiveToService = {\n    TurnOff: \"turn_off\",\n    TurnOn: \"turn_on\",\n    SetBrightness: \"turn_on\",\n    SetColorTemperature: \"turn_on\",\n    SetColor: \"turn_on\"\n}\n\nconst {domain, entityId} = msg.metadata\n\nconst service = directiveToService[msg.payload.directive]\n\nnode.status({\n    fill: service == 'turn_on' ? 'yellow' : 'grey',\n    shape: 'dot',\n    text: msg.payload.directive\n})\n\nreturn {\n    payload: {\n        domain,\n        service,\n        data: {\n            entity_id: domain + \".\" + entityId,\n            ...(service === \"turn_on\" & msg.payload.brightness !== undefined && { brightness_pct: msg.payload.brightness}),\n            ...(service === \"turn_on\" & msg.payload.color_xy !== undefined && msg.payload.lightMode === \"hsb\" && { color_xy: msg.payload.color_xy }),\n            ...(service === \"turn_on\" & msg.payload.colorTemperatureInKelvin !== undefined & msg.payload.lightMode === \"temp\" && { color_temp: msg.payload.colorTemperatureInKelvin})        }\n    }\n}",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 200,
+    "y": 80,
+    "wires": [["d6bd4dac36a284ea"]]
+  },
+  {
+    "id": "d6bd4dac36a284ea",
+    "type": "api-call-service",
+    "z": "affffc88a48e1001",
+    "name": "",
+    "server": "",
+    "version": 3,
+    "debugenabled": false,
+    "service_domain": "",
+    "service": "",
+    "entityId": "",
+    "data": "",
+    "dataType": "jsonata",
+    "mergecontext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "x": 370,
+    "y": 80,
+    "wires": [[]]
+  },
+  {
+    "id": "2e59c216b911bfdf",
+    "type": "status",
+    "z": "affffc88a48e1001",
+    "name": "",
+    "scope": ["2565add7dc2c886d"],
+    "x": 200,
+    "y": 160,
+    "wires": [[]]
+  },
+  {
+    "id": "9fe9a12665bce27b",
+    "type": "comment",
+    "z": "affffc88a48e1001",
+    "name": "READ ME!",
+    "info": "# Please note\n\nYou must have the package `node-red-contrib-home-assistant-websocket` installed in order for this subflow to work!",
+    "x": 380,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "1ecc03b0.52929c",
+    "type": "vsh-virtual-device",
+    "z": "3156dd60.366d12",
+    "name": "Kitchen Light",
+    "topic": "",
+    "metadata": "{\"domain\":\"light\",\"entityId\":\"kitchen_light\"}",
+    "connection": "",
+    "template": "SWITCH",
+    "retrievable": false,
+    "passthrough": false,
+    "diff": false,
+    "filter": false,
+    "filterTopic": false,
+    "x": 111,
+    "y": 280,
+    "wires": [["f057c4815e3be504"]]
+  },
+  {
+    "id": "f057c4815e3be504",
+    "type": "subflow:affffc88a48e1001",
+    "z": "3156dd60.366d12",
+    "name": "Alexa -> Homeassistant",
+    "x": 430,
+    "y": 280,
+    "wires": []
+  }
+]

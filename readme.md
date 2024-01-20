@@ -49,14 +49,16 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
 
 ## What it does
 
-The node gets invoked through Amazon Alexa (either via a voice command or via
-the Alexa app) and outputs a `msg` object containing the updated device state as
-payload. For example, when you say "Alexa, dim the kitchen light to 50 percent",
-the following `msg` object will be emitted:
+This node is triggered by Amazon Alexa, either through a voice command or the Alexa app,
+resulting in the generation of a `msg` object that carries the updated device state as its
+payload. This msg can be harnessed to perform practical actions, such as controlling
+physical devices connected to Home Assistant. For instance, if you say, "Alexa, dim the
+kitchen light to 50 percent," the emitted `msg` object would be as follows:
 
 ```JSON
 {
   "topic": "home/kitchen/lights",
+  "metadata": { "foo": "bar"},
   "payload": {
     "brightness": 50,
     "powerState": "ON",
