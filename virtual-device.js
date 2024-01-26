@@ -51,10 +51,18 @@ module.exports = function (RED) {
         friendlyName: config.name,
       })
 
+      let metadata
+
+      try {
+        metadata = JSON.parse(config.metadata ?? '{}')
+      } catch (e) {
+        metadata = {}
+      }
+
       if (Object.keys(payload).length > 0) {
         const msg = {
           topic: topic ? topic : config.topic,
-          metadata: JSON.parse(config.metadata ?? '{}'),
+          metadata,
           payload,
         }
 
