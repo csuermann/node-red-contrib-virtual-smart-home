@@ -68,8 +68,8 @@ body:
       required: true
   - type: input
     id: thing-id
-    description: You'll find your `Thing-ID` in the vsh-connection node
     attributes:
+      description: You'll find your `Thing-ID` in the vsh-connection node
       label: Thing-ID
       placeholder: vsht-...
     validations:
