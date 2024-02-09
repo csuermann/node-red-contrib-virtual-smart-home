@@ -24,13 +24,15 @@ body:
       description: A clear and concise description of what you would want to happen
     validations:
       required: false
-  - id: alternatives
+  - type: textarea
+    id: alternatives
     attributes:
       label: Alternatives
       description: "Describe alternatives / workarounds you've considered"
     validations:
       required: false
-  - id: additional-context
+  - type: textarea
+    id: additional-context
     attributes:
       label: Additional context
       description: Provide any other context or screenshots about the feature request here
