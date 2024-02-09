@@ -1,5 +1,7 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Frequently Asked Questions
+    url: https://github.com/csuermann/node-red-contrib-virtual-smart-home?tab=readme-ov-file#faq
+    about: The answer to your question might already be there
   - name: Customer Support
-    url: mailto:vsh@csuermann.de
-    about: Email us for issues with your PRO plan. Make sure to include your Thing-ID.
+    about: [Email us](mailto:vsh@csuermann.de) for issues with your PRO plan. Make sure to include your Thing-ID.
