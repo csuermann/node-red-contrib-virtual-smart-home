@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Customer Support
+    url: mailto:vsh@csuermann.de
+    about: Email us for issues with your PRO plan. Make sure to include your Thing-ID.
