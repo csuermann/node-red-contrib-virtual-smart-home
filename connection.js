@@ -16,6 +16,10 @@ function decodeBase64(str) {
   return Buffer.from(str, 'base64').toString('utf-8')
 }
 
+function timeout(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 module.exports = function (RED) {
   RED.httpAdmin.get(
     `/vsh-connection/:nodeId`,
@@ -228,7 +232,7 @@ module.exports = function (RED) {
 
     requestConfigDebounced = debounce(this.requestConfig, 1000)
 
-    markAsConnected() {
+    markShadowAsConnected() {
       if (!this.isConnected()) {
         return false
       }
@@ -244,9 +248,22 @@ module.exports = function (RED) {
       })
     }
 
-    markAsConnectedDebounced = debounce(this.markAsConnected, 7000, {
-      immediate: true,
-    })
+    markShadowAsConnectedDebounced = debounce(
+      this.markShadowAsConnected,
+      7000,
+      {
+        immediate: true,
+      }
+    )
+
+    async markShadowAsDisconnected() {
+      return await this.publish(
+        `$aws/things/${this.credentials.thingId}/shadow/update`,
+        {
+          state: { reported: { connected: false } },
+        }
+      )
+    }
 
     async publish(topic, message) {
       if (!this.mqttClient) {
@@ -721,12 +738,12 @@ module.exports = function (RED) {
 
       // register event listeners:
 
-      this.mqttClient.on('connect', (connack) => {
+      this.mqttClient.on('connect', (_conAck) => {
         this.logger(`MQTT: connected to ${options.host}:${options.port}`)
         this.stats.connectionCount++
         this.isError = false
         this.refreshChildrenNodeStatus()
-        this.markAsConnectedDebounced()
+        this.markShadowAsConnectedDebounced()
 
         if (!this.isSubscribed) {
           const topicsToSubscribe = [
@@ -814,6 +831,7 @@ module.exports = function (RED) {
       this.logger(
         `MQTT: attempting connection: ${options.host}:${options.port} (clientId: ${options.clientId})`
       )
+
       this.mqttClient.connect()
     }
 
@@ -826,14 +844,9 @@ module.exports = function (RED) {
 
       this.isDisconnecting = true
 
-      // this isConnected() check is important because in disconnected state publish() will block forever
       if (this.isConnected()) {
-        await this.publish(
-          `$aws/things/${this.credentials.thingId}/shadow/update`,
-          {
-            state: { reported: { connected: false } },
-          }
-        )
+        // publish() will block forever when not connected. Use of Promise.race() as an additional precaution
+        await Promise.race([this.markShadowAsDisconnected(), timeout(1000)])
       }
 
       if (this.mqttClient) {
