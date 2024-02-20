@@ -1,0 +1,76 @@
+name: Bug Report
+description: Create a bug report to help improve Virtual-Smart-Home
+assignees:
+  - csuermann
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen
+    validations:
+      required: true
+  - type: input
+    id: vsh-version
+    attributes:
+      label: Virtual-Smart-Home Version
+      placeholder: ex. 4.1.2
+    validations:
+      required: true
+  - type: input
+    id: nodered-version
+    attributes:
+      label: Node-RED Version
+      placeholder: ex. 3.1.5
+    validations:
+      required: true
+  - type: input
+    id: nodejs-version
+    attributes:
+      label: Node.js Version
+      placeholder: ex. 18.16.0
+    validations:
+      required: false
+  - type: dropdown
+    id: plan
+    attributes:
+      label: Plan
+      options:
+        - FREE
+        - PRO
+    validations:
+      required: true
+  - type: input
+    id: thing-id
+    attributes:
+      description: You'll find your `Thing-ID` in the vsh-connection node
+      label: Thing-ID
+      placeholder: vsht-...
+    validations:
+      required: false

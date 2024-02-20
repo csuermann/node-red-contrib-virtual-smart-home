@@ -1,0 +1,40 @@
+name: Feature Request
+description: What would make Virtual-Smart-Home even better for you?
+assignees:
+  - csuermann
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to share your idea!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: A clear and concise description of what the problem is
+      placeholder: "Example: I'm always frustrated when..."
+    validations:
+      required: false
+  - type: textarea
+    id: solution
+    attributes:
+      label: Ideal Solution
+      description: A clear and concise description of what you would want to happen
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: "Describe alternatives / workarounds you've considered"
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Provide any other context or screenshots about the feature request here
+    validations:
+      required: false
