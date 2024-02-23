@@ -26,7 +26,7 @@ module.exports = function (RED) {
     RED.auth.needsPermission('vsh-virtual-device.read'),
     (req, res) => {
       const connectionNode = RED.nodes.getNode(req.params.nodeId)
-      res.json({ plan: connectionNode.getPlan() })
+      res.json({ plan: connectionNode?.getPlan() ?? 'unknown' })
     }
   )
 
@@ -89,7 +89,7 @@ module.exports = function (RED) {
         try {
           await this.disconnect()
         } catch (e) {
-          console.log('connection.js:this:on:close::', e)
+          this.logger('connection.js:this:on:close::', e, 'error')
         }
 
         this.execCallbackForAll('onDisconnect')
@@ -234,6 +234,9 @@ module.exports = function (RED) {
 
     markShadowAsConnected() {
       if (!this.isConnected()) {
+        this.logger(
+          `skipping markShadowAsConnected() because isConnected() is false`
+        )
         return false
       }
 
@@ -588,7 +591,12 @@ module.exports = function (RED) {
         return
       }
 
-      console.warn('CONNECTION KILLED! Reason:', reason || 'undefined')
+      this.logger(
+        'CONNECTION KILLED! Reason:',
+        reason || 'undefined',
+        null,
+        'warn'
+      )
       this.isKilled = true
       this.killedStatusText = reason ? reason : 'KILLED'
       this.isInitializing = false
@@ -625,6 +633,7 @@ module.exports = function (RED) {
         default:
           this.logger(
             `received service request (${message.operation}) that is not supported by this VSH version. Updating to the latest version might fix this!`,
+            null,
             'warn'
           )
       }
@@ -651,7 +660,7 @@ module.exports = function (RED) {
         // }
         return response.data
       } catch (error) {
-        console.log(error)
+        this.logger('checkVersion() failed', error, 'error')
         throw new Error(
           `HTTP Error Response: ${response.status || 'n/a'} ${
             response.statusText || 'n/a'
@@ -739,27 +748,30 @@ module.exports = function (RED) {
       // register event listeners:
 
       this.mqttClient.on('connect', (_conAck) => {
-        this.logger(`MQTT: connected to ${options.host}:${options.port}`)
         this.stats.connectionCount++
+        this.logger(
+          `MQTT: connected to ${options.host}:${options.port}, connection #${this.stats.connectionCount}`
+        )
         this.isError = false
         this.refreshChildrenNodeStatus()
+
+        // if (!this.isSubscribed) {
+        const topicsToSubscribe = [
+          `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
+          `vsh/${this.credentials.thingId}/+/directive`,
+          `vsh/service`,
+          `vsh/version/${VSH_VERSION}/+`,
+          `vsh/${this.credentials.thingId}/service`,
+        ]
+
+        this.logger('MQTT: subscribe to topics', topicsToSubscribe)
+
+        this.mqttClient.subscribe(topicsToSubscribe).catch((error) => {
+          this.logger('MQTT: subscription failed', error, 'error')
+        })
+        // }
+
         this.markShadowAsConnectedDebounced()
-
-        if (!this.isSubscribed) {
-          const topicsToSubscribe = [
-            `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-            `vsh/${this.credentials.thingId}/+/directive`,
-            `vsh/service`,
-            `vsh/version/${VSH_VERSION}/+`,
-            `vsh/${this.credentials.thingId}/service`,
-          ]
-
-          this.logger('MQTT: subscribe to topics', topicsToSubscribe)
-
-          this.mqttClient.subscribe(topicsToSubscribe).catch((error) => {
-            console.error('MQTT: subscription failed', error)
-          })
-        }
       })
 
       this.mqttClient.on('offline', () => {
@@ -768,6 +780,8 @@ module.exports = function (RED) {
       })
 
       this.mqttClient.on('close', () => {
+        this.logger('MQTT: connection closed')
+        this.isSubscribed = false
         this.refreshChildrenNodeStatus()
       })
 
@@ -824,7 +838,7 @@ module.exports = function (RED) {
         }
       })
 
-      this.mqttClient.on('subscribed', (topic, messageObj) => {
+      this.mqttClient.on('subscribed', (_subscriptions) => {
         this.isSubscribed = true
       })
 

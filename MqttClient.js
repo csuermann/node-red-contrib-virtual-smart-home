@@ -7,9 +7,12 @@ class MqttClient extends EventEmitter {
 
     this.options = {
       ...options,
-      reconnectPeriod: 30000,
+      reconnectPeriod: 30_000,
       keepalive: 90,
       rejectUnauthorized: true,
+      resubscribe: false,
+      clean: true,
+      protocolVersion: 5,
     }
 
     this.client = null
@@ -18,9 +21,9 @@ class MqttClient extends EventEmitter {
   connect() {
     this.client = mqtt.connect(`mqtts://${this.options.host}`, this.options)
 
-    this.client.on('connect', (connack) => {
-      //console.log('EVENT connect', connack)
-      this.emit('connect', connack)
+    this.client.on('connect', (conAck) => {
+      //console.log('EVENT connect', conAck)
+      this.emit('connect', conAck)
     })
 
     // this.client.on('disconnect', (args) => {
