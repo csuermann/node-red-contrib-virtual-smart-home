@@ -7,8 +7,9 @@ class MqttClient extends EventEmitter {
 
     this.options = {
       ...options,
-      reconnectPeriod: 30_000,
-      keepalive: 90,
+      reconnectPeriod: 60_000, //in milliseconds, interval between two reconnections.
+      connectTimeout: 30_000, //in milliseconds, time to wait before a CONNACK is received
+      keepalive: 90, //in seconds
       rejectUnauthorized: true,
       resubscribe: false,
       clean: true,
