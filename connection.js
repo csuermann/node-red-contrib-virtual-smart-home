@@ -81,6 +81,11 @@ module.exports = function (RED) {
         await this.rater.destroy()
 
         if (!this.credentials.thingId) {
+          this.logger(
+            'no thingId present while closing vsh-connection',
+            null,
+            'warn'
+          )
           return done()
         }
 
@@ -89,7 +94,7 @@ module.exports = function (RED) {
         try {
           await this.disconnect()
         } catch (e) {
-          this.logger('connection.js:this:on:close::', e, 'error')
+          this.logger('disconnect() failed', e, 'error')
         }
 
         this.execCallbackForAll('onDisconnect')
@@ -851,6 +856,7 @@ module.exports = function (RED) {
 
     async disconnect() {
       if (this.isDisconnecting) {
+        this.logger('ignoring disconnect() as already disconnecting')
         return
       }
 
