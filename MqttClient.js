@@ -7,9 +7,13 @@ class MqttClient extends EventEmitter {
 
     this.options = {
       ...options,
-      reconnectPeriod: 30000,
-      keepalive: 90,
+      reconnectPeriod: 60_000, //in milliseconds, interval between two reconnections.
+      connectTimeout: 30_000, //in milliseconds, time to wait before a CONNACK is received
+      keepalive: 90, //in seconds
       rejectUnauthorized: true,
+      resubscribe: false,
+      clean: true,
+      protocolVersion: 5,
     }
 
     this.client = null
@@ -18,9 +22,9 @@ class MqttClient extends EventEmitter {
   connect() {
     this.client = mqtt.connect(`mqtts://${this.options.host}`, this.options)
 
-    this.client.on('connect', (connack) => {
-      //console.log('EVENT connect', connack)
-      this.emit('connect', connack)
+    this.client.on('connect', (conAck) => {
+      //console.log('EVENT connect', conAck)
+      this.emit('connect', conAck)
     })
 
     // this.client.on('disconnect', (args) => {
@@ -35,11 +39,6 @@ class MqttClient extends EventEmitter {
     this.client.on('close', () => {
       //console.log('EVENT close')
       this.emit('close')
-    })
-
-    this.client.on('reconnect', () => {
-      //console.log('EVENT reconnect')
-      this.emit('reconnect')
     })
 
     this.client.on('error', (error) => {

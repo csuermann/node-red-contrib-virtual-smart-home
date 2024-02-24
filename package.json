@@ -45,10 +45,10 @@
     "bottleneck": "^2.19.5",
     "color-convert": "^2.0.1",
     "dayjs": "^1.11.5",
-    "debounce": "^1.2.0",
+    "debounce": "^2.0.0",
     "deep-eql": "^4.1.0",
     "deepmerge": "^4.2.2",
-    "mqtt": "^5.3.4",
+    "mqtt": "^5.3.5",
     "semver": "^7.3.7"
   },
   "engines": {

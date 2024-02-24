@@ -26,7 +26,7 @@ module.exports = function (RED) {
     RED.auth.needsPermission('vsh-virtual-device.read'),
     (req, res) => {
       const connectionNode = RED.nodes.getNode(req.params.nodeId)
-      res.json({ plan: connectionNode.getPlan() })
+      res.json({ plan: connectionNode?.getPlan() ?? 'unknown' })
     }
   )
 
@@ -81,6 +81,11 @@ module.exports = function (RED) {
         await this.rater.destroy()
 
         if (!this.credentials.thingId) {
+          this.logger(
+            'no thingId present while closing vsh-connection',
+            null,
+            'warn'
+          )
           return done()
         }
 
@@ -89,7 +94,7 @@ module.exports = function (RED) {
         try {
           await this.disconnect()
         } catch (e) {
-          console.log('connection.js:this:on:close::', e)
+          this.logger('disconnect() failed', e, 'error')
         }
 
         this.execCallbackForAll('onDisconnect')
@@ -124,7 +129,9 @@ module.exports = function (RED) {
 
       if (this.isError) {
         fill = 'red'
-        text = this.errorCode
+        text = `ERROR: ${this.errorCode}. ${
+          this.isReconnecting() ? 'Periodically retrying...' : ''
+        }`
       } else if (this.isKilled) {
         fill = 'red'
         text = this.killedStatusText
@@ -234,6 +241,9 @@ module.exports = function (RED) {
 
     markShadowAsConnected() {
       if (!this.isConnected()) {
+        this.logger(
+          `skipping markShadowAsConnected() because isConnected() is false`
+        )
         return false
       }
 
@@ -250,9 +260,9 @@ module.exports = function (RED) {
 
     markShadowAsConnectedDebounced = debounce(
       this.markShadowAsConnected,
-      7000,
+      5000,
       {
-        immediate: true,
+        immediate: false, //to mitigate race condition with LWT setting device shadow to disconnected
       }
     )
 
@@ -588,7 +598,12 @@ module.exports = function (RED) {
         return
       }
 
-      console.warn('CONNECTION KILLED! Reason:', reason || 'undefined')
+      this.logger(
+        'CONNECTION KILLED! Reason:',
+        reason || 'undefined',
+        null,
+        'warn'
+      )
       this.isKilled = true
       this.killedStatusText = reason ? reason : 'KILLED'
       this.isInitializing = false
@@ -625,6 +640,7 @@ module.exports = function (RED) {
         default:
           this.logger(
             `received service request (${message.operation}) that is not supported by this VSH version. Updating to the latest version might fix this!`,
+            null,
             'warn'
           )
       }
@@ -651,7 +667,7 @@ module.exports = function (RED) {
         // }
         return response.data
       } catch (error) {
-        console.log(error)
+        this.logger('checkVersion() failed', error, 'error')
         throw new Error(
           `HTTP Error Response: ${response.status || 'n/a'} ${
             response.statusText || 'n/a'
@@ -710,7 +726,8 @@ module.exports = function (RED) {
           return
         }
       } catch (e) {
-        this.errorCode = 'version check failed'
+        this.errorCode =
+          'version check failed. Ensure internet connectivity and restart the flow'
         this.isError = true
         this.refreshChildrenNodeStatus()
         return this.logger(`version check failed! ${e.message}`, null, 'error')
@@ -725,6 +742,9 @@ module.exports = function (RED) {
         cert: decodeBase64(this.credentials.cert),
         ca: decodeBase64(this.credentials.caCert),
         clientId: this.credentials.thingId,
+        log: (message) => {
+          this.logger('mqtt.js: ' + message, null, 'debug')
+        },
         will: {
           topic: `vsh/${this.credentials.thingId}/update`,
           payload: JSON.stringify({
@@ -739,27 +759,28 @@ module.exports = function (RED) {
       // register event listeners:
 
       this.mqttClient.on('connect', (_conAck) => {
-        this.logger(`MQTT: connected to ${options.host}:${options.port}`)
         this.stats.connectionCount++
+        this.logger(
+          `MQTT: connected to ${options.host}:${options.port}, connection #${this.stats.connectionCount}`
+        )
         this.isError = false
         this.refreshChildrenNodeStatus()
+
+        const topicsToSubscribe = [
+          `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
+          `vsh/${this.credentials.thingId}/+/directive`,
+          `vsh/service`,
+          `vsh/version/${VSH_VERSION}/+`,
+          `vsh/${this.credentials.thingId}/service`,
+        ]
+
+        this.logger('MQTT: subscribe to topics', topicsToSubscribe)
+
+        this.mqttClient.subscribe(topicsToSubscribe).catch((error) => {
+          this.logger('MQTT: subscription failed', error, 'error')
+        })
+
         this.markShadowAsConnectedDebounced()
-
-        if (!this.isSubscribed) {
-          const topicsToSubscribe = [
-            `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
-            `vsh/${this.credentials.thingId}/+/directive`,
-            `vsh/service`,
-            `vsh/version/${VSH_VERSION}/+`,
-            `vsh/${this.credentials.thingId}/service`,
-          ]
-
-          this.logger('MQTT: subscribe to topics', topicsToSubscribe)
-
-          this.mqttClient.subscribe(topicsToSubscribe).catch((error) => {
-            console.error('MQTT: subscription failed', error)
-          })
-        }
       })
 
       this.mqttClient.on('offline', () => {
@@ -768,15 +789,13 @@ module.exports = function (RED) {
       })
 
       this.mqttClient.on('close', () => {
+        this.logger('MQTT: connection closed')
+        this.isSubscribed = false
         this.refreshChildrenNodeStatus()
       })
 
-      this.mqttClient.on('reconnect', () => {
-        this.logger('MQTT: reconnecting...')
-        this.refreshChildrenNodeStatus('Reconnecting...')
-      })
-
       this.mqttClient.on('error', (error) => {
+        this.logger('MQTT: error', error)
         this.isError = true
         this.errorCode = error.code
         this.refreshChildrenNodeStatus()
@@ -824,7 +843,7 @@ module.exports = function (RED) {
         }
       })
 
-      this.mqttClient.on('subscribed', (topic, messageObj) => {
+      this.mqttClient.on('subscribed', (_subscriptions) => {
         this.isSubscribed = true
       })
 
@@ -837,6 +856,7 @@ module.exports = function (RED) {
 
     async disconnect() {
       if (this.isDisconnecting) {
+        this.logger('ignoring disconnect() as already disconnecting')
         return
       }
 
