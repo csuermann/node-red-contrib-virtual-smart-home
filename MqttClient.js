@@ -41,11 +41,6 @@ class MqttClient extends EventEmitter {
       this.emit('close')
     })
 
-    this.client.on('reconnect', () => {
-      //console.log('EVENT reconnect')
-      this.emit('reconnect')
-    })
-
     this.client.on('error', (error) => {
       //console.log('EVENT error', error)
       this.emit('error', error)

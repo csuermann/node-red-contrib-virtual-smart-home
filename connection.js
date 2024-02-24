@@ -129,7 +129,9 @@ module.exports = function (RED) {
 
       if (this.isError) {
         fill = 'red'
-        text = this.errorCode
+        text = `ERROR: ${this.errorCode}. ${
+          this.isReconnecting() ? 'Periodically retrying...' : ''
+        }`
       } else if (this.isKilled) {
         fill = 'red'
         text = this.killedStatusText
@@ -258,9 +260,9 @@ module.exports = function (RED) {
 
     markShadowAsConnectedDebounced = debounce(
       this.markShadowAsConnected,
-      7000,
+      5000,
       {
-        immediate: true,
+        immediate: false, //to mitigate race condition with LWT setting device shadow to disconnected
       }
     )
 
@@ -724,7 +726,8 @@ module.exports = function (RED) {
           return
         }
       } catch (e) {
-        this.errorCode = 'version check failed'
+        this.errorCode =
+          'version check failed. Ensure internet connectivity and restart the flow'
         this.isError = true
         this.refreshChildrenNodeStatus()
         return this.logger(`version check failed! ${e.message}`, null, 'error')
@@ -739,6 +742,9 @@ module.exports = function (RED) {
         cert: decodeBase64(this.credentials.cert),
         ca: decodeBase64(this.credentials.caCert),
         clientId: this.credentials.thingId,
+        log: (message) => {
+          this.logger('mqtt.js: ' + message, null, 'debug')
+        },
         will: {
           topic: `vsh/${this.credentials.thingId}/update`,
           payload: JSON.stringify({
@@ -790,12 +796,8 @@ module.exports = function (RED) {
         this.refreshChildrenNodeStatus()
       })
 
-      this.mqttClient.on('reconnect', () => {
-        this.logger('MQTT: reconnecting...')
-        this.refreshChildrenNodeStatus('Reconnecting...')
-      })
-
       this.mqttClient.on('error', (error) => {
+        this.logger('MQTT: error', error)
         this.isError = true
         this.errorCode = error.code
         this.refreshChildrenNodeStatus()
