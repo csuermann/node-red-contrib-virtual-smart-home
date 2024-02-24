@@ -766,7 +766,6 @@ module.exports = function (RED) {
         this.isError = false
         this.refreshChildrenNodeStatus()
 
-        // if (!this.isSubscribed) {
         const topicsToSubscribe = [
           `$aws/things/${this.credentials.thingId}/shadow/get/accepted`,
           `vsh/${this.credentials.thingId}/+/directive`,
@@ -780,7 +779,6 @@ module.exports = function (RED) {
         this.mqttClient.subscribe(topicsToSubscribe).catch((error) => {
           this.logger('MQTT: subscription failed', error, 'error')
         })
-        // }
 
         this.markShadowAsConnectedDebounced()
       })
