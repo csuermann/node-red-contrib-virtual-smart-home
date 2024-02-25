@@ -51,6 +51,9 @@
     "mqtt": "^5.3.5",
     "semver": "^7.3.7"
   },
+  "overrides": {
+    "fast-unique-numbers": "^8.0.12"
+  },
   "engines": {
     "node": ">=16.0.0"
   }
