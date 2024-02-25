@@ -52,7 +52,7 @@
     "semver": "^7.3.7"
   },
   "overrides": {
-    "fast-unique-numbers": "^8.0.12"
+    "fast-unique-numbers": "8.0.13"
   },
   "engines": {
     "node": ">=16.0.0"
