@@ -41,18 +41,19 @@
     "singleQuote": true
   },
   "dependencies": {
-    "axios": "1.6.5",
+    "axios": "1.6.7",
     "bottleneck": "2.19.5",
     "color-convert": "2.0.1",
-    "dayjs": "1.11.5",
+    "dayjs": "1.11.10",
     "debounce": "1.2.1",
     "deep-eql": "4.1.3",
     "deepmerge": "4.2.2",
-    "mqtt": "5.3.5",
-    "semver": "7.3.7"
+    "mqtt": "5.3.6",
+    "semver": "7.6.0"
   },
   "overrides": {
-    "fast-unique-numbers": "8.0.13"
+    "fast-unique-numbers": "8.0.13",
+    "deepmerge": "4.2.2"
   },
   "engines": {
     "node": ">=16.0.0"
