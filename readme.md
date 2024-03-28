@@ -1,23 +1,10 @@
 # Virtual Smart Home (VSH)
 
-A Node-RED node that represents a virtual device which can be controlled via
+A Node-RED node that represents a virtual smart home device which can be controlled via
 Amazon Alexa. Requires the '_virtual smart home_' skill to be enabled for your
 Amazon account.
 
-## Availability
-
-The _virtual smart home_ skill is available in the Amazon skill stores in the following locales:
-
-- [English (AU)](https://www.amazon.com.au/dp/B08JV9RT7H)
-- [English (CA)](https://www.amazon.ca/dp/B08JV9RT7H)
-- [English (GB)](https://www.amazon.co.uk/dp/B08JV9RT7H)
-- [English (IN)](https://www.amazon.in/dp/B08JV9RT7H)
-- [English (US)](https://www.amazon.com/dp/B08JV9RT7H)
-- [French (FR)](https://www.amazon.fr/dp/B08JV9RT7H)
-- [German (DE)](https://www.amazon.de/dp/B08JV9RT7H)
-- [Italian (IT)](https://www.amazon.it/dp/B08JV9RT7H)
-- [Portuguese (BR)](https://www.amazon.com.br/dp/B08JV9RT7H)
-- [Spanish (ES)](https://www.amazon.es/dp/B08JV9RT7H)
+![Examples](./img/examples.png)
 
 ## Highlights
 
@@ -27,16 +14,18 @@ The _virtual smart home_ skill is available in the Amazon skill stores in the fo
   - Contact Sensor
   - Dimmable Light Bulb
   - Dimmer Switch
+  - Doorbell Event Source
   - Entertainment Device
   - Fan
   - Garage Door Opener (en-US locale only)
   - Lock
   - Motion Sensor
   - Plug
-  - Switch
   - Scene
+  - Switch
   - Temperature Sensor
-  - Thermostat
+  - Thermostat (Single-setpoint)
+  - Thermostat (Dual-setpoint)
 - no separate account needed. Just link your existing Amazon account.
 - new virtual devices can simply be dragged onto the Node-RED canvas and will
   proactively be discovered by Alexa. No need to ask Alexa to discover devices.
@@ -76,6 +65,21 @@ passthrough option is enabled, this will also trigger an outbound message, just
 like when the node gets invoked via Alexa. In this case `payload.source` is set to `device` instead of `alexa`. If the inbound message has a `topic` attribute, its value will be present in the outbound msg instead of the topic configured in the editor.
 
 Please ensure that your setup does not send too many messages to Alexa. Otherwise you risk getting your account blocked.
+
+## Availability
+
+The _virtual smart home_ skill is available in the Amazon skill stores in the following locales:
+
+- [English (AU)](https://www.amazon.com.au/dp/B08JV9RT7H)
+- [English (CA)](https://www.amazon.ca/dp/B08JV9RT7H)
+- [English (GB)](https://www.amazon.co.uk/dp/B08JV9RT7H)
+- [English (IN)](https://www.amazon.in/dp/B08JV9RT7H)
+- [English (US)](https://www.amazon.com/dp/B08JV9RT7H)
+- [French (FR)](https://www.amazon.fr/dp/B08JV9RT7H)
+- [German (DE)](https://www.amazon.de/dp/B08JV9RT7H)
+- [Italian (IT)](https://www.amazon.it/dp/B08JV9RT7H)
+- [Portuguese (BR)](https://www.amazon.com.br/dp/B08JV9RT7H)
+- [Spanish (ES)](https://www.amazon.es/dp/B08JV9RT7H)
 
 ## Setup Instructions
 

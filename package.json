@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/csuermann/node-red-contrib-virtual-smart-home"
+    "url": "git+https://github.com/csuermann/node-red-contrib-virtual-smart-home.git"
   },
   "keywords": [
     "Alexa",

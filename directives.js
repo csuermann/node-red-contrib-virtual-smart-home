@@ -172,11 +172,26 @@ const directives = {
   SelectInput: (request, _currentState) => ({
     input: request.directive.payload.input,
   }),
-  SetTargetTemperature: (request, _currentState) => ({
-    targetTemperature: request.directive.payload.targetSetpoint.value,
-    targetScale: request.directive.payload.targetSetpoint.scale,
-    powerState: 'ON',
-  }),
+  SetTargetTemperature: (request, currentState) => {
+    const newState = {
+      powerState: 'ON',
+    }
+
+    if (currentState.template === 'THERMOSTAT') {
+      newState['targetTemperature'] =
+        request.directive.payload.targetSetpoint.value
+      newState['targetScale'] = request.directive.payload.targetSetpoint.scale
+    } else if (currentState.template === 'THERMOSTAT_2') {
+      newState['lowerSetpoint'] = request.directive.payload.lowerSetpoint.value
+      newState['lowerSetpointScale'] =
+        request.directive.payload.lowerSetpoint.scale
+      newState['upperSetpoint'] = request.directive.payload.upperSetpoint.value
+      newState['upperSetpointScale'] =
+        request.directive.payload.upperSetpoint.scale
+    }
+
+    return newState
+  },
   SetThermostatMode: (request, _currentState) => {
     const newState = {
       thermostatMode: request.directive.payload.thermostatMode.value,
@@ -414,6 +429,24 @@ function buildPropertiesFromState(state) {
       makeProperty('Alexa.ThermostatController', 'targetSetpoint', {
         value: state.targetTemperature,
         scale: state.targetScale,
+      })
+    )
+  }
+
+  if (state.hasOwnProperty('lowerSetpoint')) {
+    properties.push(
+      makeProperty('Alexa.ThermostatController', 'lowerSetpoint', {
+        value: state.lowerSetpoint,
+        scale: state.lowerSetpointScale,
+      })
+    )
+  }
+
+  if (state.hasOwnProperty('upperSetpoint')) {
+    properties.push(
+      makeProperty('Alexa.ThermostatController', 'upperSetpoint', {
+        value: state.upperSetpoint,
+        scale: state.upperSetpointScale,
       })
     )
   }

@@ -710,6 +710,29 @@ const types = {
     },
     decorator: defaultDecorator,
   },
+  THERMOSTAT_2: {
+    defaultState: {
+      temperature: 0,
+      scale: 'CELSIUS',
+      lowerSetpoint: 0,
+      upperSetpoint: 0,
+      lowerSetpointScale: 'CELSIUS',
+      upperSetpointScale: 'CELSIUS',
+      thermostatMode: 'OFF',
+      powerState: 'OFF',
+    },
+    validators: {
+      temperature: temperatureValue,
+      scale: temperatureScale,
+      thermostatMode,
+      lowerSetpoint: wrapValidator(temperatureValue, 'lowerSetpoint'),
+      upperSetpoint: wrapValidator(temperatureValue, 'upperSetpoint'),
+      lowerSetpointScale: wrapValidator(temperatureScale, 'lowerSetpointScale'),
+      upperSetpointScale: wrapValidator(temperatureScale, 'upperSetpointScale'),
+      powerState,
+    },
+    decorator: defaultDecorator,
+  },
 }
 
 //---HELPERS---

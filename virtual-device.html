@@ -182,7 +182,8 @@
       <option value="SCENE">Scene</option>
       <option value="SWITCH">Switch</option>
       <option value="TEMPERATURE_SENSOR">Temperature Sensor</option>
-      <option value="THERMOSTAT">Thermostat</option>
+      <option value="THERMOSTAT">Thermostat (Single-setpoint)</option>
+      <option value="THERMOSTAT_2">Thermostat (Dual-setpoint)</option>
     </select>
   </div>
 
@@ -699,13 +700,18 @@
     </dd>
   </dl>
 
-  <h4>Thermostat</h4>
+  <h4>Thermostat (Single-setpoint)</h4>
   <dl class="message-properties">
     <dt>
       payload.powerState
       <span class="property-type">string</span>
     </dt>
     <dd>'ON' or 'OFF'</dd>
+    <dt>
+      payload.temperature
+      <span class="property-type">float</span>
+    </dt>
+    <dd>Measured temperature</dd>
     <dt>
       payload.scale
       <span class="property-type">string</span>
@@ -715,6 +721,11 @@
       'KELVIN'
     </dd>
     <dt>
+      payload.targetTemperature
+      <span class="property-type">float</span>
+    </dt>
+    <dd>Target temperature</dd>
+    <dt>
       payload.targetScale
       <span class="property-type">string</span>
     </dt>
@@ -723,15 +734,57 @@
       'FAHRENHEIT', 'KELVIN'
     </dd>
     <dt>
-      payload.targetTemperature
+      payload.thermostatMode
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'AUTO', 'HEAT', 'COOL', 'ECO', 'OFF'</dd>
+  </dl>
+  <h4>Thermostat (Dual-setpoint)</h4>
+  <dl class="message-properties">
+    <dt>
+      payload.powerState
+      <span class="property-type">string</span>
+    </dt>
+    <dd>'ON' or 'OFF'</dd>
+    <dt>
+      payload.lowerSetpoint
       <span class="property-type">float</span>
     </dt>
-    <dd>Target temperature</dd>
+    <dd>Lower setpoint temperature</dd>
+    <dt>
+      payload.lowerSetpointScale
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Scale / unit of lowerSetpoint. Allowed values: 'CELSIUS', 'FAHRENHEIT',
+      'KELVIN'
+    </dd>
+    <dt>
+      payload.upperSetpoint
+      <span class="property-type">float</span>
+    </dt>
+    <dd>Upper setpoint temperature</dd>
+    <dt>
+      payload.upperSetpointScale
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Scale / unit of upperSetpoint. Allowed values: 'CELSIUS', 'FAHRENHEIT',
+      'KELVIN'
+    </dd>
     <dt>
       payload.temperature
       <span class="property-type">float</span>
     </dt>
     <dd>Measured temperature</dd>
+    <dt>
+      payload.scale
+      <span class="property-type">string</span>
+    </dt>
+    <dd>
+      Scale / unit of temperature. Allowed values: 'CELSIUS', 'FAHRENHEIT',
+      'KELVIN'
+    </dd>
     <dt>
       payload.thermostatMode
       <span class="property-type">string</span>
