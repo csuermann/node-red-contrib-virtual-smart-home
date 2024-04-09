@@ -23,6 +23,8 @@ const booleanValidator = (val) => {
 }
 
 const powerState = (val) => {
+  val = val.toUpperCase()
+
   const isValid = val == 'ON' || val == 'OFF'
   if (!isValid) {
     return false
@@ -31,6 +33,8 @@ const powerState = (val) => {
 }
 
 const lockState = (val) => {
+  val = val.toUpperCase()
+
   const isValid = val == 'LOCKED' || val == 'UNLOCKED' || val == 'JAMMED'
   if (!isValid) {
     return false
@@ -47,6 +51,8 @@ const brightness = (val) => {
 }
 
 const detectionState = (val) => {
+  val = val.toUpperCase()
+
   const isValid = val == 'DETECTED' || val == 'NOT_DETECTED'
   if (!isValid) {
     return false
@@ -277,6 +283,8 @@ const color_lab = (val) => {
 }
 
 const input = (val) => {
+  val = val.toUpperCase()
+
   const inputs = [
     'AUX 1',
     'AUX 2',
@@ -327,6 +335,8 @@ const input = (val) => {
 }
 
 const lightMode = (val) => {
+  val = val.toLowerCase()
+
   const isValid = val == 'hsb' || val == 'temp'
   if (!isValid) {
     return false
@@ -335,11 +345,17 @@ const lightMode = (val) => {
 }
 
 const position = (val) => {
-  const isValid = val == 'Position.Up' || val == 'Position.Down'
-  if (!isValid) {
+  val = val.toUpperCase()
+
+  const acceptableValues = {
+    'POSITION.UP': 'Position.Up',
+    'POSITION.DOWN': 'Position.Down',
+  }
+
+  if (!acceptableValues[val]) {
     return false
   }
-  return { key: 'position', value: val }
+  return { key: 'position', value: acceptableValues[val] }
 }
 
 const temperatureValue = (val) => {
@@ -352,6 +368,8 @@ const temperatureValue = (val) => {
 }
 
 const temperatureScale = (val) => {
+  val = val.toUpperCase()
+
   const isValid = val === 'CELSIUS' || val === 'FAHRENHEIT' || val === 'KELVIN'
   if (!isValid) {
     return false
@@ -360,6 +378,8 @@ const temperatureScale = (val) => {
 }
 
 const thermostatMode = (val) => {
+  val = val.toUpperCase()
+
   const isValid =
     val === 'AUTO' ||
     val === 'HEAT' ||
