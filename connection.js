@@ -224,6 +224,15 @@ module.exports = function (RED) {
     execCallbackForAllThrottled = throttle(this.execCallbackForAll, 1000)
 
     execCallbackForOne(nodeId, eventName, params, ...moreParams) {
+      if (!this.childNodes[nodeId]) {
+        this.logger(
+          `execCallbackForOne() failed because node ${nodeId} has not been registered at this connection node!`,
+          null,
+          'warn'
+        )
+        return
+      }
+
       if (this.childNodes[nodeId][eventName]) {
         return this.childNodes[nodeId][eventName](params, ...moreParams)
       }
