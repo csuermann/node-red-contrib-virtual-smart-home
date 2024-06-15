@@ -38,7 +38,22 @@
       name: { value: '', required: true },
       //deviceId: { value: 'vshd-xxx', required: false },
       topic: { value: '', required: false },
-      metadata: { value: '', required: false },
+      metadata: {
+        value: '',
+        required: false,
+        validate: (value) => {
+          if (value === '') {
+            // empty metadata should not be marked as invalid
+            return true
+          }
+
+          try {
+            return typeof JSON.parse(value) === 'object'
+          } catch (e) {
+            return false
+          }
+        },
+      },
       connection: { type: 'vsh-connection', required: true },
       template: { value: 'SWITCH', required: true },
       retrievable: { value: false },
@@ -128,7 +143,7 @@
   </div>
 
   <div class="form-row">
-    <label for="node-input-metadata"><i class="fa fa-code"></i> Metadata</label>
+    <label><i class="fa fa-code"></i> Metadata</label>
     <input
       type="text"
       id="node-input-metadata"
