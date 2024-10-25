@@ -54,7 +54,11 @@ class MqttClient extends EventEmitter {
   }
 
   async end() {
-    return this.client.endAsync()
+    try {
+      return this.client.endAsync()
+    } catch (err) {
+      return false
+    }
   }
 
   async publish(topic, json) {

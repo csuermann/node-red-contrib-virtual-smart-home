@@ -726,10 +726,13 @@ module.exports = function (RED) {
           return
         }
       } catch (e) {
-        this.errorCode =
-          'version check failed. Ensure internet connectivity and restart the flow'
+        this.errorCode = 'Connection failed'
         this.isError = true
         this.refreshChildrenNodeStatus()
+
+        //retry again in 30s:
+        setTimeout(() => this.connectAndSubscribe(), 30_000)
+
         return this.logger(`version check failed! ${e.message}`, null, 'error')
       }
 
