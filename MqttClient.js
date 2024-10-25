@@ -14,6 +14,7 @@ class MqttClient extends EventEmitter {
       resubscribe: false,
       clean: true,
       protocolVersion: 5,
+      family: 4, //Version of IP stack. Must be 4, 6, or 0. The value 0 indicates that both IPv4 and IPv6 addresses are allowed. Default: 0.
     }
 
     this.client = null
