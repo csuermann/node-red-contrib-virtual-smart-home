@@ -42,8 +42,8 @@
         value: '',
         required: false,
         validate: (value) => {
-          if (value === '') {
-            // empty metadata should not be marked as invalid
+          if (value === '' || value === undefined) {
+            // empty metadata should NOT be marked as invalid
             return true
           }
 
