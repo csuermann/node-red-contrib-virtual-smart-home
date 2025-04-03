@@ -23,6 +23,14 @@ module.exports = function (RED) {
 
     let isActive = false
 
+    // default logger. Will be overridden by connection node if available
+    let logger = (logMessage, variable = undefined, logLevel = 'log') => {
+      if (variable) {
+        logMessage = logMessage + ': ' + JSON.stringify(variable)
+      }
+      that[logLevel](logMessage)
+    }
+
     const getLocalState = () => {
       let contextState = that.context().get('state')
 
@@ -92,6 +100,9 @@ module.exports = function (RED) {
 
     if (getConnectionNode()) {
       //connection is configured
+
+      logger = getConnectionNode().getLogger()
+
       //register callbacks. This way connectionNode can communicate with us:
       getConnectionNode().registerChildNode(deviceId, {
         setStatus: (status, force = false) => {
@@ -118,9 +129,7 @@ module.exports = function (RED) {
 
     that.on('input', function (msg, send, done) {
       if (!getConnectionNode() || !isActive) {
-        console.log(
-          `ignoring inbound msg for non-active device ID ${deviceId}'`
-        )
+        logger(`ignoring inbound msg for non-active device ID ${deviceId}'`)
         if (done) {
           done()
         }
@@ -133,7 +142,7 @@ module.exports = function (RED) {
         if (done) {
           done()
         }
-        console.log(
+        logger(
           `ignoring inbound msg for device ID ${deviceId} because msg.payload.name (${
             msg.payload.name ? `'${msg.payload.name}'` : '<undefined>'
           }) does not match '${config.name}'`
@@ -147,7 +156,7 @@ module.exports = function (RED) {
         if (done) {
           done()
         }
-        console.log(
+        logger(
           `ignoring inbound msg for device ID ${deviceId} because msg.topic (${
             msg.topic ? `'${msg.topic}'` : '<undefined>'
           }) does not match '${config.topic}'`

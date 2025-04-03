@@ -159,6 +159,10 @@ module.exports = function (RED) {
       })
     }
 
+    getLogger() {
+      return this.logger
+    }
+
     registerChildNode(nodeId, callbacks) {
       if (Object.keys(this.childNodes).length >= this.allowedDeviceCount) {
         callbacks.setActive(false)
