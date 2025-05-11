@@ -187,7 +187,7 @@ New versions of VSH are frequently released and it is generally recommended to a
 
 1. Q: Why did a paid PRO plan get introduced?
 
-   A: With growing popularity of VSH the infrastructure costs also grew significantly. I had to make a decision to either shut VSH down or to introduce a paid plan. For 12 EUR per year, you can deploy up to 200 virtual devices and support further development of VSH. You can upgrade to the "Pro" plan from the Connection dialog within Node-RED.
+   A: With growing popularity of VSH the infrastructure costs also grew significantly. I had to make a decision to either shut VSH down or to introduce a paid plan. With the PRO plan you can deploy up to 200 virtual devices and support further development of VSH. You can upgrade to the PRO plan from the Connection dialog within Node-RED.
 
 1. Q: Where can I manage my VSH subscription?
 
