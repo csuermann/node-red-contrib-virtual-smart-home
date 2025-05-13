@@ -611,12 +611,7 @@ module.exports = function (RED) {
         return
       }
 
-      this.logger(
-        'CONNECTION KILLED! Reason:',
-        reason || 'undefined',
-        null,
-        'warn'
-      )
+      this.logger('CONNECTION KILLED! Reason:', reason || 'undefined', 'warn')
       this.isKilled = true
       this.killedStatusText = reason ? reason : 'KILLED'
       this.isInitializing = false
@@ -844,7 +839,6 @@ module.exports = function (RED) {
                 this.logger(
                   'received device-related message that is not supported yet!',
                   { topic, message },
-                  null,
                   'warn'
                 )
               }
@@ -852,7 +846,6 @@ module.exports = function (RED) {
               this.logger(
                 'received thing-related message that is not supported yet!',
                 { topic, message },
-                null,
                 'warn'
               )
             }
