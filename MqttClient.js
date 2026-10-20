@@ -71,7 +71,6 @@ class MqttClient extends EventEmitter {
 
       this.client.publish(topic, message, options, (err, result) => {
         if (err) {
-          console.log(err)
           reject(err)
         } else {
           resolve(result)

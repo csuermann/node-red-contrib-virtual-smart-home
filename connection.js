@@ -297,7 +297,11 @@ module.exports = function (RED) {
 
       this.logger(`MQTT: publish to topic ${topic}`, message)
 
-      return await this.mqttClient.publish(topic, message)
+      try {
+        return await this.mqttClient.publish(topic, message)
+      } catch (err) {
+        this.warn(`MQTT: publish to ${topic} failed: ${err.message}`)
+      }
     }
 
     triggerChangeReport({
